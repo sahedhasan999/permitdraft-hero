@@ -1,9 +1,8 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { Check, ArrowRight } from "lucide-react";
 import { AnimatedButton } from "../ui/AnimatedButton";
 import { GlassMorphismCard } from "../ui/GlassMorphismCard";
-import { animateOnScroll } from "@/utils/transitions";
 import { Link } from "react-router-dom";
 
 interface ServiceCardProps {
@@ -21,8 +20,8 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
 }) => {
   return (
     <div 
-      className="animate-on-scroll opacity-0"
-      style={{ transitionDelay: `${delay}ms` }}
+      className="animate-fade-up"
+      style={{ animationDelay: `${delay}ms` }}
     >
       <GlassMorphismCard 
         variant="interactive" 
@@ -57,10 +56,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
 };
 
 const Services = () => {
-  useEffect(() => {
-    const cleanup = animateOnScroll();
-    return cleanup;
-  }, []);
+  const servicesRef = useRef<HTMLDivElement>(null);
 
   const services: ServiceCardProps[] = [
     {
@@ -85,7 +81,7 @@ const Services = () => {
       ],
       cta: "Explore Outdoor Living",
       link: "/services/outdoor-living",
-      delay: 0
+      delay: 100
     },
     {
       icon: (
@@ -107,7 +103,7 @@ const Services = () => {
       ],
       cta: "View Landscape Solutions",
       link: "/services/landscape-planning",
-      delay: 100
+      delay: 200
     },
     {
       icon: (
@@ -132,14 +128,14 @@ const Services = () => {
       ],
       cta: "Discover Water Features",
       link: "/services/pools-water-features",
-      delay: 200
+      delay: 300
     }
   ];
 
   return (
-    <section id="services" className="section-padding bg-zinc-50">
+    <section id="services" className="section-padding bg-zinc-50" ref={servicesRef}>
       <div className="container px-4 mx-auto">
-        <div className="max-w-2xl mx-auto text-center mb-16 animate-on-scroll opacity-0">
+        <div className="max-w-2xl mx-auto text-center mb-16 animate-fade-up">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
             Specialized Outdoor Design Services
           </h2>
@@ -154,7 +150,7 @@ const Services = () => {
           ))}
         </div>
 
-        <div className="mt-16 text-center animate-on-scroll opacity-0">
+        <div className="mt-16 text-center animate-fade-up" style={{ animationDelay: "400ms" }}>
           <Link to="/services">
             <AnimatedButton 
               variant="outline" 

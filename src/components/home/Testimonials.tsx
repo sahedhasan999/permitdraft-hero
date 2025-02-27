@@ -1,10 +1,9 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { GlassMorphismCard } from "../ui/GlassMorphismCard";
 import { AnimatedButton } from "../ui/AnimatedButton";
 import { ChevronLeft, ChevronRight, Quote } from "lucide-react";
 import { Link } from "react-router-dom";
-import { animateOnScroll } from "@/utils/transitions";
 
 interface TestimonialProps {
   quote: string;
@@ -53,6 +52,7 @@ const testimonials: TestimonialProps[] = [
 const Testimonials = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
+  const testimonialsRef = useRef<HTMLDivElement>(null);
 
   const goToPrevious = () => {
     setSlideDirection('left');
@@ -69,11 +69,6 @@ const Testimonials = () => {
   };
 
   useEffect(() => {
-    const cleanup = animateOnScroll();
-    return cleanup;
-  }, []);
-
-  useEffect(() => {
     const interval = setInterval(() => {
       goToNext();
     }, 8000);
@@ -82,9 +77,9 @@ const Testimonials = () => {
   }, [currentIndex]);
 
   return (
-    <section id="testimonials" className="section-padding bg-zinc-50">
+    <section id="testimonials" className="section-padding bg-zinc-50" ref={testimonialsRef}>
       <div className="container px-4 mx-auto">
-        <div className="max-w-2xl mx-auto text-center mb-16 animate-on-scroll opacity-0">
+        <div className="max-w-2xl mx-auto text-center mb-16 animate-fade-up">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
             Trusted by Professionals and Homeowners
           </h2>
@@ -93,7 +88,7 @@ const Testimonials = () => {
           </p>
         </div>
 
-        <div className="relative max-w-4xl mx-auto animate-on-scroll opacity-0">
+        <div className="relative max-w-4xl mx-auto animate-fade-up" style={{ animationDelay: "200ms" }}>
           <GlassMorphismCard variant="default" className="relative overflow-hidden p-0">
             <div className="absolute top-4 left-4 text-primary opacity-50">
               <Quote size={52} />
@@ -176,7 +171,7 @@ const Testimonials = () => {
           </div>
         </div>
         
-        <div className="mt-10 text-center animate-on-scroll opacity-0">
+        <div className="mt-10 text-center animate-fade-up" style={{ animationDelay: "400ms" }}>
           <Link to="/testimonials">
             <AnimatedButton variant="ghost" size="md">
               View All Testimonials

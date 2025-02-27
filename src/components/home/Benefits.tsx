@@ -1,7 +1,6 @@
 
-import React, { useEffect } from "react";
+import React, { useRef } from "react";
 import { GlassMorphismCard } from "../ui/GlassMorphismCard";
-import { animateOnScroll } from "@/utils/transitions";
 
 interface BenefitProps {
   icon: React.ReactNode;
@@ -13,8 +12,8 @@ interface BenefitProps {
 const BenefitCard: React.FC<BenefitProps> = ({ icon, title, description, delay = 0 }) => {
   return (
     <div 
-      className="animate-on-scroll opacity-0"
-      style={{ transitionDelay: `${delay}ms` }}
+      className="animate-fade-up"
+      style={{ animationDelay: `${delay}ms` }}
     >
       <GlassMorphismCard variant="hover" className="h-full">
         <div className="flex flex-col">
@@ -30,10 +29,7 @@ const BenefitCard: React.FC<BenefitProps> = ({ icon, title, description, delay =
 };
 
 const Benefits = () => {
-  useEffect(() => {
-    const cleanup = animateOnScroll();
-    return cleanup;
-  }, []);
+  const benefitsRef = useRef<HTMLDivElement>(null);
 
   const benefits: BenefitProps[] = [
     {
@@ -45,7 +41,7 @@ const Benefits = () => {
       ),
       title: "Cost-Effective Solutions",
       description: "Save up to 60% compared to US-based drafting services without compromising on quality or precision.",
-      delay: 0
+      delay: 100
     },
     {
       icon: (
@@ -56,7 +52,7 @@ const Benefits = () => {
       ),
       title: "Rapid Turnaround",
       description: "48-72 hour delivery on standard projects, with rush options available for time-sensitive needs.",
-      delay: 100
+      delay: 200
     },
     {
       icon: (
@@ -69,7 +65,7 @@ const Benefits = () => {
       ),
       title: "Permit-Ready Drawings",
       description: "Our drawings are compliant with US building codes and designed to streamline permit approval processes.",
-      delay: 200
+      delay: 300
     },
     {
       icon: (
@@ -83,7 +79,7 @@ const Benefits = () => {
       ),
       title: "Comprehensive Service",
       description: "From initial sketches to final construction documents, we handle all aspects of the drafting process.",
-      delay: 300
+      delay: 400
     },
     {
       icon: (
@@ -93,7 +89,7 @@ const Benefits = () => {
       ),
       title: "Unlimited Revisions",
       description: "Our service includes unlimited revisions during the design phase to ensure complete client satisfaction.",
-      delay: 400
+      delay: 500
     },
     {
       icon: (
@@ -110,14 +106,14 @@ const Benefits = () => {
       ),
       title: "Experienced Team",
       description: "Our drafters have extensive experience working with US construction standards and permit requirements.",
-      delay: 500
+      delay: 600
     },
   ];
 
   return (
-    <section id="benefits" className="section-padding">
+    <section id="benefits" className="section-padding" ref={benefitsRef}>
       <div className="container px-4 mx-auto">
-        <div className="max-w-2xl mx-auto text-center mb-16 animate-on-scroll opacity-0">
+        <div className="max-w-2xl mx-auto text-center mb-16 animate-fade-up">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
             Why Choose PermitDraft Pro?
           </h2>
