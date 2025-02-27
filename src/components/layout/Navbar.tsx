@@ -76,30 +76,30 @@ const Navbar = () => {
       <div className="container px-4 mx-auto flex items-center justify-between">
         <Link to="/" className="flex items-center">
           <span className="text-2xl font-display font-bold tracking-tight text-foreground">
-            Permit<span className="text-primary">Draft</span>Pro
+            Permit<span className="text-teal-500">Draft</span>Pro
           </span>
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-1">
+        <nav className="hidden md:flex items-center space-x-6">
           {navLinks.map((link) => (
             <div key={link.title} className="relative group" onMouseLeave={closeDropdown}>
               {link.children ? (
                 <button
                   className={cn(
-                    "px-3 py-2 text-sm font-medium rounded-md flex items-center transition-colors",
-                    "hover:bg-secondary group"
+                    "px-0 py-2 text-sm font-medium flex items-center transition-colors",
+                    "hover:text-teal-600 group"
                   )}
                   onClick={() => toggleDropdown(link.title)}
                   onMouseEnter={() => setActiveDropdown(link.title)}
                 >
                   {link.title}
-                  <ChevronDown size={16} className="ml-1 transition-transform duration-200 group-hover:rotate-180" />
+                  <ChevronDown size={14} className="ml-1 transition-transform duration-200 group-hover:rotate-180" />
                 </button>
               ) : (
                 <Link
                   to={link.href}
-                  className="px-3 py-2 text-sm font-medium rounded-md hover:bg-secondary transition-colors"
+                  className="px-0 py-2 text-sm font-medium hover:text-teal-600 transition-colors"
                 >
                   {link.title}
                 </Link>
@@ -112,7 +112,7 @@ const Navbar = () => {
                       <Link
                         key={child.title}
                         to={child.href}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-secondary transition-colors"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                         onClick={closeDropdown}
                       >
                         {child.title}
@@ -127,18 +127,13 @@ const Navbar = () => {
 
         <div className="hidden md:flex items-center space-x-4">
           <Link to="/order">
-            <AnimatedButton 
-              variant="primary" 
-              size="sm"
-              iconRight={<ArrowRight size={16} />}
-            >
+            <button className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center transition-colors">
               Start Your Project
-            </AnimatedButton>
+              <ArrowRight size={16} className="ml-2" />
+            </button>
           </Link>
-          <Link to="/login">
-            <AnimatedButton variant="ghost" size="sm">
-              Login
-            </AnimatedButton>
+          <Link to="/login" className="text-sm font-medium hover:text-teal-600 transition-colors">
+            Login
           </Link>
         </div>
 
@@ -204,27 +199,14 @@ const Navbar = () => {
 
             <div className="mt-6 space-y-4 px-4">
               <Link to="/order">
-                <AnimatedButton 
-                  variant="primary" 
-                  size="sm" 
-                  fullWidth
-                  iconRight={<ArrowRight size={16} />}
-                >
+                <button className="w-full bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center transition-colors">
                   Start Your Project
-                </AnimatedButton>
+                  <ArrowRight size={16} className="ml-2" />
+                </button>
               </Link>
-              <div className="grid grid-cols-2 gap-4">
-                <Link to="/login">
-                  <AnimatedButton variant="outline" size="sm" fullWidth>
-                    Login
-                  </AnimatedButton>
-                </Link>
-                <Link to="/signup">
-                  <AnimatedButton variant="ghost" size="sm" fullWidth>
-                    Sign Up
-                  </AnimatedButton>
-                </Link>
-              </div>
+              <Link to="/login" className="block text-center text-sm font-medium hover:text-teal-600 transition-colors">
+                Login
+              </Link>
             </div>
           </div>
         </div>
