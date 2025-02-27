@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, ArrowRight } from "lucide-react";
 import { AnimatedButton } from "../ui/AnimatedButton";
 import { cn } from "@/lib/utils";
 
@@ -17,9 +17,11 @@ const navLinks: NavLink[] = [
     title: "Services", 
     href: "#",
     children: [
-      { title: "For Contractors", href: "/contractors" },
-      { title: "For Homeowners", href: "/homeowners" },
-      { title: "Pricing", href: "/pricing" },
+      { title: "Deck", href: "/services/deck" },
+      { title: "Patio", href: "/services/patio" },
+      { title: "Pergola", href: "/services/pergola" },
+      { title: "Outdoor Kitchen", href: "/services/outdoor-kitchen" },
+      { title: "Home Addition/ADU", href: "/services/home-addition" },
     ]
   },
   { title: "Portfolio", href: "/portfolio" },
@@ -124,14 +126,18 @@ const Navbar = () => {
         </nav>
 
         <div className="hidden md:flex items-center space-x-4">
+          <Link to="/order">
+            <AnimatedButton 
+              variant="primary" 
+              size="sm"
+              iconRight={<ArrowRight size={16} />}
+            >
+              Start Your Project
+            </AnimatedButton>
+          </Link>
           <Link to="/login">
             <AnimatedButton variant="ghost" size="sm">
               Login
-            </AnimatedButton>
-          </Link>
-          <Link to="/signup">
-            <AnimatedButton variant="primary" size="sm">
-              Sign Up
             </AnimatedButton>
           </Link>
         </div>
@@ -196,17 +202,29 @@ const Navbar = () => {
               ))}
             </nav>
 
-            <div className="mt-6 grid grid-cols-2 gap-4 px-4">
-              <Link to="/login">
-                <AnimatedButton variant="outline" size="sm" fullWidth>
-                  Login
+            <div className="mt-6 space-y-4 px-4">
+              <Link to="/order">
+                <AnimatedButton 
+                  variant="primary" 
+                  size="sm" 
+                  fullWidth
+                  iconRight={<ArrowRight size={16} />}
+                >
+                  Start Your Project
                 </AnimatedButton>
               </Link>
-              <Link to="/signup">
-                <AnimatedButton variant="primary" size="sm" fullWidth>
-                  Sign Up
-                </AnimatedButton>
-              </Link>
+              <div className="grid grid-cols-2 gap-4">
+                <Link to="/login">
+                  <AnimatedButton variant="outline" size="sm" fullWidth>
+                    Login
+                  </AnimatedButton>
+                </Link>
+                <Link to="/signup">
+                  <AnimatedButton variant="ghost" size="sm" fullWidth>
+                    Sign Up
+                  </AnimatedButton>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
