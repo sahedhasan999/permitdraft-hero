@@ -1,4 +1,10 @@
 
+interface AnimationProps {
+  opacity: number;
+  x?: number;
+  y?: number;
+}
+
 type TransitionDirection = 'up' | 'down' | 'left' | 'right' | 'fade';
 
 interface TransitionOptions {
@@ -19,8 +25,8 @@ export const getTransitionProps = (
     ease = 'ease-out',
   } = options;
 
-  let initial = {};
-  let animate = { opacity: 1 };
+  let initial: AnimationProps = { opacity: 0 };
+  let animate: AnimationProps = { opacity: 1 };
   let transition = { duration, delay, ease };
 
   switch (direction) {
