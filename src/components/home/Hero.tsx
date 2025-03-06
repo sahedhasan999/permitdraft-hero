@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Heart, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AnimatedButton } from "../ui/AnimatedButton";
 import { GlassMorphismCard } from "../ui/GlassMorphismCard";
@@ -108,19 +108,17 @@ const Hero = () => {
               variant="interactive"
             >
               <img
-                src="/lovable-uploads/9d442cad-aa2c-4975-81b1-d34f9bc6a90b.png"
+                src="/lovable-uploads/586bad9f-d388-4012-a9a5-a4290aff2c2e.png"
                 alt="Architectural Drafting"
                 className="rounded-lg shadow-lg w-full object-cover aspect-[4/3]"
               />
               
-              {/* Floating stat cards */}
+              {/* Satisfaction tag */}
               <div className="absolute -bottom-6 -left-6 animate-float">
                 <GlassMorphismCard className="px-4 py-3" fadeIn>
                   <div className="flex items-center space-x-3">
                     <div className="bg-teal-100 p-2 rounded-full">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-primary">
-                        <path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 0C1.46 6.7 1.33 10.28 4 13l8 8 8-8c2.67-2.72 2.54-6.3.42-8.42z"></path>
-                      </svg>
+                      <Heart size={18} className="text-primary" />
                     </div>
                     <div>
                       <h3 className="text-sm font-semibold">100% Satisfaction</h3>
@@ -130,14 +128,12 @@ const Hero = () => {
                 </GlassMorphismCard>
               </div>
               
+              {/* Fast delivery tag */}
               <div className="absolute -top-6 -right-6 animate-float" style={{ animationDelay: "0.5s" }}>
                 <GlassMorphismCard className="px-4 py-3" fadeIn>
                   <div className="flex items-center space-x-3">
                     <div className="bg-teal-100 p-2 rounded-full">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-primary">
-                        <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
-                        <path d="m9 12 2 2 4-4"></path>
-                      </svg>
+                      <Clock size={18} className="text-primary" />
                     </div>
                     <div>
                       <h3 className="text-sm font-semibold">Fast Turnaround</h3>
