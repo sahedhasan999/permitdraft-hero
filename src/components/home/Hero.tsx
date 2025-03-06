@@ -67,21 +67,13 @@ const Hero = () => {
               Professional architectural drafting services specializing in outdoor space designs for US permit applications. High-quality drawings at competitive prices.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/contractors">
+              <Link to="/quote">
                 <AnimatedButton 
                   variant="primary" 
                   size="lg" 
                   iconRight={<ArrowRight size={16} />}
                 >
-                  For Contractors
-                </AnimatedButton>
-              </Link>
-              <Link to="/homeowners">
-                <AnimatedButton 
-                  variant="outline" 
-                  size="lg"
-                >
-                  For Homeowners
+                  Get a Quote
                 </AnimatedButton>
               </Link>
             </div>
@@ -116,7 +108,7 @@ const Hero = () => {
               variant="interactive"
             >
               <img
-                src="https://images.unsplash.com/photo-1431576901776-e539bd916ba2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80"
+                src="/lovable-uploads/819e5896-6733-4264-b1b1-455ef62bf6b0.png"
                 alt="Architectural Drafting"
                 className="rounded-lg shadow-lg w-full object-cover aspect-[4/3]"
               />
