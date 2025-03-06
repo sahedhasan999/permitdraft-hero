@@ -103,19 +103,21 @@ const Hero = () => {
 
           {/* Hero Image */}
           <div className="order-1 lg:order-2 animate-fade-in">
-            <GlassMorphismCard 
-              className="relative p-3 max-w-xl mx-auto lg:ml-auto"
-              variant="interactive"
-            >
-              <img
-                src="/lovable-uploads/586bad9f-d388-4012-a9a5-a4290aff2c2e.png"
-                alt="Architectural Drafting"
-                className="rounded-lg shadow-lg w-full object-cover aspect-[4/3]"
-              />
+            <div className="relative max-w-xl mx-auto lg:ml-auto">
+              <GlassMorphismCard 
+                className="relative p-3"
+                variant="interactive"
+              >
+                <img
+                  src="/lovable-uploads/586bad9f-d388-4012-a9a5-a4290aff2c2e.png"
+                  alt="Architectural Drafting"
+                  className="rounded-lg shadow-lg w-full object-cover aspect-[4/3]"
+                />
+              </GlassMorphismCard>
               
-              {/* Satisfaction tag */}
-              <div className="absolute -bottom-6 -left-6 animate-float">
-                <GlassMorphismCard className="px-4 py-3" fadeIn>
+              {/* Satisfaction tag - positioned better now */}
+              <div className="absolute -bottom-5 -left-5 z-10">
+                <GlassMorphismCard className="px-4 py-3 shadow-lg" fadeIn>
                   <div className="flex items-center space-x-3">
                     <div className="bg-teal-100 p-2 rounded-full">
                       <Heart size={18} className="text-primary" />
@@ -128,9 +130,9 @@ const Hero = () => {
                 </GlassMorphismCard>
               </div>
               
-              {/* Fast delivery tag */}
-              <div className="absolute -top-6 -right-6 animate-float" style={{ animationDelay: "0.5s" }}>
-                <GlassMorphismCard className="px-4 py-3" fadeIn>
+              {/* Fast delivery tag - positioned better now */}
+              <div className="absolute -top-5 -right-5 z-10">
+                <GlassMorphismCard className="px-4 py-3 shadow-lg" fadeIn>
                   <div className="flex items-center space-x-3">
                     <div className="bg-teal-100 p-2 rounded-full">
                       <Clock size={18} className="text-primary" />
@@ -142,7 +144,7 @@ const Hero = () => {
                   </div>
                 </GlassMorphismCard>
               </div>
-            </GlassMorphismCard>
+            </div>
           </div>
         </div>
       </div>
