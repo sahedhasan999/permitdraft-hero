@@ -108,7 +108,7 @@ const Hero = () => {
               variant="interactive"
             >
               <img
-                src="/lovable-uploads/819e5896-6733-4264-b1b1-455ef62bf6b0.png"
+                src="/lovable-uploads/9d442cad-aa2c-4975-81b1-d34f9bc6a90b.png"
                 alt="Architectural Drafting"
                 className="rounded-lg shadow-lg w-full object-cover aspect-[4/3]"
               />

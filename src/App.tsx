@@ -7,6 +7,16 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import Portfolio from "./pages/Portfolio";
+import Testimonials from "./pages/Testimonials";
+import Contact from "./pages/Contact";
+import About from "./pages/About";
+import Quote from "./pages/Quote";
+import Deck from "./pages/services/Deck";
+import Patio from "./pages/services/Patio";
+import Pergola from "./pages/services/Pergola"; 
+import OutdoorKitchen from "./pages/services/OutdoorKitchen";
+import HomeAddition from "./pages/services/HomeAddition";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +58,16 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/portfolio" element={<Portfolio />} />
+            <Route path="/testimonials" element={<Testimonials />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/quote" element={<Quote />} />
+            <Route path="/services/deck" element={<Deck />} />
+            <Route path="/services/patio" element={<Patio />} />
+            <Route path="/services/pergola" element={<Pergola />} />
+            <Route path="/services/outdoor-kitchen" element={<OutdoorKitchen />} />
+            <Route path="/services/home-addition" element={<HomeAddition />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
