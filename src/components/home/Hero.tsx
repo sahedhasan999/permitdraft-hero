@@ -4,6 +4,7 @@ import { ArrowRight, Heart, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AnimatedButton } from "../ui/AnimatedButton";
 import { GlassMorphismCard } from "../ui/GlassMorphismCard";
+import { ImageCarousel } from "../ui/ImageCarousel";
 import { scrollParallax } from "@/utils/transitions";
 
 const Hero = () => {
@@ -11,6 +12,18 @@ const Hero = () => {
   const decorativeElement1 = useRef<HTMLDivElement>(null);
   const decorativeElement2 = useRef<HTMLDivElement>(null);
   const decorativeElement3 = useRef<HTMLDivElement>(null);
+
+  const heroImages = [
+    "/lovable-uploads/66619c27-f30e-4e6c-b1c7-0f5ad695cee0.png",
+    "/lovable-uploads/dd2d3de4-09ef-4eb5-a833-36fb407ca0ad.png",
+    "/lovable-uploads/741fe312-9ad4-4de6-833f-cb39ab80875c.png",
+    "/lovable-uploads/3a843a1c-f661-483d-8811-7db962bc1ae3.png",
+    "/lovable-uploads/9f01866a-b5d5-4500-b848-661b05f806fc.png",
+    "/lovable-uploads/6f8495a1-edcb-490a-96bd-74de3ccd30ab.png",
+    "/lovable-uploads/12407047-f591-4871-b433-89be31d5efd4.png",
+    "/lovable-uploads/2f66816d-eb2c-415b-97e2-3a4797161b8d.png",
+    "/lovable-uploads/bcbbc964-b88c-4788-98b5-67f72c5652c5.png"
+  ];
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -108,15 +121,17 @@ const Hero = () => {
                 className="relative p-3"
                 variant="interactive"
               >
-                <img
-                  src="/lovable-uploads/586bad9f-d388-4012-a9a5-a4290aff2c2e.png"
-                  alt="Architectural Drafting"
-                  className="rounded-lg shadow-lg w-full object-cover aspect-[4/3]"
-                />
+                <div className="relative aspect-[4/3] w-full">
+                  <ImageCarousel 
+                    images={heroImages} 
+                    interval={6000}
+                    className="aspect-[4/3] w-full" 
+                  />
+                </div>
               </GlassMorphismCard>
               
-              {/* Satisfaction tag - positioned better now */}
-              <div className="absolute -bottom-5 -left-5 z-10">
+              {/* Satisfaction tag */}
+              <div className="absolute -bottom-8 -left-8 z-20">
                 <GlassMorphismCard className="px-4 py-3 shadow-lg" fadeIn>
                   <div className="flex items-center space-x-3">
                     <div className="bg-teal-100 p-2 rounded-full">
@@ -130,8 +145,8 @@ const Hero = () => {
                 </GlassMorphismCard>
               </div>
               
-              {/* Fast delivery tag - positioned better now */}
-              <div className="absolute -top-5 -right-5 z-10">
+              {/* Fast delivery tag */}
+              <div className="absolute -top-8 -right-8 z-20">
                 <GlassMorphismCard className="px-4 py-3 shadow-lg" fadeIn>
                   <div className="flex items-center space-x-3">
                     <div className="bg-teal-100 p-2 rounded-full">
