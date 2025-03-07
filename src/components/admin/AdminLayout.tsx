@@ -2,264 +2,212 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
-import {
+import { 
   LayoutDashboard,
   ShoppingCart,
   Users,
   MessageSquare,
+  Package,
+  FileImage,
   Settings,
-  FileText,
-  Image,
   LogOut,
   Menu,
-  X,
-  ChevronDown
+  X
 } from 'lucide-react';
-
-interface SidebarItemProps {
-  icon: React.ReactNode;
-  label: string;
-  path: string;
-  isActive: boolean;
-  hasSubmenu?: boolean;
-  isSubmenuOpen?: boolean;
-  onClick?: () => void;
-  children?: React.ReactNode;
-}
-
-const SidebarItem: React.FC<SidebarItemProps> = ({
-  icon,
-  label,
-  path,
-  isActive,
-  hasSubmenu = false,
-  isSubmenuOpen = false,
-  onClick,
-  children
-}) => {
-  return (
-    <div className={cn("mb-1", hasSubmenu && "mb-0")}>
-      <Link
-        to={path}
-        className={cn(
-          "flex items-center px-4 py-2.5 text-sm font-medium rounded-md transition-colors",
-          isActive
-            ? "bg-sidebar-primary text-sidebar-primary-foreground"
-            : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-        )}
-        onClick={onClick}
-      >
-        <span className="mr-3">{icon}</span>
-        <span className="flex-1">{label}</span>
-        {hasSubmenu && (
-          <ChevronDown
-            className={cn(
-              "h-4 w-4 transition-transform",
-              isSubmenuOpen && "transform rotate-180"
-            )}
-          />
-        )}
-      </Link>
-      {hasSubmenu && isSubmenuOpen && (
-        <div className="ml-9 mt-1 space-y-1">{children}</div>
-      )}
-    </div>
-  );
-};
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { useMobile } from '@/hooks/use-mobile';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
-const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
+const AdminLayout = ({ children }: AdminLayoutProps) => {
   const { user, logout } = useAuth();
-  const { toast } = useToast();
-  const location = useLocation();
   const navigate = useNavigate();
-
-  const toggleSubmenu = (menu: string) => {
-    setOpenSubmenu(current => (current === menu ? null : menu));
-  };
+  const location = useLocation();
+  const isMobile = useMobile();
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out",
-    });
     navigate('/admin/login');
   };
 
-  const isActive = (path: string) => {
-    return location.pathname === path || location.pathname.startsWith(`${path}/`);
-  };
+  const navItems = [
+    { 
+      icon: LayoutDashboard, 
+      label: 'Dashboard', 
+      path: '/admin/dashboard',
+      active: location.pathname === '/admin/dashboard'
+    },
+    { 
+      icon: ShoppingCart, 
+      label: 'Orders', 
+      path: '/admin/orders',
+      active: location.pathname === '/admin/orders'
+    },
+    { 
+      icon: Users, 
+      label: 'Leads', 
+      path: '/admin/leads',
+      active: location.pathname === '/admin/leads'
+    },
+    { 
+      icon: MessageSquare, 
+      label: 'Communications', 
+      path: '/admin/communications',
+      active: location.pathname === '/admin/communications'
+    },
+    { 
+      icon: Package, 
+      label: 'Services', 
+      path: '/admin/services',
+      active: location.pathname === '/admin/services'
+    },
+    { 
+      icon: FileImage, 
+      label: 'Content', 
+      path: '/admin/content',
+      active: location.pathname === '/admin/content'
+    },
+    { 
+      icon: Settings, 
+      label: 'Settings', 
+      path: '/admin/settings',
+      active: location.pathname === '/admin/settings'
+    }
+  ];
+
+  const renderNavLinks = () => (
+    <div className="space-y-1">
+      {navItems.map((item) => (
+        <Link 
+          key={item.path} 
+          to={item.path}
+          onClick={() => setSheetOpen(false)}
+          className={`flex items-center px-3 py-2 rounded-md text-sm transition-colors ${
+            item.active 
+              ? 'bg-primary text-primary-foreground' 
+              : 'hover:bg-muted'
+          }`}
+        >
+          <item.icon className="h-5 w-5 mr-3" />
+          {item.label}
+        </Link>
+      ))}
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Sidebar */}
-      <aside
-        className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 bg-sidebar-background border-r border-sidebar-border transition-transform lg:translate-x-0 lg:static lg:w-64",
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        )}
-      >
-        <div className="h-full flex flex-col">
-          <div className="p-4 border-b border-sidebar-border">
-            <Link to="/admin/dashboard" className="flex items-center">
-              <span className="text-xl font-bold text-primary">PermitDraft Pro</span>
-            </Link>
-          </div>
-
-          <nav className="flex-1 overflow-auto p-3">
-            <SidebarItem
-              icon={<LayoutDashboard className="h-5 w-5" />}
-              label="Dashboard"
-              path="/admin/dashboard"
-              isActive={isActive('/admin/dashboard')}
-            />
-
-            <SidebarItem
-              icon={<ShoppingCart className="h-5 w-5" />}
-              label="Orders"
-              path="/admin/orders"
-              isActive={isActive('/admin/orders')}
-            />
-
-            <SidebarItem
-              icon={<Users className="h-5 w-5" />}
-              label="Leads"
-              path="/admin/leads"
-              isActive={isActive('/admin/leads')}
-            />
-
-            <SidebarItem
-              icon={<MessageSquare className="h-5 w-5" />}
-              label="Communication"
-              path="/admin/communication"
-              isActive={isActive('/admin/communication')}
-            />
-
-            <SidebarItem
-              icon={<FileText className="h-5 w-5" />}
-              label="Services"
-              path="/admin/services"
-              isActive={isActive('/admin/services')}
-              hasSubmenu={true}
-              isSubmenuOpen={openSubmenu === 'services'}
-              onClick={() => toggleSubmenu('services')}
-            >
-              <Link
-                to="/admin/services/list"
-                className={cn(
-                  "flex items-center px-4 py-2 text-sm rounded-md transition-colors",
-                  isActive('/admin/services/list')
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent/50"
-                )}
-              >
-                Service List
+      {/* Mobile Navigation */}
+      {isMobile && (
+        <div className="fixed top-0 left-0 right-0 z-40 bg-background border-b p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Link to="/" className="font-semibold text-xl">
+                PermitDraftPro
               </Link>
-              <Link
-                to="/admin/services/create"
-                className={cn(
-                  "flex items-center px-4 py-2 text-sm rounded-md transition-colors",
-                  isActive('/admin/services/create')
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent/50"
-                )}
-              >
-                Create Service
-              </Link>
-            </SidebarItem>
-
-            <SidebarItem
-              icon={<Image className="h-5 w-5" />}
-              label="Content"
-              path="/admin/content"
-              isActive={isActive('/admin/content')}
-              hasSubmenu={true}
-              isSubmenuOpen={openSubmenu === 'content'}
-              onClick={() => toggleSubmenu('content')}
-            >
-              <Link
-                to="/admin/content/hero-images"
-                className={cn(
-                  "flex items-center px-4 py-2 text-sm rounded-md transition-colors",
-                  isActive('/admin/content/hero-images')
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent/50"
-                )}
-              >
-                Hero Images
-              </Link>
-            </SidebarItem>
-
-            <SidebarItem
-              icon={<Settings className="h-5 w-5" />}
-              label="Settings"
-              path="/admin/settings"
-              isActive={isActive('/admin/settings')}
-            />
-          </nav>
-
-          <div className="p-4 border-t border-sidebar-border">
-            <div className="flex items-center mb-4">
-              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mr-3">
-                <span className="text-primary font-semibold">
-                  {user?.name.charAt(0) || 'A'}
-                </span>
-              </div>
-              <div>
-                <p className="font-medium text-sm">{user?.name || 'Admin'}</p>
-                <p className="text-xs text-sidebar-foreground/70">{user?.email || 'admin@example.com'}</p>
+              <div className="px-2 py-1 bg-primary/10 text-primary rounded-md text-xs font-medium">
+                Admin
               </div>
             </div>
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center px-4 py-2 text-sm font-medium rounded-md text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
-            >
-              <LogOut className="h-5 w-5 mr-3" />
-              <span>Log Out</span>
-            </button>
+            <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="p-0">
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <Link to="/" className="font-semibold text-xl">
+                      PermitDraftPro
+                    </Link>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => setSheetOpen(false)}
+                    >
+                      <X className="h-5 w-5" />
+                    </Button>
+                  </div>
+                  <div className="flex items-center space-x-3 mb-6">
+                    <Avatar>
+                      <AvatarFallback>
+                        {user?.name?.charAt(0) || 'A'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium">{user?.name || 'Admin User'}</p>
+                      <p className="text-sm text-muted-foreground">{user?.email}</p>
+                    </div>
+                  </div>
+                  <Separator className="my-4" />
+                  {renderNavLinks()}
+                  <Separator className="my-4" />
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start" 
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="h-5 w-5 mr-3" />
+                    Logout
+                  </Button>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
-      </aside>
+      )}
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Header */}
-        <header className="bg-card border-b border-border sticky top-0 z-40">
-          <div className="px-4 h-16 flex items-center justify-between">
-            <button
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="lg:hidden p-2 rounded-md hover:bg-accent"
-              aria-label="Toggle sidebar"
-            >
-              {isSidebarOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
-            </button>
-
-            <div className="ml-auto flex items-center space-x-4">
-              <Link
-                to="/"
-                className="text-sm text-muted-foreground hover:text-foreground"
-                target="_blank"
+      {/* Desktop Sidebar */}
+      {!isMobile && (
+        <div className="w-64 border-r bg-card h-screen sticky top-0 overflow-y-auto p-6">
+          <div className="space-y-6">
+            <Link to="/" className="flex items-center space-x-2">
+              <span className="font-semibold text-xl">PermitDraftPro</span>
+            </Link>
+            
+            <div className="flex items-center space-x-3">
+              <Avatar>
+                <AvatarFallback>
+                  {user?.name?.charAt(0) || 'A'}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-medium">{user?.name || 'Admin User'}</p>
+                <p className="text-sm text-muted-foreground">{user?.email}</p>
+              </div>
+            </div>
+            
+            <Separator />
+            
+            <nav className="space-y-1">
+              {renderNavLinks()}
+            </nav>
+            
+            <div className="mt-auto pt-6">
+              <Separator className="mb-6" />
+              <Button 
+                variant="outline" 
+                className="w-full justify-start" 
+                onClick={handleLogout}
               >
-                View Website
-              </Link>
+                <LogOut className="h-5 w-5 mr-2" />
+                Logout
+              </Button>
             </div>
           </div>
-        </header>
+        </div>
+      )}
 
-        {/* Main content */}
-        <main className="flex-1 overflow-auto p-6">
+      {/* Main Content */}
+      <div className="flex-1">
+        <main className={`p-6 ${isMobile ? 'mt-16' : ''}`}>
           {children}
         </main>
       </div>

@@ -1,80 +1,137 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useEffect } from "react";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import Portfolio from "./pages/Portfolio";
-import Testimonials from "./pages/Testimonials";
-import Contact from "./pages/Contact";
-import About from "./pages/About";
-import Quote from "./pages/Quote";
-import Deck from "./pages/services/Deck";
-import Patio from "./pages/services/Patio";
-import Pergola from "./pages/services/Pergola"; 
-import OutdoorKitchen from "./pages/services/OutdoorKitchen";
-import HomeAddition from "./pages/services/HomeAddition";
+import './App.css';
+import { lazy, Suspense } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from './contexts/AuthContext';
+import ProtectedRoute from './components/admin/ProtectedRoute';
 
-const queryClient = new QueryClient();
+// Layout
+import Navbar from './components/layout/Navbar';
+import Footer from './components/layout/Footer';
 
-const App = () => {
-  useEffect(() => {
-    // Add mousemove event listener for parallax effects
-    const handleMouseMove = (e: MouseEvent) => {
-      document.documentElement.style.setProperty('--parallax-slow', `${e.clientY * 0.01}px`);
-      document.documentElement.style.setProperty('--parallax-medium', `${e.clientY * 0.02}px`);
-      document.documentElement.style.setProperty('--parallax-fast', `${e.clientY * 0.03}px`);
-    };
+// Pages
+import Index from './pages/Index';
+import About from './pages/About';
+import Contact from './pages/Contact';
+import Testimonials from './pages/Testimonials';
+import Portfolio from './pages/Portfolio';
+import Quote from './pages/Quote';
+import NotFound from './pages/NotFound';
 
-    window.addEventListener('mousemove', handleMouseMove);
+// Service Pages
+import Deck from './pages/services/Deck';
+import Patio from './pages/services/Patio';
+import Pergola from './pages/services/Pergola';
+import OutdoorKitchen from './pages/services/OutdoorKitchen';
+import HomeAddition from './pages/services/HomeAddition';
 
-    // Preload critical images
-    const preloadImages = () => {
-      const images = [
-        "https://images.unsplash.com/photo-1431576901776-e539bd916ba2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80"
-      ];
-      
-      images.forEach((src) => {
-        const img = new Image();
-        img.src = src;
-      });
-    };
+// Admin Pages
+import Login from './pages/admin/Login';
+import Dashboard from './pages/admin/Dashboard';
+import Orders from './pages/admin/Orders';
+import Leads from './pages/admin/Leads';
+import Communications from './pages/admin/Communications';
+import Services from './pages/admin/Services';
+import ContentManager from './pages/admin/ContentManager';
 
-    preloadImages();
+// Context Providers
+import { AuthProvider } from './contexts/AuthContext';
+import { Toaster } from './components/ui/toaster';
 
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-    };
-  }, []);
-
+function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+    <BrowserRouter>
+      <AuthProvider>
+        <Suspense fallback={<div>Loading...</div>}>
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/portfolio" element={<Portfolio />} />
-            <Route path="/testimonials" element={<Testimonials />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/quote" element={<Quote />} />
-            <Route path="/services/deck" element={<Deck />} />
-            <Route path="/services/patio" element={<Patio />} />
-            <Route path="/services/pergola" element={<Pergola />} />
-            <Route path="/services/outdoor-kitchen" element={<OutdoorKitchen />} />
-            <Route path="/services/home-addition" element={<HomeAddition />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
+            {/* Public Routes */}
+            <Route
+              path="/*"
+              element={
+                <>
+                  <Navbar />
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/contact" element={<Contact />} />
+                    <Route path="/testimonials" element={<Testimonials />} />
+                    <Route path="/portfolio" element={<Portfolio />} />
+                    <Route path="/quote" element={<Quote />} />
+                    
+                    {/* Service Routes */}
+                    <Route path="/services/deck" element={<Deck />} />
+                    <Route path="/services/patio" element={<Patio />} />
+                    <Route path="/services/pergola" element={<Pergola />} />
+                    <Route path="/services/outdoor-kitchen" element={<OutdoorKitchen />} />
+                    <Route path="/services/home-addition" element={<HomeAddition />} />
+                    
+                    {/* 404 */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                  <Footer />
+                </>
+              }
+            />
+            
+            {/* Admin Routes */}
+            <Route path="/admin">
+              <Route path="login" element={<Login />} />
+              <Route
+                path="dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="orders"
+                element={
+                  <ProtectedRoute>
+                    <Orders />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="leads"
+                element={
+                  <ProtectedRoute>
+                    <Leads />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="communications"
+                element={
+                  <ProtectedRoute>
+                    <Communications />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="services"
+                element={
+                  <ProtectedRoute>
+                    <Services />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="content"
+                element={
+                  <ProtectedRoute>
+                    <ContentManager />
+                  </ProtectedRoute>
+                }
+              />
+              <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            </Route>
           </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
+        </Suspense>
+        <Toaster />
+      </AuthProvider>
+    </BrowserRouter>
   );
-};
+}
 
 export default App;
