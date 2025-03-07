@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect } from "react";
-import { GlassMorphismCard } from "./GlassMorphismCard";
 
 interface ImageCarouselProps {
   images: string[];
@@ -14,15 +13,51 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
   className 
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [imagesLoaded, setImagesLoaded] = useState(false);
+
+  // Preload images
+  useEffect(() => {
+    const preloadImages = () => {
+      let loadedCount = 0;
+      const totalImages = images.length;
+      
+      images.forEach((src) => {
+        const img = new Image();
+        img.onload = () => {
+          loadedCount++;
+          if (loadedCount === totalImages) {
+            setImagesLoaded(true);
+          }
+        };
+        img.src = src;
+      });
+    };
+
+    preloadImages();
+  }, [images]);
 
   useEffect(() => {
+    // Only start the interval once images are loaded
+    if (!imagesLoaded) return;
+    
     // Set up automatic image rotation
     const timer = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
     }, interval);
 
     return () => clearInterval(timer);
-  }, [images.length, interval]);
+  }, [images.length, interval, imagesLoaded]);
+
+  if (!imagesLoaded) {
+    return (
+      <div className={`${className} flex items-center justify-center bg-gray-100 rounded-lg`}>
+        <div className="text-center p-4">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+          <p className="mt-2 text-sm text-muted-foreground">Loading images...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`relative overflow-hidden rounded-lg ${className}`}>
