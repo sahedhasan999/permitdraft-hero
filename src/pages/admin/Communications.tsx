@@ -40,9 +40,9 @@ const mockCommunications = [
     email: 'robert@example.com',
     subject: 'Home Addition Timeline',
     messages: [
-      { id: 'm1', sender: 'customer', content: 'What's the typical timeline for a small home addition?', timestamp: '2023-09-08T09:15:00Z' },
+      { id: 'm1', sender: 'customer', content: 'What\'s the typical timeline for a small home addition?', timestamp: '2023-09-08T09:15:00Z' },
       { id: 'm2', sender: 'ai', content: 'For a small home addition, the timeline typically ranges from 6-12 weeks from design approval to completion. This includes permitting (2-3 weeks), construction (3-8 weeks), and finishing work (1-2 weeks). Would you like more details about a specific type of addition?', timestamp: '2023-09-08T09:20:00Z' },
-      { id: 'm3', sender: 'customer', content: 'Yes, I'm interested in adding a bedroom and bathroom.', timestamp: '2023-09-08T09:25:00Z' },
+      { id: 'm3', sender: 'customer', content: 'Yes, I\'m interested in adding a bedroom and bathroom.', timestamp: '2023-09-08T09:25:00Z' },
       { id: 'm4', sender: 'ai', content: 'A bedroom and bathroom addition typically falls on the longer end of the timeline, around 8-12 weeks due to the plumbing work involved. The permitting process might also take a bit longer. Would you like to schedule a consultation to discuss your specific requirements?', timestamp: '2023-09-08T09:30:00Z' },
     ],
     status: 'closed',
