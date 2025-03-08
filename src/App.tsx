@@ -17,6 +17,7 @@ import Testimonials from './pages/Testimonials';
 import Portfolio from './pages/Portfolio';
 import Quote from './pages/Quote';
 import NotFound from './pages/NotFound';
+import Login from './pages/Login';
 
 // Service Pages
 import Deck from './pages/services/Deck';
@@ -26,7 +27,7 @@ import OutdoorKitchen from './pages/services/OutdoorKitchen';
 import HomeAddition from './pages/services/HomeAddition';
 
 // Admin Pages
-import Login from './pages/admin/Login';
+import AdminLogin from './pages/admin/Login';
 import Dashboard from './pages/admin/Dashboard';
 import Orders from './pages/admin/Orders';
 import Leads from './pages/admin/Leads';
@@ -62,6 +63,7 @@ function App() {
                       <Route path="/testimonials" element={<Testimonials />} />
                       <Route path="/portfolio" element={<Portfolio />} />
                       <Route path="/quote" element={<Quote />} />
+                      <Route path="/login" element={<Login />} />
                       
                       {/* Service Routes */}
                       <Route path="/services/deck" element={<Deck />} />
@@ -80,7 +82,7 @@ function App() {
               
               {/* Admin Routes */}
               <Route path="/admin">
-                <Route path="login" element={<Login />} />
+                <Route path="login" element={<AdminLogin />} />
                 <Route
                   path="dashboard"
                   element={

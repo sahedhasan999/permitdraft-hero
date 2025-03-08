@@ -1,10 +1,11 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { AnimatedButton } from "@/components/ui/AnimatedButton";
+import { CheckCircle, Upload, X, FileText } from "lucide-react";
+import { cn } from "@/lib/utils";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { CheckCircle } from "lucide-react";
 
 const projectTypes = [
   { id: 'deck', name: 'Deck' },
@@ -22,6 +23,11 @@ interface FormData {
   phone: string;
   timeline: string;
   additionalDetails: string;
+  files: File[];
+}
+
+interface FileWithPreview extends File {
+  preview?: string;
 }
 
 const Quote = () => {
@@ -33,10 +39,13 @@ const Quote = () => {
     phone: '',
     timeline: 'asap',
     additionalDetails: '',
+    files: [],
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -59,9 +68,9 @@ const Quote = () => {
       setSubmitted(true);
       toast({
         title: "Quote Request Submitted",
-        description: "We'll be in touch with you shortly.",
+        description: `We've received your request with ${formData.files.length} files.`,
       });
-      // Reset form after submission (in a real app, you'd likely redirect)
+      // Reset form after submission
       setFormData({
         projectType: '',
         squareFootage: '',
@@ -70,8 +79,77 @@ const Quote = () => {
         phone: '',
         timeline: 'asap',
         additionalDetails: '',
+        files: [],
       });
     }, 1500);
+  };
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const newFiles = Array.from(e.dataTransfer.files);
+      addFiles(newFiles);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const newFiles = Array.from(e.target.files);
+      addFiles(newFiles);
+    }
+  };
+
+  const addFiles = (newFiles: File[]) => {
+    // Add new files to the existing files array
+    setFormData(prev => ({
+      ...prev,
+      files: [...prev.files, ...newFiles]
+    }));
+
+    // Show success toast
+    toast({
+      title: "Files Added",
+      description: `${newFiles.length} file(s) added successfully.`,
+    });
+  };
+
+  const removeFile = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      files: prev.files.filter((_, i) => i !== index)
+    }));
+  };
+
+  const getFileIcon = (fileName: string) => {
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    
+    switch (extension) {
+      case 'pdf':
+        return <FileText className="h-6 w-6 text-red-500" />;
+      case 'doc':
+      case 'docx':
+        return <FileText className="h-6 w-6 text-blue-500" />;
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'heic':
+        return <FileText className="h-6 w-6 text-green-500" />;
+      default:
+        return <FileText className="h-6 w-6 text-gray-500" />;
+    }
   };
 
   return (
@@ -215,6 +293,67 @@ const Quote = () => {
                       placeholder="Tell us more about your project, special requirements, or questions..."
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors"
                     ></textarea>
+                  </div>
+
+                  {/* File Upload Section */}
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium mb-2">
+                      Upload Project Documents
+                    </label>
+                    <div 
+                      className={cn(
+                        "border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors",
+                        dragActive ? "border-teal-500 bg-teal-50" : "border-gray-300 hover:border-teal-400",
+                      )}
+                      onDragEnter={handleDrag}
+                      onDragLeave={handleDrag}
+                      onDragOver={handleDrag}
+                      onDrop={handleDrop}
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                      <p className="mt-2 text-sm text-gray-600">
+                        Drag & drop files here or <span className="text-teal-600 font-medium">browse</span>
+                      </p>
+                      <p className="mt-1 text-xs text-gray-500">
+                        Accepted file types: PDF, DOC, DOCX, JPG, JPEG, PNG, HEIC
+                      </p>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        multiple
+                        onChange={handleFileSelect}
+                        className="hidden"
+                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.heic"
+                      />
+                    </div>
+
+                    {/* File List */}
+                    {formData.files.length > 0 && (
+                      <div className="mt-4 space-y-2">
+                        <p className="text-sm font-medium">Attached Files ({formData.files.length})</p>
+                        <div className="max-h-48 overflow-y-auto space-y-2 p-2 border rounded-md">
+                          {formData.files.map((file, index) => (
+                            <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                              <div className="flex items-center space-x-2">
+                                {getFileIcon(file.name)}
+                                <div className="truncate max-w-[200px] sm:max-w-xs">
+                                  <p className="text-sm truncate">{file.name}</p>
+                                  <p className="text-xs text-gray-500">{(file.size / 1024).toFixed(1)} KB</p>
+                                </div>
+                              </div>
+                              <button 
+                                type="button" 
+                                className="text-gray-500 hover:text-red-500"
+                                onClick={() => removeFile(index)}
+                              >
+                                <X size={16} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 

@@ -126,13 +126,13 @@ const Navbar = () => {
         </nav>
 
         <div className="hidden md:flex items-center space-x-4">
-          <Link to="/order">
+          <Link to="/quote">
             <button className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center transition-colors">
               Start Your Project
               <ArrowRight size={16} className="ml-2" />
             </button>
           </Link>
-          <Link to="/login" className="text-sm font-medium hover:text-teal-600 transition-colors">
+          <Link to="/admin/login" className="text-sm font-medium hover:text-teal-600 transition-colors">
             Login
           </Link>
         </div>
@@ -149,7 +149,7 @@ const Navbar = () => {
 
       {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="md:hidden py-4 bg-background border-t animate-fade-down">
+        <div className="md:hidden py-4 bg-background/80 backdrop-blur-lg border-t animate-fade-down">
           <div className="container px-4 mx-auto">
             <nav className="flex flex-col space-y-1">
               {navLinks.map((link) => (
@@ -198,13 +198,13 @@ const Navbar = () => {
             </nav>
 
             <div className="mt-6 space-y-4 px-4">
-              <Link to="/order">
+              <Link to="/quote">
                 <button className="w-full bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center transition-colors">
                   Start Your Project
                   <ArrowRight size={16} className="ml-2" />
                 </button>
               </Link>
-              <Link to="/login" className="block text-center text-sm font-medium hover:text-teal-600 transition-colors">
+              <Link to="/admin/login" className="block text-center text-sm font-medium hover:text-teal-600 transition-colors">
                 Login
               </Link>
             </div>
