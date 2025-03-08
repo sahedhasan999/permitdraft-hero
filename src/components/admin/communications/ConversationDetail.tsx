@@ -44,15 +44,21 @@ const ConversationDetail: React.FC<ConversationDetailProps> = ({
   const toggleConversationStatus = () => {
     const updatedConversations = conversations.map(conv => {
       if (conv.id === selectedConversation.id) {
+        const newStatus: 'active' | 'closed' = conv.status === 'active' ? 'closed' : 'active';
         return {
           ...conv,
-          status: conv.status === 'active' ? 'closed' : 'active'
+          status: newStatus
         };
       }
       return conv;
     });
+    
     setConversations(updatedConversations);
-    setSelectedConversation(updatedConversations.find(c => c.id === selectedConversation.id)!);
+    // Find the updated conversation and pass it to setSelectedConversation
+    const updatedConversation = updatedConversations.find(c => c.id === selectedConversation.id);
+    if (updatedConversation) {
+      setSelectedConversation(updatedConversation);
+    }
   };
 
   return (
