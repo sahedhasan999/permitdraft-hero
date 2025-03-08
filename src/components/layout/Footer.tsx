@@ -171,7 +171,10 @@ const Footer = () => {
           <p className="text-sm text-muted-foreground">
             &copy; {new Date().getFullYear()} PermitDraftPro. All rights reserved.
           </p>
-          <div className="mt-4 md:mt-0">
+          <div className="mt-4 md:mt-0 flex items-center space-x-4">
+            <Link to="/admin/login" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+              Admin Login
+            </Link>
             <img 
               src="https://static.vecteezy.com/system/resources/previews/022/048/316/original/payment-method-icon-sign-symbol-design-free-png.png" 
               alt="Payment Methods" 
