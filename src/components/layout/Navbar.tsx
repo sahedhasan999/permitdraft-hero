@@ -132,7 +132,7 @@ const Navbar = () => {
               <ArrowRight size={16} className="ml-2" />
             </button>
           </Link>
-          <Link to="/admin/login" className="text-sm font-medium hover:text-teal-600 transition-colors">
+          <Link to="/login" className="text-sm font-medium hover:text-teal-600 transition-colors">
             Login
           </Link>
         </div>
@@ -204,7 +204,7 @@ const Navbar = () => {
                   <ArrowRight size={16} className="ml-2" />
                 </button>
               </Link>
-              <Link to="/admin/login" className="block text-center text-sm font-medium hover:text-teal-600 transition-colors">
+              <Link to="/login" className="block text-center text-sm font-medium hover:text-teal-600 transition-colors">
                 Login
               </Link>
             </div>
