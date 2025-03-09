@@ -1,7 +1,6 @@
 
 import React from "react";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 import { GlassMorphismCard } from "@/components/ui/GlassMorphismCard";
 import { AnimatedButton } from "@/components/ui/AnimatedButton";
 import { Send } from "lucide-react";
@@ -121,8 +120,6 @@ const Contact = () => {
           </div>
         </div>
       </main>
-      
-      <Footer />
     </div>
   );
 };

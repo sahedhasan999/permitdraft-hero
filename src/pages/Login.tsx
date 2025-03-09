@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import LoginForm from '@/components/auth/LoginForm';
 import SignUpDialog from '@/components/auth/SignUpDialog';
 
@@ -34,7 +33,6 @@ const Login = () => {
           <LoginForm />
         </div>
       </main>
-      <Footer />
 
       <SignUpDialog 
         open={showSignUp} 

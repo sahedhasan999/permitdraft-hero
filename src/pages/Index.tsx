@@ -6,7 +6,6 @@ import Benefits from "../components/home/Benefits";
 import Testimonials from "../components/home/Testimonials";
 import CTASection from "../components/home/CTASection";
 import Navbar from "../components/layout/Navbar";
-import Footer from "../components/layout/Footer";
 
 const Index = () => {
   useEffect(() => {
@@ -24,7 +23,6 @@ const Index = () => {
         <Testimonials />
         <CTASection />
       </main>
-      <Footer />
     </div>
   );
 };

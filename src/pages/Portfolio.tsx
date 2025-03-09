@@ -1,7 +1,5 @@
-
 import React, { useEffect } from "react";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { AnimatedButton } from "@/components/ui/AnimatedButton";
@@ -107,7 +105,6 @@ const Portfolio = () => {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

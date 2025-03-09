@@ -6,7 +6,6 @@ import { useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './components/admin/ProtectedRoute';
 
 // Layout
-import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 
 // Pages
@@ -55,7 +54,6 @@ function App() {
                 path="/*"
                 element={
                   <>
-                    <Navbar />
                     <Routes>
                       <Route path="/" element={<Index />} />
                       <Route path="/about" element={<About />} />

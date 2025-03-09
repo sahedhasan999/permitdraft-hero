@@ -5,7 +5,6 @@ import { ArrowLeft } from "lucide-react";
 import { AnimatedButton } from "@/components/ui/AnimatedButton";
 import { GlassMorphismCard } from "@/components/ui/GlassMorphismCard";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 
 const NotFound = () => {
   const location = useLocation();
@@ -54,7 +53,6 @@ const NotFound = () => {
           </div>
         </div>
       </div>
-      <Footer />
     </div>
   );
 };
