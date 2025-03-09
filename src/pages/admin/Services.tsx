@@ -1,5 +1,6 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useToast } from '@/hooks/use-toast';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,106 +10,41 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { PlusCircle, Edit, Trash2, CheckCircle, Search, DollarSign, Package, ListChecks, ChevronUp, ChevronDown } from 'lucide-react';
-
-// Mock data for services
-const initialServices = [
-  {
-    id: 'service-001',
-    title: 'Deck Design',
-    description: 'Professional deck designs with precise measurements for permit applications.',
-    shortDescription: 'Custom deck designs ready for permit submission.',
-    category: 'Outdoor',
-    basePrice: 499,
-    features: [
-      'Complete CAD drawings',
-      'Material specifications',
-      'Structural calculations',
-      'Permit-ready documentation',
-      '3 revision rounds'
-    ],
-    active: true,
-    image: '/lovable-uploads/66619c27-f30e-4e6c-b1c7-0f5ad695cee0.png'
-  },
-  {
-    id: 'service-002',
-    title: 'Patio Design',
-    description: 'Custom patio designs for outdoor living spaces with detailed specifications.',
-    shortDescription: 'Transform your outdoor space with custom patio designs.',
-    category: 'Outdoor',
-    basePrice: 649,
-    features: [
-      'Detailed layout plans',
-      'Material selection guidance',
-      'Drainage considerations',
-      'Permit-ready documentation',
-      '3 revision rounds'
-    ],
-    active: true,
-    image: '/lovable-uploads/dd2d3de4-09ef-4eb5-a833-36fb407ca0ad.png'
-  },
-  {
-    id: 'service-003',
-    title: 'Pergola Design',
-    description: 'Custom pergola designs with structural calculations and material specifications.',
-    shortDescription: 'Add shade and style with custom pergola designs.',
-    category: 'Outdoor',
-    basePrice: 399,
-    features: [
-      'Structural drawings',
-      'Connection details',
-      'Material specifications',
-      'Permit-ready documentation',
-      '2 revision rounds'
-    ],
-    active: true,
-    image: '/lovable-uploads/741fe312-9ad4-4de6-833f-cb39ab80875c.png'
-  },
-  {
-    id: 'service-004',
-    title: 'Outdoor Kitchen',
-    description: 'Comprehensive outdoor kitchen designs with utility connections and appliance specifications.',
-    shortDescription: 'Create the perfect outdoor cooking space.',
-    category: 'Outdoor',
-    basePrice: 899,
-    features: [
-      'Layout and elevation drawings',
-      'Utility placement plans',
-      'Appliance specifications',
-      'Material selection guidance',
-      '3 revision rounds'
-    ],
-    active: true,
-    image: '/lovable-uploads/3a843a1c-f661-483d-8811-7db962bc1ae3.png'
-  },
-  {
-    id: 'service-005',
-    title: 'Home Addition',
-    description: 'Architectural plans for home additions with structural details and code compliance.',
-    shortDescription: 'Expand your living space with professional design.',
-    category: 'Residential',
-    basePrice: 1299,
-    features: [
-      'Floor plans',
-      'Elevations',
-      'Structural details',
-      'Code compliance review',
-      '3 revision rounds'
-    ],
-    active: true,
-    image: '/lovable-uploads/9f01866a-b5d5-4500-b848-661b05f806fc.png'
-  }
-];
+import { PlusCircle, Edit, Trash2, CheckCircle, Search, DollarSign, Package, ListChecks, ChevronUp, ChevronDown, Loader2 } from 'lucide-react';
+import { Service, getServices, addService, updateService, deleteService } from '@/services/servicesService';
 
 const ServiceManagement = () => {
-  const [services, setServices] = useState(initialServices);
+  const [services, setServices] = useState<Service[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [currentService, setCurrentService] = useState<any>(null);
+  const [currentService, setCurrentService] = useState<Partial<Service> | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
   const [newFeature, setNewFeature] = useState('');
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
+  const fetchServices = async () => {
+    setIsLoading(true);
+    try {
+      const data = await getServices();
+      setServices(data);
+    } catch (error) {
+      toast({
+        title: "Error fetching services",
+        description: "There was a problem loading the services.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const filteredServices = services.filter(service => {
     const matchesSearch = service.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -123,7 +59,6 @@ const ServiceManagement = () => {
 
   const handleAddService = () => {
     setCurrentService({
-      id: `service-${Date.now()}`,
       title: '',
       description: '',
       shortDescription: '',
@@ -137,49 +72,106 @@ const ServiceManagement = () => {
     setIsDialogOpen(true);
   };
 
-  const handleEditService = (service: any) => {
+  const handleEditService = (service: Service) => {
     setCurrentService({ ...service });
     setIsEditing(true);
     setIsDialogOpen(true);
   };
 
-  const handleDeletePrompt = (service: any) => {
+  const handleDeletePrompt = (service: Service) => {
     setCurrentService(service);
     setIsDeleteDialogOpen(true);
   };
 
-  const handleDeleteService = () => {
-    setServices(services.filter(s => s.id !== currentService.id));
-    setIsDeleteDialogOpen(false);
+  const handleDeleteService = async () => {
+    if (!currentService?.id) return;
+    
+    try {
+      await deleteService(currentService.id);
+      setServices(services.filter(s => s.id !== currentService.id));
+      toast({
+        title: "Service deleted",
+        description: "The service has been successfully deleted.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error deleting service",
+        description: "There was a problem deleting the service.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleteDialogOpen(false);
+    }
   };
 
-  const handleSaveService = () => {
-    if (isEditing) {
-      setServices(services.map(s => s.id === currentService.id ? currentService : s));
-    } else {
-      setServices([...services, currentService]);
+  const handleSaveService = async () => {
+    if (!currentService) return;
+    
+    // Validate required fields
+    if (!currentService.title || !currentService.description || !currentService.shortDescription) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
     }
-    setIsDialogOpen(false);
+    
+    setIsSaving(true);
+    
+    try {
+      if (isEditing && currentService.id) {
+        // Update existing service
+        const { id, ...serviceData } = currentService as Service;
+        await updateService(id, serviceData);
+        setServices(services.map(s => s.id === id ? { ...serviceData, id } as Service : s));
+        toast({
+          title: "Service updated",
+          description: "The service has been successfully updated.",
+        });
+      } else {
+        // Add new service
+        const serviceData = currentService as Omit<Service, 'id'>;
+        const id = await addService(serviceData);
+        setServices([...services, { ...serviceData, id }]);
+        toast({
+          title: "Service created",
+          description: "The new service has been successfully created.",
+        });
+      }
+      setIsDialogOpen(false);
+    } catch (error) {
+      toast({
+        title: "Error saving service",
+        description: "There was a problem saving the service.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleAddFeature = () => {
-    if (newFeature.trim()) {
+    if (newFeature.trim() && currentService) {
       setCurrentService({
         ...currentService,
-        features: [...currentService.features, newFeature.trim()]
+        features: [...(currentService.features || []), newFeature.trim()]
       });
       setNewFeature('');
     }
   };
 
   const handleRemoveFeature = (index: number) => {
+    if (!currentService) return;
     setCurrentService({
       ...currentService,
-      features: currentService.features.filter((_: any, i: number) => i !== index)
+      features: currentService.features?.filter((_, i) => i !== index) || []
     });
   };
 
   const handleMoveFeature = (index: number, direction: 'up' | 'down') => {
+    if (!currentService || !currentService.features) return;
+    
     if ((direction === 'up' && index === 0) || 
         (direction === 'down' && index === currentService.features.length - 1)) {
       return;
@@ -194,6 +186,28 @@ const ServiceManagement = () => {
       ...currentService,
       features: newFeatures
     });
+  };
+
+  const handleToggleActive = async (service: Service) => {
+    try {
+      await updateService(service.id, { active: !service.active });
+      setServices(services.map(s => {
+        if (s.id === service.id) {
+          return { ...s, active: !s.active };
+        }
+        return s;
+      }));
+      toast({
+        title: `Service ${service.active ? 'deactivated' : 'activated'}`,
+        description: `"${service.title}" is now ${service.active ? 'inactive' : 'active'}.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error updating service",
+        description: "There was a problem updating the service status.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -232,26 +246,25 @@ const ServiceManagement = () => {
           </TabsList>
           
           <TabsContent value="all" className="space-y-4 mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredServices.map((service) => (
-                <ServiceCard
-                  key={service.id}
-                  service={service}
-                  onEdit={() => handleEditService(service)}
-                  onDelete={() => handleDeletePrompt(service)}
-                  onToggleActive={() => {
-                    setServices(services.map(s => {
-                      if (s.id === service.id) {
-                        return { ...s, active: !s.active };
-                      }
-                      return s;
-                    }));
-                  }}
-                />
-              ))}
-            </div>
+            {isLoading ? (
+              <div className="flex justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredServices.map((service) => (
+                  <ServiceCard
+                    key={service.id}
+                    service={service}
+                    onEdit={() => handleEditService(service)}
+                    onDelete={() => handleDeletePrompt(service)}
+                    onToggleActive={() => handleToggleActive(service)}
+                  />
+                ))}
+              </div>
+            )}
             
-            {filteredServices.length === 0 && (
+            {!isLoading && filteredServices.length === 0 && (
               <div className="text-center py-12">
                 <Package className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
                 <h3 className="mt-4 text-lg font-medium">No services found</h3>
@@ -262,30 +275,30 @@ const ServiceManagement = () => {
             )}
           </TabsContent>
           
+          {/* Active tab content */}
           <TabsContent value="active" className="space-y-4 mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredServices
-                .filter(service => service.active)
-                .map((service) => (
-                  <ServiceCard
-                    key={service.id}
-                    service={service}
-                    onEdit={() => handleEditService(service)}
-                    onDelete={() => handleDeletePrompt(service)}
-                    onToggleActive={() => {
-                      setServices(services.map(s => {
-                        if (s.id === service.id) {
-                          return { ...s, active: !s.active };
-                        }
-                        return s;
-                      }));
-                    }}
-                  />
-                ))
-              }
-            </div>
+            {isLoading ? (
+              <div className="flex justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredServices
+                  .filter(service => service.active)
+                  .map((service) => (
+                    <ServiceCard
+                      key={service.id}
+                      service={service}
+                      onEdit={() => handleEditService(service)}
+                      onDelete={() => handleDeletePrompt(service)}
+                      onToggleActive={() => handleToggleActive(service)}
+                    />
+                  ))
+                }
+              </div>
+            )}
             
-            {filteredServices.filter(s => s.active).length === 0 && (
+            {!isLoading && filteredServices.filter(s => s.active).length === 0 && (
               <div className="text-center py-12">
                 <Package className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
                 <h3 className="mt-4 text-lg font-medium">No active services found</h3>
@@ -296,30 +309,30 @@ const ServiceManagement = () => {
             )}
           </TabsContent>
           
+          {/* Inactive tab content */}
           <TabsContent value="inactive" className="space-y-4 mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredServices
-                .filter(service => !service.active)
-                .map((service) => (
-                  <ServiceCard
-                    key={service.id}
-                    service={service}
-                    onEdit={() => handleEditService(service)}
-                    onDelete={() => handleDeletePrompt(service)}
-                    onToggleActive={() => {
-                      setServices(services.map(s => {
-                        if (s.id === service.id) {
-                          return { ...s, active: !s.active };
-                        }
-                        return s;
-                      }));
-                    }}
-                  />
-                ))
-              }
-            </div>
+            {isLoading ? (
+              <div className="flex justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredServices
+                  .filter(service => !service.active)
+                  .map((service) => (
+                    <ServiceCard
+                      key={service.id}
+                      service={service}
+                      onEdit={() => handleEditService(service)}
+                      onDelete={() => handleDeletePrompt(service)}
+                      onToggleActive={() => handleToggleActive(service)}
+                    />
+                  ))
+                }
+              </div>
+            )}
             
-            {filteredServices.filter(s => !s.active).length === 0 && (
+            {!isLoading && filteredServices.filter(s => !s.active).length === 0 && (
               <div className="text-center py-12">
                 <Package className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
                 <h3 className="mt-4 text-lg font-medium">No inactive services found</h3>
@@ -439,7 +452,7 @@ const ServiceManagement = () => {
                           size="sm"
                           variant="ghost"
                           onClick={() => handleMoveFeature(index, 'down')}
-                          disabled={index === currentService.features.length - 1}
+                          disabled={index === (currentService.features?.length || 0) - 1}
                           className="h-8 w-8 p-0"
                         >
                           <ChevronDown className="h-4 w-4" />
@@ -457,7 +470,7 @@ const ServiceManagement = () => {
                   ))}
                 </div>
                 
-                {currentService?.features?.length === 0 && (
+                {!currentService?.features?.length && (
                   <div className="text-center text-sm text-muted-foreground py-2">
                     No features added yet
                   </div>
@@ -494,7 +507,11 @@ const ServiceManagement = () => {
           
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSaveService} disabled={!currentService?.title}>
+            <Button 
+              onClick={handleSaveService} 
+              disabled={!currentService?.title || isSaving}
+            >
+              {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isEditing ? 'Update' : 'Create'} Service
             </Button>
           </DialogFooter>
@@ -520,7 +537,12 @@ const ServiceManagement = () => {
   );
 };
 
-const ServiceCard = ({ service, onEdit, onDelete, onToggleActive }: any) => {
+const ServiceCard = ({ service, onEdit, onDelete, onToggleActive }: { 
+  service: Service; 
+  onEdit: () => void; 
+  onDelete: () => void; 
+  onToggleActive: () => void;
+}) => {
   return (
     <Card className={service.active ? '' : 'opacity-60'}>
       <CardHeader className="relative pb-2">

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { useFirebase } from '@/contexts/FirebaseContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { AnimatedButton } from '@/components/ui/AnimatedButton';
 import { LogIn, Lock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -13,7 +13,7 @@ const AdminLoginForm = () => {
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const { signIn } = useFirebase();
+  const { login } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -26,10 +26,10 @@ const AdminLoginForm = () => {
     setIsSubmitting(true);
     
     try {
-      await signIn(email, password);
+      await login(email, password);
       toast({
         title: "Login successful",
-        description: "Welcome to the Dashboard",
+        description: "Welcome to the Admin Dashboard",
       });
       navigate(from, { replace: true });
     } catch (error) {

@@ -1,129 +1,40 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { Search, Filter, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
-
-// Mock orders data
-const mockOrders = [
-  { 
-    id: 'ORD-1234', 
-    customer: 'John Smith', 
-    email: 'john@example.com',
-    phone: '(555) 123-4567',
-    service: 'Deck Design', 
-    amount: 499, 
-    status: 'Completed', 
-    date: '2023-09-01',
-    address: '123 Main St, Anytown, CA',
-  },
-  { 
-    id: 'ORD-1235', 
-    customer: 'Sarah Johnson', 
-    email: 'sarah@example.com',
-    phone: '(555) 234-5678',
-    service: 'Patio Design', 
-    amount: 649, 
-    status: 'Processing', 
-    date: '2023-09-03',
-    address: '456 Oak Ave, Someville, CA',
-  },
-  { 
-    id: 'ORD-1236', 
-    customer: 'Michael Brown', 
-    email: 'michael@example.com',
-    phone: '(555) 345-6789',
-    service: 'Pergola Design', 
-    amount: 399, 
-    status: 'Pending', 
-    date: '2023-09-05',
-    address: '789 Pine Blvd, Othercity, CA',
-  },
-  { 
-    id: 'ORD-1237', 
-    customer: 'Emily Davis', 
-    email: 'emily@example.com',
-    phone: '(555) 456-7890',
-    service: 'Outdoor Kitchen', 
-    amount: 899, 
-    status: 'Completed', 
-    date: '2023-09-06',
-    address: '101 Cedar Ln, Newtown, CA',
-  },
-  { 
-    id: 'ORD-1238', 
-    customer: 'David Wilson', 
-    email: 'david@example.com',
-    phone: '(555) 567-8901',
-    service: 'Home Addition', 
-    amount: 1299, 
-    status: 'Processing', 
-    date: '2023-09-08',
-    address: '202 Elm St, Springfield, CA',
-  },
-  { 
-    id: 'ORD-1239', 
-    customer: 'Jessica Brown', 
-    email: 'jessica@example.com',
-    phone: '(555) 678-9012',
-    service: 'Deck Design', 
-    amount: 499, 
-    status: 'Cancelled', 
-    date: '2023-09-10',
-    address: '303 Maple Dr, Riverside, CA',
-  },
-  { 
-    id: 'ORD-1240', 
-    customer: 'Thomas Johnson', 
-    email: 'thomas@example.com',
-    phone: '(555) 789-0123',
-    service: 'Patio Design', 
-    amount: 649, 
-    status: 'Pending', 
-    date: '2023-09-12',
-    address: '404 Birch Ave, Hillside, CA',
-  },
-  { 
-    id: 'ORD-1241', 
-    customer: 'Lisa Garcia', 
-    email: 'lisa@example.com',
-    phone: '(555) 890-1234',
-    service: 'Home Addition', 
-    amount: 1299, 
-    status: 'Processing', 
-    date: '2023-09-14',
-    address: '505 Walnut St, Lakeside, CA',
-  },
-  { 
-    id: 'ORD-1242', 
-    customer: 'Robert Martinez', 
-    email: 'robert@example.com',
-    phone: '(555) 901-2345',
-    service: 'Pergola Design', 
-    amount: 399, 
-    status: 'Completed', 
-    date: '2023-09-16',
-    address: '606 Cherry Ln, Mountain View, CA',
-  },
-  { 
-    id: 'ORD-1243', 
-    customer: 'Jennifer Taylor', 
-    email: 'jennifer@example.com',
-    phone: '(555) 012-3456',
-    service: 'Outdoor Kitchen', 
-    amount: 899, 
-    status: 'Completed', 
-    date: '2023-09-18',
-    address: '707 Aspen Blvd, Seaside, CA',
-  },
-];
+import { Search, Filter, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { getOrders, updateOrderStatus, Order } from '@/services/ordersService';
 
 const Orders = () => {
-  const [orders, setOrders] = useState(mockOrders);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
+  const [sortConfig, setSortConfig] = useState<{ key: keyof Order; direction: 'asc' | 'desc' } | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [selectedOrder, setSelectedOrder] = useState<typeof mockOrders[0] | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = async () => {
+    setIsLoading(true);
+    try {
+      const data = await getOrders();
+      setOrders(data);
+    } catch (error) {
+      toast({
+        title: "Error fetching orders",
+        description: "There was a problem loading the orders.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Sort function
   const sortedOrders = React.useMemo(() => {
@@ -151,10 +62,10 @@ const Orders = () => {
     // Apply sorting
     if (sortConfig !== null) {
       sortableOrders.sort((a, b) => {
-        if (a[sortConfig.key as keyof typeof a] < b[sortConfig.key as keyof typeof b]) {
+        if (a[sortConfig.key] < b[sortConfig.key]) {
           return sortConfig.direction === 'asc' ? -1 : 1;
         }
-        if (a[sortConfig.key as keyof typeof a] > b[sortConfig.key as keyof typeof b]) {
+        if (a[sortConfig.key] > b[sortConfig.key]) {
           return sortConfig.direction === 'asc' ? 1 : -1;
         }
         return 0;
@@ -165,7 +76,7 @@ const Orders = () => {
   }, [orders, searchTerm, sortConfig, statusFilter]);
 
   // Request sort function
-  const requestSort = (key: string) => {
+  const requestSort = (key: keyof Order) => {
     let direction: 'asc' | 'desc' = 'asc';
     if (
       sortConfig &&
@@ -177,7 +88,7 @@ const Orders = () => {
     setSortConfig({ key, direction });
   };
 
-  const getSortDirectionIcon = (name: string) => {
+  const getSortDirectionIcon = (name: keyof Order) => {
     if (!sortConfig || sortConfig.key !== name) {
       return null;
     }
@@ -186,19 +97,37 @@ const Orders = () => {
       <ChevronDown className="h-4 w-4" />;
   };
 
-  const handleStatusChange = (orderId: string, newStatus: string) => {
-    setOrders(
-      orders.map(order => 
-        order.id === orderId ? { ...order, status: newStatus } : order
-      )
-    );
-    
-    if (selectedOrder && selectedOrder.id === orderId) {
-      setSelectedOrder({ ...selectedOrder, status: newStatus });
+  const handleStatusChange = async (orderId: string, newStatus: Order['status']) => {
+    setIsUpdating(true);
+    try {
+      await updateOrderStatus(orderId, newStatus);
+      
+      setOrders(
+        orders.map(order => 
+          order.id === orderId ? { ...order, status: newStatus } : order
+        )
+      );
+      
+      if (selectedOrder && selectedOrder.id === orderId) {
+        setSelectedOrder({ ...selectedOrder, status: newStatus });
+      }
+      
+      toast({
+        title: "Order status updated",
+        description: `Order ${orderId.substring(0, 8).toUpperCase()} status changed to ${newStatus}`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error updating order status",
+        description: "There was a problem updating the order status.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdating(false);
     }
   };
 
-  const openOrderDetail = (order: typeof mockOrders[0]) => {
+  const openOrderDetail = (order: Order) => {
     setSelectedOrder(order);
     setIsDetailOpen(true);
   };
@@ -245,114 +174,121 @@ const Orders = () => {
 
         {/* Orders Table */}
         <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-muted">
-                  <th 
-                    className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider cursor-pointer"
-                    onClick={() => requestSort('id')}
-                  >
-                    <div className="flex items-center space-x-1">
-                      <span>Order ID</span>
-                      {getSortDirectionIcon('id')}
-                    </div>
-                  </th>
-                  <th 
-                    className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider cursor-pointer"
-                    onClick={() => requestSort('customer')}
-                  >
-                    <div className="flex items-center space-x-1">
-                      <span>Customer</span>
-                      {getSortDirectionIcon('customer')}
-                    </div>
-                  </th>
-                  <th 
-                    className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider cursor-pointer"
-                    onClick={() => requestSort('service')}
-                  >
-                    <div className="flex items-center space-x-1">
-                      <span>Service</span>
-                      {getSortDirectionIcon('service')}
-                    </div>
-                  </th>
-                  <th 
-                    className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider cursor-pointer"
-                    onClick={() => requestSort('amount')}
-                  >
-                    <div className="flex items-center space-x-1">
-                      <span>Amount</span>
-                      {getSortDirectionIcon('amount')}
-                    </div>
-                  </th>
-                  <th 
-                    className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider cursor-pointer"
-                    onClick={() => requestSort('status')}
-                  >
-                    <div className="flex items-center space-x-1">
-                      <span>Status</span>
-                      {getSortDirectionIcon('status')}
-                    </div>
-                  </th>
-                  <th 
-                    className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider cursor-pointer"
-                    onClick={() => requestSort('date')}
-                  >
-                    <div className="flex items-center space-x-1">
-                      <span>Date</span>
-                      {getSortDirectionIcon('date')}
-                    </div>
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {sortedOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-muted/50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">{order.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <div>
-                        <div className="font-medium">{order.customer}</div>
-                        <div className="text-xs text-muted-foreground">{order.email}</div>
+          {isLoading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-muted">
+                    <th 
+                      className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider cursor-pointer"
+                      onClick={() => requestSort('id')}
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>Order ID</span>
+                        {getSortDirectionIcon('id')}
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">{order.service}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">${order.amount.toFixed(2)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <select
-                        value={order.status}
-                        onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                        className={`px-2 py-1 rounded text-xs font-medium border-0 ${
-                          order.status === 'Completed' ? 'bg-green-100 text-green-800' :
-                          order.status === 'Processing' ? 'bg-blue-100 text-blue-800' :
-                          order.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
-                          'bg-amber-100 text-amber-800'
-                        }`}
-                      >
-                        <option value="Pending">Pending</option>
-                        <option value="Processing">Processing</option>
-                        <option value="Completed">Completed</option>
-                        <option value="Cancelled">Cancelled</option>
-                      </select>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">{order.date}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <button
-                        onClick={() => openOrderDetail(order)}
-                        className="text-primary hover:text-primary/80 font-medium"
-                      >
-                        View Details
-                      </button>
-                    </td>
+                    </th>
+                    <th 
+                      className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider cursor-pointer"
+                      onClick={() => requestSort('customer')}
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>Customer</span>
+                        {getSortDirectionIcon('customer')}
+                      </div>
+                    </th>
+                    <th 
+                      className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider cursor-pointer"
+                      onClick={() => requestSort('service')}
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>Service</span>
+                        {getSortDirectionIcon('service')}
+                      </div>
+                    </th>
+                    <th 
+                      className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider cursor-pointer"
+                      onClick={() => requestSort('amount')}
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>Amount</span>
+                        {getSortDirectionIcon('amount')}
+                      </div>
+                    </th>
+                    <th 
+                      className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider cursor-pointer"
+                      onClick={() => requestSort('status')}
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>Status</span>
+                        {getSortDirectionIcon('status')}
+                      </div>
+                    </th>
+                    <th 
+                      className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider cursor-pointer"
+                      onClick={() => requestSort('date')}
+                    >
+                      <div className="flex items-center space-x-1">
+                        <span>Date</span>
+                        {getSortDirectionIcon('date')}
+                      </div>
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {sortedOrders.map((order) => (
+                    <tr key={order.id} className="hover:bg-muted/50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">{order.id.substring(0, 8).toUpperCase()}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <div>
+                          <div className="font-medium">{order.customer}</div>
+                          <div className="text-xs text-muted-foreground">{order.email}</div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">{order.service}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">${order.amount.toFixed(2)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <select
+                          value={order.status}
+                          onChange={(e) => handleStatusChange(order.id, e.target.value as Order['status'])}
+                          disabled={isUpdating}
+                          className={`px-2 py-1 rounded text-xs font-medium border-0 ${
+                            order.status === 'Completed' ? 'bg-green-100 text-green-800' :
+                            order.status === 'Processing' ? 'bg-blue-100 text-blue-800' :
+                            order.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
+                            'bg-amber-100 text-amber-800'
+                          }`}
+                        >
+                          <option value="Pending">Pending</option>
+                          <option value="Processing">Processing</option>
+                          <option value="Completed">Completed</option>
+                          <option value="Cancelled">Cancelled</option>
+                        </select>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">{order.date}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <button
+                          onClick={() => openOrderDetail(order)}
+                          className="text-primary hover:text-primary/80 font-medium"
+                        >
+                          View Details
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
           
-          {sortedOrders.length === 0 && (
+          {!isLoading && sortedOrders.length === 0 && (
             <div className="py-12 text-center">
               <p className="text-muted-foreground">No orders found</p>
             </div>
@@ -365,7 +301,7 @@ const Orders = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-card rounded-lg shadow-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
             <div className="px-6 py-4 border-b border-border flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Order Details: {selectedOrder.id}</h2>
+              <h2 className="text-xl font-semibold">Order Details: {selectedOrder.id.substring(0, 8).toUpperCase()}</h2>
               <button
                 onClick={closeOrderDetail}
                 className="text-muted-foreground hover:text-foreground"
@@ -393,7 +329,8 @@ const Orders = () => {
                     <span className="font-medium">Status:</span>
                     <select
                       value={selectedOrder.status}
-                      onChange={(e) => handleStatusChange(selectedOrder.id, e.target.value)}
+                      onChange={(e) => handleStatusChange(selectedOrder.id, e.target.value as Order['status'])}
+                      disabled={isUpdating}
                       className={`ml-2 px-2 py-1 rounded text-xs font-medium ${
                         selectedOrder.status === 'Completed' ? 'bg-green-100 text-green-800' :
                         selectedOrder.status === 'Processing' ? 'bg-blue-100 text-blue-800' :
