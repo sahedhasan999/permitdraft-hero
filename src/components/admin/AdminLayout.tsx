@@ -1,212 +1,213 @@
+
 import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { 
-  LayoutDashboard,
-  ShoppingCart,
-  Users,
-  MessageSquare,
-  Package,
-  FileImage,
-  Settings,
-  LogOut,
-  Menu,
-  X
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
+import { 
+  Users, Files, MessageSquare, Package, LayoutDashboard, 
+  ClipboardList, Menu, LogOut, ChevronDown
+} from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
+const navigation = [
+  { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+  { name: 'Orders', href: '/admin/orders', icon: ClipboardList },
+  { name: 'Leads', href: '/admin/leads', icon: Users },
+  { name: 'Communications', href: '/admin/communications', icon: MessageSquare },
+  { name: 'Services', href: '/admin/services', icon: Package },
+  { name: 'Content', href: '/admin/content', icon: Files },
+];
+
 const AdminLayout = ({ children }: AdminLayoutProps) => {
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const isMobile = useIsMobile();
-  const [sheetOpen, setSheetOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/admin/login');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/admin/login');
+    } catch (error) {
+      console.error('Failed to log out', error);
+    }
   };
 
-  const navItems = [
-    { 
-      icon: LayoutDashboard, 
-      label: 'Dashboard', 
-      path: '/admin/dashboard',
-      active: location.pathname === '/admin/dashboard'
-    },
-    { 
-      icon: ShoppingCart, 
-      label: 'Orders', 
-      path: '/admin/orders',
-      active: location.pathname === '/admin/orders'
-    },
-    { 
-      icon: Users, 
-      label: 'Leads', 
-      path: '/admin/leads',
-      active: location.pathname === '/admin/leads'
-    },
-    { 
-      icon: MessageSquare, 
-      label: 'Communications', 
-      path: '/admin/communications',
-      active: location.pathname === '/admin/communications'
-    },
-    { 
-      icon: Package, 
-      label: 'Services', 
-      path: '/admin/services',
-      active: location.pathname === '/admin/services'
-    },
-    { 
-      icon: FileImage, 
-      label: 'Content', 
-      path: '/admin/content',
-      active: location.pathname === '/admin/content'
-    },
-    { 
-      icon: Settings, 
-      label: 'Settings', 
-      path: '/admin/settings',
-      active: location.pathname === '/admin/settings'
-    }
-  ];
+  if (!isAdmin) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+        <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
+        <p className="text-center mb-6">
+          You don't have permission to access the admin area.
+        </p>
+        <Button onClick={() => navigate('/')}>Return to Homepage</Button>
+      </div>
+    );
+  }
 
-  const renderNavLinks = () => (
-    <div className="space-y-1">
-      {navItems.map((item) => (
-        <Link 
-          key={item.path} 
-          to={item.path}
-          onClick={() => setSheetOpen(false)}
-          className={`flex items-center px-3 py-2 rounded-md text-sm transition-colors ${
-            item.active 
-              ? 'bg-primary text-primary-foreground' 
-              : 'hover:bg-muted'
-          }`}
-        >
-          <item.icon className="h-5 w-5 mr-3" />
-          {item.label}
-        </Link>
-      ))}
-    </div>
-  );
+  // Get initials for avatar fallback
+  const getInitials = () => {
+    if (user?.displayName) {
+      return user.displayName
+        .split(' ')
+        .map(name => name[0])
+        .join('')
+        .toUpperCase();
+    }
+    return user?.email?.slice(0, 2).toUpperCase() || 'A';
+  };
 
   return (
-    <div className="min-h-screen bg-background flex">
-      {/* Mobile Navigation */}
-      {isMobile && (
-        <div className="fixed top-0 left-0 right-0 z-40 bg-background border-b p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Link to="/" className="font-semibold text-xl">
-                PermitDraftPro
-              </Link>
-              <div className="px-2 py-1 bg-primary/10 text-primary rounded-md text-xs font-medium">
-                Admin
-              </div>
-            </div>
-            <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="p-0">
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <Link to="/" className="font-semibold text-xl">
-                      PermitDraftPro
-                    </Link>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      onClick={() => setSheetOpen(false)}
-                    >
-                      <X className="h-5 w-5" />
-                    </Button>
-                  </div>
-                  <div className="flex items-center space-x-3 mb-6">
-                    <Avatar>
-                      <AvatarFallback>
-                        {user?.name?.charAt(0) || 'A'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">{user?.name || 'Admin User'}</p>
-                      <p className="text-sm text-muted-foreground">{user?.email}</p>
-                    </div>
-                  </div>
-                  <Separator className="my-4" />
-                  {renderNavLinks()}
-                  <Separator className="my-4" />
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-start" 
-                    onClick={handleLogout}
-                  >
-                    <LogOut className="h-5 w-5 mr-3" />
-                    Logout
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-        </div>
-      )}
-
-      {/* Desktop Sidebar */}
-      {!isMobile && (
-        <div className="w-64 border-r bg-card h-screen sticky top-0 overflow-y-auto p-6">
-          <div className="space-y-6">
-            <Link to="/" className="flex items-center space-x-2">
-              <span className="font-semibold text-xl">PermitDraftPro</span>
+    <div className="flex h-screen bg-background">
+      {/* Desktop sidebar */}
+      <div className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 border-r">
+        <div className="flex flex-col h-full">
+          <div className="flex items-center h-16 px-6 border-b">
+            <Link to="/" className="flex items-center gap-2">
+              <span className="text-xl font-bold">PermitDraftPro</span>
             </Link>
-            
-            <div className="flex items-center space-x-3">
-              <Avatar>
-                <AvatarFallback>
-                  {user?.name?.charAt(0) || 'A'}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="font-medium">{user?.name || 'Admin User'}</p>
-                <p className="text-sm text-muted-foreground">{user?.email}</p>
-              </div>
-            </div>
-            
-            <Separator />
-            
-            <nav className="space-y-1">
-              {renderNavLinks()}
+          </div>
+          <div className="flex-1 overflow-y-auto py-4">
+            <nav className="px-2 space-y-1">
+              {navigation.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={cn(
+                    "flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors",
+                    location.pathname === item.href
+                      ? "bg-primary text-primary-foreground"
+                      : "text-foreground hover:bg-muted"
+                  )}
+                >
+                  <item.icon className="mr-3 h-5 w-5" />
+                  {item.name}
+                </Link>
+              ))}
             </nav>
-            
-            <div className="mt-auto pt-6">
-              <Separator className="mb-6" />
-              <Button 
-                variant="outline" 
-                className="w-full justify-start" 
-                onClick={handleLogout}
-              >
-                <LogOut className="h-5 w-5 mr-2" />
-                Logout
+          </div>
+          <div className="px-4 py-4 border-t">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <Avatar className="h-8 w-8 mr-2">
+                  <AvatarImage src={user?.photoURL || ''} />
+                  <AvatarFallback>{getInitials()}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-sm font-medium">{user?.displayName || user?.email}</p>
+                  <p className="text-xs text-muted-foreground">Admin</p>
+                </div>
+              </div>
+              <Button variant="ghost" size="icon" onClick={handleLogout}>
+                <LogOut className="h-5 w-5" />
               </Button>
             </div>
           </div>
         </div>
-      )}
+      </div>
 
-      {/* Main Content */}
-      <div className="flex-1">
-        <main className={`p-6 ${isMobile ? 'mt-16' : ''}`}>
+      {/* Mobile header */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 border-b bg-background z-10 flex items-center justify-between px-4">
+        <div className="flex items-center">
+          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Menu className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-64 p-0">
+              <div className="flex flex-col h-full">
+                <div className="flex items-center h-16 px-6 border-b">
+                  <Link to="/" className="flex items-center gap-2">
+                    <span className="text-xl font-bold">PermitDraftPro</span>
+                  </Link>
+                </div>
+                <div className="flex-1 overflow-y-auto py-4">
+                  <nav className="px-2 space-y-1">
+                    {navigation.map((item) => (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        className={cn(
+                          "flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors",
+                          location.pathname === item.href
+                            ? "bg-primary text-primary-foreground"
+                            : "text-foreground hover:bg-muted"
+                        )}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <item.icon className="mr-3 h-5 w-5" />
+                        {item.name}
+                      </Link>
+                    ))}
+                  </nav>
+                </div>
+                <div className="px-4 py-4 border-t">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Avatar className="h-8 w-8 mr-2">
+                        <AvatarImage src={user?.photoURL || ''} />
+                        <AvatarFallback>{getInitials()}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium truncate max-w-[120px]">
+                          {user?.displayName || user?.email}
+                        </p>
+                        <p className="text-xs text-muted-foreground">Admin</p>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="icon" onClick={handleLogout}>
+                      <LogOut className="h-5 w-5" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+          <Link to="/" className="ml-3 text-lg font-bold">
+            PermitDraftPro
+          </Link>
+        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 rounded-full">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={user?.photoURL || ''} />
+                <AvatarFallback>{getInitials()}</AvatarFallback>
+              </Avatar>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>
+              {user?.displayName || user?.email}
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Log out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      {/* Main content */}
+      <div className="lg:pl-64 flex flex-col flex-1">
+        <main className="flex-1 p-6 pt-16 lg:pt-6">
           {children}
         </main>
       </div>
