@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,80 +11,17 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { ImageCarousel } from '@/components/ui/ImageCarousel';
-
-const initialCarouselImages = [
-  {
-    id: 'img-1',
-    src: '/lovable-uploads/66619c27-f30e-4e6c-b1c7-0f5ad695cee0.png',
-    alt: 'Modern deck design',
-    caption: 'Modern deck with built-in lighting',
-    active: true
-  },
-  {
-    id: 'img-2',
-    src: '/lovable-uploads/dd2d3de4-09ef-4eb5-a833-36fb407ca0ad.png',
-    alt: 'Wooden deck with pergola',
-    caption: 'Wooden deck with overhead pergola',
-    active: true
-  },
-  {
-    id: 'img-3',
-    src: '/lovable-uploads/741fe312-9ad4-4de6-833f-cb39ab80875c.png',
-    alt: 'Custom patio design',
-    caption: 'Custom stone patio with firepit',
-    active: true
-  },
-  {
-    id: 'img-4',
-    src: '/lovable-uploads/3a843a1c-f661-483d-8811-7db962bc1ae3.png',
-    alt: 'Elevated deck with railing',
-    caption: 'Elevated deck with glass railing',
-    active: true
-  },
-  {
-    id: 'img-5',
-    src: '/lovable-uploads/9f01866a-b5d5-4500-b848-661b05f806fc.png',
-    alt: 'Outdoor kitchen area',
-    caption: 'Luxury outdoor kitchen and dining area',
-    active: true
-  },
-  {
-    id: 'img-6',
-    src: '/lovable-uploads/6f8495a1-edcb-490a-96bd-74de3ccd30ab.png',
-    alt: 'Backyard transformation',
-    caption: 'Complete backyard transformation',
-    active: true
-  },
-  {
-    id: 'img-7',
-    src: '/lovable-uploads/12407047-f591-4871-b433-89be31d5efd4.png',
-    alt: 'Multi-level deck',
-    caption: 'Multi-level deck with integrated planters',
-    active: true
-  },
-  {
-    id: 'img-8',
-    src: '/lovable-uploads/2f66816d-eb2c-415b-97e2-3a4797161b8d.png',
-    alt: 'Covered patio design',
-    caption: 'Covered patio with outdoor living room',
-    active: true
-  },
-  {
-    id: 'img-9',
-    src: '/lovable-uploads/bcbbc964-b88c-4788-98b5-67f72c5652c5.png',
-    alt: 'Modern deck with scenery',
-    caption: 'Modern deck with mountain views',
-    active: true
-  }
-];
+import { useContent, CarouselImage } from '@/contexts/ContentContext';
+import { useToast } from '@/hooks/use-toast';
 
 const ContentManager = () => {
-  const [carouselImages, setCarouselImages] = useState(initialCarouselImages);
-  const [currentImage, setCurrentImage] = useState<any>(null);
+  const { carouselImages, setCarouselImages } = useContent();
+  const [currentImage, setCurrentImage] = useState<Partial<CarouselImage> | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
+  const { toast } = useToast();
 
   const activeImages = carouselImages.filter(img => img.active).map(img => img.src);
 
@@ -100,27 +37,44 @@ const ContentManager = () => {
     setIsDialogOpen(true);
   };
 
-  const handleEditImage = (image: any) => {
+  const handleEditImage = (image: CarouselImage) => {
     setCurrentImage({ ...image });
     setIsEditing(true);
     setIsDialogOpen(true);
   };
 
-  const handleDeletePrompt = (image: any) => {
+  const handleDeletePrompt = (image: CarouselImage) => {
     setCurrentImage(image);
     setIsDeleteDialogOpen(true);
   };
 
   const handleDeleteImage = () => {
-    setCarouselImages(carouselImages.filter(img => img.id !== currentImage.id));
+    if (!currentImage) return;
+    setCarouselImages(prev => prev.filter(img => img.id !== currentImage.id));
     setIsDeleteDialogOpen(false);
+    toast({
+      title: "Image deleted",
+      description: "The image has been removed from the carousel",
+    });
   };
 
   const handleSaveImage = () => {
+    if (!currentImage || !currentImage.src) return;
+
     if (isEditing) {
-      setCarouselImages(carouselImages.map(img => img.id === currentImage.id ? currentImage : img));
+      setCarouselImages(prev => 
+        prev.map(img => img.id === currentImage.id ? currentImage as CarouselImage : img)
+      );
+      toast({
+        title: "Image updated",
+        description: "Your changes have been saved",
+      });
     } else {
-      setCarouselImages([...carouselImages, currentImage]);
+      setCarouselImages(prev => [...prev, currentImage as CarouselImage]);
+      toast({
+        title: "Image added",
+        description: "New image has been added to the carousel",
+      });
     }
     setIsDialogOpen(false);
   };
@@ -141,12 +95,22 @@ const ContentManager = () => {
   };
 
   const handleToggleActive = (id: string) => {
-    setCarouselImages(carouselImages.map(img => {
-      if (img.id === id) {
-        return { ...img, active: !img.active };
-      }
-      return img;
-    }));
+    setCarouselImages(prev => 
+      prev.map(img => {
+        if (img.id === id) {
+          return { ...img, active: !img.active };
+        }
+        return img;
+      })
+    );
+    
+    const image = carouselImages.find(img => img.id === id);
+    if (image) {
+      toast({
+        title: image.active ? "Image hidden" : "Image shown",
+        description: `The image has been ${image.active ? "hidden from" : "made visible in"} the carousel`,
+      });
+    }
   };
 
   return (
