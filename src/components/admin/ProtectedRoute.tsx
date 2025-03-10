@@ -8,7 +8,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isAdmin } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
@@ -20,6 +20,16 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
+  // Check if user is logged in but not an admin
+  if (user && !isAdmin) {
+    // Redirect non-admin users to the client dashboard with an error message
+    return <Navigate to="/" state={{ 
+      accessDenied: true,
+      message: "You don't have permission to access the admin area."
+    }} replace />;
+  }
+
+  // If not authenticated at all
   if (!user) {
     // Redirect to login if not authenticated
     return <Navigate to="/admin/login" state={{ from: location }} replace />;

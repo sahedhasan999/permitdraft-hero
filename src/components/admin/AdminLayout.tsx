@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Separator } from '@/components/ui/separator';
@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Users, Files, MessageSquare, Package, LayoutDashboard, 
   ClipboardList, Menu, LogOut, ChevronDown
@@ -36,8 +37,20 @@ const navigation = [
 const AdminLayout = ({ children }: AdminLayoutProps) => {
   const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
+  const { toast } = useToast();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    // Double-check admin status when layout mounts
+    if (user && !isAdmin) {
+      toast({
+        title: "Access Denied",
+        description: "You don't have permission to access the admin area.",
+        variant: "destructive",
+      });
+      navigate('/', { replace: true });
+    }
+  }, [user, isAdmin, navigate, toast]);
 
   const handleLogout = async () => {
     try {
@@ -45,9 +58,15 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       navigate('/admin/login');
     } catch (error) {
       console.error('Failed to log out', error);
+      toast({
+        title: "Logout Failed",
+        description: "There was a problem logging out. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
+  // If not admin, show access denied (this is a fallback, should be caught by ProtectedRoute)
   if (!isAdmin) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">

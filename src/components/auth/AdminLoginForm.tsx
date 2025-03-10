@@ -4,16 +4,18 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { AnimatedButton } from '@/components/ui/AnimatedButton';
-import { LogIn, Lock } from 'lucide-react';
+import { LogIn, Lock, AlertTriangle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const AdminLoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [accessError, setAccessError] = useState(false);
   
-  const { login } = useAuth();
+  const { login, isAdmin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -24,14 +26,28 @@ const AdminLoginForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setAccessError(false);
     
     try {
+      // First attempt to login
       await login(email, password);
-      toast({
-        title: "Login successful",
-        description: "Welcome to the Admin Dashboard",
-      });
-      navigate(from, { replace: true });
+      
+      // Check if the logged in user is an admin
+      if (!isAdmin) {
+        setAccessError(true);
+        toast({
+          title: "Access Denied",
+          description: "You don't have admin privileges.",
+          variant: "destructive",
+        });
+        // We'll let the useEffect in the parent component handle the redirect
+      } else {
+        toast({
+          title: "Login successful",
+          description: "Welcome to the Admin Dashboard",
+        });
+        navigate(from, { replace: true });
+      }
     } catch (error) {
       console.error('Login error:', error);
       toast({
@@ -53,6 +69,15 @@ const AdminLoginForm = () => {
       </div>
       
       <h1 className="text-2xl font-bold text-center mb-6">Admin Login</h1>
+      
+      {accessError && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertTriangle className="h-4 w-4 mr-2" />
+          <AlertDescription>
+            This account does not have admin privileges.
+          </AlertDescription>
+        </Alert>
+      )}
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
