@@ -33,6 +33,7 @@ const AdminLoginForm = () => {
       });
       navigate(from, { replace: true });
     } catch (error) {
+      console.error('Login error:', error);
       toast({
         title: "Login failed",
         description: (error as Error).message || "Please check your credentials",

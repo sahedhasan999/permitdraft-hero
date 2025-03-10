@@ -1,14 +1,14 @@
 
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useFirebase } from '@/contexts/FirebaseContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { currentUser, isLoading } = useFirebase();
+  const { user, isLoading } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
@@ -20,7 +20,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  if (!currentUser) {
+  if (!user) {
     // Redirect to login if not authenticated
     return <Navigate to="/admin/login" state={{ from: location }} replace />;
   }
