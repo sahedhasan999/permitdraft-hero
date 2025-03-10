@@ -21,8 +21,12 @@ export const useAuth = () => {
   return context;
 };
 
-// List of admin emails
-const ADMIN_EMAILS = ['admin@permitdraftpro.com'];
+// List of admin emails - add your email here to grant admin access
+const ADMIN_EMAILS = [
+  'admin@permitdraftpro.com',
+  // Add your email below, for example:
+  // 'your-email@example.com',
+];
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { currentUser, isLoading: firebaseLoading, signIn, signOut } = useFirebase();
