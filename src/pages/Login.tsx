@@ -1,5 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/layout/Navbar';
 import LoginForm from '@/components/auth/LoginForm';
 import SignUpDialog from '@/components/auth/SignUpDialog';
@@ -8,6 +10,16 @@ const Login = () => {
   const [showSignUp, setShowSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { user, isAdmin } = useAuth();
+  
+  // Redirect if already logged in
+  if (user) {
+    if (isAdmin) {
+      return <Navigate to="/admin/dashboard" replace />;
+    } else {
+      return <Navigate to="/client/dashboard" replace />;
+    }
+  }
   
   // Listen for custom event to open signup dialog
   useEffect(() => {

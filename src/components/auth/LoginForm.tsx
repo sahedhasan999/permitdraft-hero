@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useFirebase } from '@/contexts/FirebaseContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { AnimatedButton } from '@/components/ui/AnimatedButton';
 import { LogIn, Lock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -14,12 +15,13 @@ const LoginForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { signIn } = useFirebase();
+  const { isAdmin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Get the redirect path from location state, or default to client dashboard
-  const from = (location.state as any)?.from?.pathname || '/client/dashboard';
+  // Get the redirect path from location state, or use a default
+  const from = (location.state as any)?.from?.pathname;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +33,13 @@ const LoginForm = () => {
         title: "Login successful",
         description: "Welcome to your dashboard",
       });
-      navigate(from, { replace: true });
+      
+      // Redirect based on admin status
+      if (isAdmin) {
+        navigate('/admin/dashboard', { replace: true });
+      } else {
+        navigate('/client/dashboard', { replace: true });
+      }
     } catch (error) {
       toast({
         title: "Login failed",

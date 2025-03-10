@@ -26,7 +26,6 @@ import OutdoorKitchen from './pages/services/OutdoorKitchen';
 import HomeAddition from './pages/services/HomeAddition';
 
 // Admin Pages
-import AdminLogin from './pages/admin/Login';
 import Dashboard from './pages/admin/Dashboard';
 import Orders from './pages/admin/Orders';
 import Leads from './pages/admin/Leads';
@@ -80,7 +79,6 @@ function App() {
               
               {/* Admin Routes */}
               <Route path="/admin">
-                <Route path="login" element={<AdminLogin />} />
                 <Route
                   path="dashboard"
                   element={
