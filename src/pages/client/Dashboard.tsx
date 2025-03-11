@@ -5,7 +5,19 @@ import { useToast } from '@/hooks/use-toast';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { 
+  Package, 
+  MessageSquare, 
+  User, 
+  CreditCard, 
+  Star, 
+  Settings, 
+  LogOut,
   Bell,
+  ShoppingCart,
+  ClipboardList,
+  Calendar,
+  RefreshCw,
+  FileText,
   ChevronRight
 } from 'lucide-react';
 import { 
@@ -31,7 +43,7 @@ const ClientDashboard = () => {
         title: "Logged out successfully",
         description: "You have been successfully logged out of your account."
       });
-      navigate('/login');
+      navigate('/admin/login');
     } catch (error) {
       toast({
         title: "Error signing out",
@@ -58,10 +70,11 @@ const ClientDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 pt-16">
-        <header className="bg-background border-b sticky top-16 z-10">
+      
+      <div className="flex-1">
+        <header className="bg-background border-b sticky top-0 z-10">
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
             <div className="flex items-center space-x-2">
               <h1 className="text-2xl font-bold">Client Dashboard</h1>
@@ -71,9 +84,6 @@ const ClientDashboard = () => {
                 <Bell className="h-5 w-5" />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full"></span>
               </button>
-              <Button variant="ghost" onClick={handleSignOut} className="text-sm">
-                Sign Out
-              </Button>
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">
                   {currentUser?.displayName?.charAt(0) || 'U'}
@@ -83,7 +93,7 @@ const ClientDashboard = () => {
           </div>
         </header>
 
-        <div className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <Card>
               <CardHeader>
@@ -162,8 +172,8 @@ const ClientDashboard = () => {
               </CardFooter>
             </Card>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
       <Footer />
     </div>
   );
