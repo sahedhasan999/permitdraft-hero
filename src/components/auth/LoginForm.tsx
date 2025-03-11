@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -18,28 +17,28 @@ const LoginForm = () => {
   const { isAdmin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const location = useLocation();
   
-  // Get the redirect path from location state, or use a default
-  const from = (location.state as any)?.from?.pathname;
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
     try {
       await signIn(email, password);
+      
+      // Wait for isAdmin to be updated after sign in
+      setTimeout(() => {
+        // Redirect based on admin status
+        if (isAdmin) {
+          navigate('/admin/dashboard', { replace: true });
+        } else {
+          navigate('/client/dashboard', { replace: true });
+        }
+      }, 100);
+
       toast({
         title: "Login successful",
         description: "Welcome to your dashboard",
       });
-      
-      // Redirect based on admin status
-      if (isAdmin) {
-        navigate('/admin/dashboard', { replace: true });
-      } else {
-        navigate('/client/dashboard', { replace: true });
-      }
     } catch (error) {
       toast({
         title: "Login failed",
