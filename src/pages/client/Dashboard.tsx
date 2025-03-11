@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useFirebase } from '@/contexts/FirebaseContext';
 import { useNavigate } from 'react-router-dom';
@@ -74,6 +75,195 @@ const ClientDashboard = () => {
     { id: 'MSG-001', subject: 'Deck Installation Update', date: '2023-06-18', isUnread: true },
     { id: 'MSG-002', subject: 'Quote Request Response', date: '2023-06-15', isUnread: false },
   ];
+
+  const renderContent = () => {
+    switch (activeTab.toLowerCase()) {
+      case 'overview':
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Orders</CardTitle>
+                <CardDescription>Your latest project orders</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {recentOrders.map(order => (
+                    <div key={order.id} className="flex justify-between items-center">
+                      <div>
+                        <p className="font-medium">{order.name}</p>
+                        <p className="text-sm text-muted-foreground">{order.date}</p>
+                      </div>
+                      <span className="text-sm font-medium">{order.amount}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button variant="ghost" className="w-full" onClick={() => setActiveTab('orders')}>
+                  View All Orders <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </CardFooter>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Active Services</CardTitle>
+                <CardDescription>Your ongoing services</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {activeServices.map(service => (
+                    <div key={service.id} className="flex justify-between items-center">
+                      <div>
+                        <p className="font-medium">{service.name}</p>
+                        <p className="text-sm text-muted-foreground">Next: {service.nextService}</p>
+                      </div>
+                      <span className="text-sm font-medium">{service.status}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button variant="ghost" className="w-full" onClick={() => setActiveTab('documents')}>
+                  Manage Services <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </CardFooter>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Messages</CardTitle>
+                <CardDescription>Latest communications</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {recentMessages.map(message => (
+                    <div key={message.id} className="flex justify-between items-center">
+                      <div>
+                        <p className="font-medium">{message.subject}</p>
+                        <p className="text-sm text-muted-foreground">{message.date}</p>
+                      </div>
+                      {message.isUnread && (
+                        <span className="h-2 w-2 bg-primary rounded-full"></span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button variant="ghost" className="w-full" onClick={() => setActiveTab('messages')}>
+                  View All Messages <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+        );
+      case 'orders':
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>All Orders</CardTitle>
+              <CardDescription>View and manage all your orders</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {recentOrders.map(order => (
+                  <div key={order.id} className="flex justify-between items-center p-4 border rounded-lg">
+                    <div>
+                      <p className="font-medium">{order.name}</p>
+                      <p className="text-sm text-muted-foreground">{order.date}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium">{order.amount}</p>
+                      <p className="text-sm text-muted-foreground">{order.status}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        );
+      case 'documents':
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>Documents & Services</CardTitle>
+              <CardDescription>Access your documents and manage services</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {activeServices.map(service => (
+                  <div key={service.id} className="flex justify-between items-center p-4 border rounded-lg">
+                    <div>
+                      <p className="font-medium">{service.name}</p>
+                      <p className="text-sm text-muted-foreground">Next Service: {service.nextService}</p>
+                    </div>
+                    <span className="px-3 py-1 text-sm font-medium rounded-full bg-primary/10 text-primary">
+                      {service.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        );
+      case 'messages':
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>Messages</CardTitle>
+              <CardDescription>Your communication history</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {recentMessages.map(message => (
+                  <div key={message.id} className="flex justify-between items-center p-4 border rounded-lg">
+                    <div>
+                      <p className="font-medium">{message.subject}</p>
+                      <p className="text-sm text-muted-foreground">{message.date}</p>
+                    </div>
+                    {message.isUnread && (
+                      <span className="px-3 py-1 text-sm font-medium rounded-full bg-primary/10 text-primary">
+                        New
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        );
+      case 'settings':
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>Settings</CardTitle>
+              <CardDescription>Manage your account settings</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-4">
+                  <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-lg font-semibold">
+                    {currentUser?.displayName?.charAt(0) || 'U'}
+                  </div>
+                  <div>
+                    <p className="font-medium">{currentUser?.displayName || 'User'}</p>
+                    <p className="text-sm text-muted-foreground">{currentUser?.email}</p>
+                  </div>
+                </div>
+                <Button variant="outline" className="w-full" onClick={handleSignOut}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -164,84 +354,7 @@ const ClientDashboard = () => {
             </header>
 
             <main className="container mx-auto px-4 py-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Recent Orders</CardTitle>
-                    <CardDescription>Your latest project orders</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {recentOrders.map(order => (
-                        <div key={order.id} className="flex justify-between items-center">
-                          <div>
-                            <p className="font-medium">{order.name}</p>
-                            <p className="text-sm text-muted-foreground">{order.date}</p>
-                          </div>
-                          <span className="text-sm font-medium">{order.amount}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="ghost" className="w-full">
-                      View All Orders <ChevronRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </CardFooter>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Active Services</CardTitle>
-                    <CardDescription>Your ongoing services</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {activeServices.map(service => (
-                        <div key={service.id} className="flex justify-between items-center">
-                          <div>
-                            <p className="font-medium">{service.name}</p>
-                            <p className="text-sm text-muted-foreground">Next: {service.nextService}</p>
-                          </div>
-                          <span className="text-sm font-medium">{service.status}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="ghost" className="w-full">
-                      Manage Services <ChevronRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </CardFooter>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Recent Messages</CardTitle>
-                    <CardDescription>Latest communications</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {recentMessages.map(message => (
-                        <div key={message.id} className="flex justify-between items-center">
-                          <div>
-                            <p className="font-medium">{message.subject}</p>
-                            <p className="text-sm text-muted-foreground">{message.date}</p>
-                          </div>
-                          {message.isUnread && (
-                            <span className="h-2 w-2 bg-primary rounded-full"></span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="ghost" className="w-full">
-                      View All Messages <ChevronRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </div>
+              {renderContent()}
             </main>
           </div>
         </div>
@@ -252,3 +365,4 @@ const ClientDashboard = () => {
 };
 
 export default ClientDashboard;
+
