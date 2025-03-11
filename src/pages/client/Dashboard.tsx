@@ -53,7 +53,6 @@ const ClientDashboard = () => {
     }
   };
 
-  // Mock data for demonstration
   const recentOrders = [
     { id: 'ORD-1234', name: 'Deck Installation', status: 'In Progress', date: '2023-06-15', amount: '$2,500' },
     { id: 'ORD-1235', name: 'Outdoor Kitchen Design', status: 'Completed', date: '2023-05-20', amount: '$3,800' },
@@ -88,5 +87,96 @@ const ClientDashboard = () => {
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">
                   {currentUser?.displayName?.charAt(0) || 'U'}
-               
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
 
+        <main className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Orders</CardTitle>
+                <CardDescription>Your latest project orders</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {recentOrders.map(order => (
+                    <div key={order.id} className="flex justify-between items-center">
+                      <div>
+                        <p className="font-medium">{order.name}</p>
+                        <p className="text-sm text-muted-foreground">{order.date}</p>
+                      </div>
+                      <span className="text-sm font-medium">{order.amount}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button variant="ghost" className="w-full">
+                  View All Orders <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </CardFooter>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Active Services</CardTitle>
+                <CardDescription>Your ongoing services</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {activeServices.map(service => (
+                    <div key={service.id} className="flex justify-between items-center">
+                      <div>
+                        <p className="font-medium">{service.name}</p>
+                        <p className="text-sm text-muted-foreground">Next: {service.nextService}</p>
+                      </div>
+                      <span className="text-sm font-medium">{service.status}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button variant="ghost" className="w-full">
+                  Manage Services <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </CardFooter>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Messages</CardTitle>
+                <CardDescription>Latest communications</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {recentMessages.map(message => (
+                    <div key={message.id} className="flex justify-between items-center">
+                      <div>
+                        <p className="font-medium">{message.subject}</p>
+                        <p className="text-sm text-muted-foreground">{message.date}</p>
+                      </div>
+                      {message.isUnread && (
+                        <span className="h-2 w-2 bg-primary rounded-full"></span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button variant="ghost" className="w-full">
+                  View All Messages <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+        </main>
+      </div>
+      <Footer />
+    </div>
+  );
+};
+
+export default ClientDashboard;
