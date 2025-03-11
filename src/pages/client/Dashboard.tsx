@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useFirebase } from '@/contexts/FirebaseContext';
 import { useNavigate } from 'react-router-dom';
@@ -5,20 +6,9 @@ import { useToast } from '@/hooks/use-toast';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { 
-  Package, 
-  MessageSquare, 
-  User, 
-  CreditCard, 
-  Star, 
-  Settings, 
-  LogOut,
   Bell,
-  ShoppingCart,
-  ClipboardList,
-  Calendar,
-  RefreshCw,
-  FileText,
-  ChevronRight
+  ChevronRight,
+  LogOut
 } from 'lucide-react';
 import { 
   Card, 
@@ -43,7 +33,7 @@ const ClientDashboard = () => {
         title: "Logged out successfully",
         description: "You have been successfully logged out of your account."
       });
-      navigate('/admin/login');
+      navigate('/login');
     } catch (error) {
       toast({
         title: "Error signing out",
@@ -73,8 +63,8 @@ const ClientDashboard = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <div className="flex-1">
-        <header className="bg-background border-b sticky top-0 z-10">
+      <div className="flex-1 pt-20">
+        <header className="bg-background border-b sticky top-20 z-10">
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
             <div className="flex items-center space-x-2">
               <h1 className="text-2xl font-bold">Client Dashboard</h1>
@@ -89,6 +79,14 @@ const ClientDashboard = () => {
                   {currentUser?.displayName?.charAt(0) || 'U'}
                 </div>
               </div>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={handleSignOut}
+                title="Sign Out"
+              >
+                <LogOut className="h-5 w-5" />
+              </Button>
             </div>
           </div>
         </header>
