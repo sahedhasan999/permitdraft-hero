@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useFirebase } from '@/contexts/FirebaseContext';
 import { useNavigate } from 'react-router-dom';
@@ -8,7 +7,13 @@ import Footer from '@/components/layout/Footer';
 import { 
   Bell,
   ChevronRight,
-  LogOut
+  LogOut,
+  LayoutDashboard,
+  FileText,
+  ShoppingCart,
+  MessageSquare,
+  Settings,
+  Menu
 } from 'lucide-react';
 import { 
   Card, 
@@ -19,12 +24,15 @@ import {
   CardFooter 
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { cn } from '@/lib/utils';
 
 const ClientDashboard = () => {
   const { currentUser, signOut } = useFirebase();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('overview');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleSignOut = async () => {
     try {
@@ -42,6 +50,14 @@ const ClientDashboard = () => {
       });
     }
   };
+
+  const navigation = [
+    { name: 'Overview', icon: LayoutDashboard },
+    { name: 'Orders', icon: ShoppingCart },
+    { name: 'Documents', icon: FileText },
+    { name: 'Messages', icon: MessageSquare },
+    { name: 'Settings', icon: Settings },
+  ];
 
   const recentOrders = [
     { id: 'ORD-1234', name: 'Deck Installation', status: 'In Progress', date: '2023-06-15', amount: '$2,500' },
@@ -64,113 +80,171 @@ const ClientDashboard = () => {
       <Navbar />
       
       <div className="flex-1 pt-20">
-        <header className="bg-background border-b sticky top-20 z-10">
-          <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-            <div className="flex items-center space-x-2">
-              <h1 className="text-2xl font-bold">Client Dashboard</h1>
+        <div className="flex h-[calc(100vh-5rem)]">
+          <div className="hidden lg:flex w-64 flex-col fixed left-0 top-20 h-[calc(100vh-5rem)] border-r bg-background">
+            <div className="flex-1 py-4">
+              <nav className="space-y-1 px-2">
+                {navigation.map((item) => (
+                  <button
+                    key={item.name}
+                    className={cn(
+                      "flex items-center w-full px-4 py-2 text-sm font-medium rounded-md",
+                      activeTab === item.name.toLowerCase()
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    )}
+                    onClick={() => setActiveTab(item.name.toLowerCase())}
+                  >
+                    <item.icon className="h-5 w-5 mr-3" />
+                    {item.name}
+                  </button>
+                ))}
+              </nav>
             </div>
-            <div className="flex items-center space-x-4">
-              <button className="relative p-2 rounded-full hover:bg-muted">
-                <Bell className="h-5 w-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full"></span>
-              </button>
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">
-                  {currentUser?.displayName?.charAt(0) || 'U'}
+          </div>
+
+          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+            <SheetTrigger asChild className="lg:hidden">
+              <Button variant="ghost" size="icon" className="lg:hidden absolute left-4 top-4">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-64 p-0">
+              <div className="flex-1 py-4">
+                <nav className="space-y-1 px-2">
+                  {navigation.map((item) => (
+                    <button
+                      key={item.name}
+                      className={cn(
+                        "flex items-center w-full px-4 py-2 text-sm font-medium rounded-md",
+                        activeTab === item.name.toLowerCase()
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      )}
+                      onClick={() => {
+                        setActiveTab(item.name.toLowerCase());
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      <item.icon className="h-5 w-5 mr-3" />
+                      {item.name}
+                    </button>
+                  ))}
+                </nav>
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          <div className="flex-1 lg:pl-64">
+            <header className="bg-background border-b sticky top-20 z-10">
+              <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+                <div className="flex items-center space-x-2">
+                  <h1 className="text-2xl font-bold">Client Dashboard</h1>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <button className="relative p-2 rounded-full hover:bg-muted">
+                    <Bell className="h-5 w-5" />
+                    <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full"></span>
+                  </button>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold">
+                      {currentUser?.displayName?.charAt(0) || 'U'}
+                    </div>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={handleSignOut}
+                    title="Sign Out"
+                  >
+                    <LogOut className="h-5 w-5" />
+                  </Button>
                 </div>
               </div>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={handleSignOut}
-                title="Sign Out"
-              >
-                <LogOut className="h-5 w-5" />
-              </Button>
-            </div>
+            </header>
+
+            <main className="container mx-auto px-4 py-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recent Orders</CardTitle>
+                    <CardDescription>Your latest project orders</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {recentOrders.map(order => (
+                        <div key={order.id} className="flex justify-between items-center">
+                          <div>
+                            <p className="font-medium">{order.name}</p>
+                            <p className="text-sm text-muted-foreground">{order.date}</p>
+                          </div>
+                          <span className="text-sm font-medium">{order.amount}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <Button variant="ghost" className="w-full">
+                      View All Orders <ChevronRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardFooter>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Active Services</CardTitle>
+                    <CardDescription>Your ongoing services</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {activeServices.map(service => (
+                        <div key={service.id} className="flex justify-between items-center">
+                          <div>
+                            <p className="font-medium">{service.name}</p>
+                            <p className="text-sm text-muted-foreground">Next: {service.nextService}</p>
+                          </div>
+                          <span className="text-sm font-medium">{service.status}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <Button variant="ghost" className="w-full">
+                      Manage Services <ChevronRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardFooter>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recent Messages</CardTitle>
+                    <CardDescription>Latest communications</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {recentMessages.map(message => (
+                        <div key={message.id} className="flex justify-between items-center">
+                          <div>
+                            <p className="font-medium">{message.subject}</p>
+                            <p className="text-sm text-muted-foreground">{message.date}</p>
+                          </div>
+                          {message.isUnread && (
+                            <span className="h-2 w-2 bg-primary rounded-full"></span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <Button variant="ghost" className="w-full">
+                      View All Messages <ChevronRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </div>
+            </main>
           </div>
-        </header>
-
-        <main className="container mx-auto px-4 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Orders</CardTitle>
-                <CardDescription>Your latest project orders</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentOrders.map(order => (
-                    <div key={order.id} className="flex justify-between items-center">
-                      <div>
-                        <p className="font-medium">{order.name}</p>
-                        <p className="text-sm text-muted-foreground">{order.date}</p>
-                      </div>
-                      <span className="text-sm font-medium">{order.amount}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button variant="ghost" className="w-full">
-                  View All Orders <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardFooter>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Active Services</CardTitle>
-                <CardDescription>Your ongoing services</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {activeServices.map(service => (
-                    <div key={service.id} className="flex justify-between items-center">
-                      <div>
-                        <p className="font-medium">{service.name}</p>
-                        <p className="text-sm text-muted-foreground">Next: {service.nextService}</p>
-                      </div>
-                      <span className="text-sm font-medium">{service.status}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button variant="ghost" className="w-full">
-                  Manage Services <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardFooter>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Messages</CardTitle>
-                <CardDescription>Latest communications</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentMessages.map(message => (
-                    <div key={message.id} className="flex justify-between items-center">
-                      <div>
-                        <p className="font-medium">{message.subject}</p>
-                        <p className="text-sm text-muted-foreground">{message.date}</p>
-                      </div>
-                      {message.isUnread && (
-                        <span className="h-2 w-2 bg-primary rounded-full"></span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button variant="ghost" className="w-full">
-                  View All Messages <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardFooter>
-            </Card>
-          </div>
-        </main>
+        </div>
       </div>
       <Footer />
     </div>
