@@ -1,9 +1,11 @@
 
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Check, ArrowRight, Tag } from "lucide-react";
 import { AnimatedButton } from "../ui/AnimatedButton";
 import { GlassMorphismCard } from "../ui/GlassMorphismCard";
 import { Link } from "react-router-dom";
+import { getActiveServices, Service } from "@/services/servicesService";
+import { useToast } from "@/hooks/use-toast";
 
 interface ServiceCardProps {
   icon: React.ReactNode;
@@ -72,119 +74,157 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
   );
 };
 
-const Services = () => {
-  const servicesRef = useRef<HTMLDivElement>(null);
-
-  const services: ServiceCardProps[] = [
-    {
-      icon: (
+const getServiceIcon = (category: string) => {
+  switch (category.toLowerCase()) {
+    case 'deck':
+      return (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-primary">
           <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
           <line x1="3" y1="9" x2="21" y2="9" />
           <line x1="9" y1="21" x2="9" y2="9" />
         </svg>
-      ),
-      title: "Deck Drawing Services",
-      description: "Professional deck design drawings with detailed specifications for permit approval.",
-      regularPrice: 499,
-      discountPercentage: 15,
-      features: [
-        "3D visualization of your deck",
-        "Complete material specifications",
-        "Detailed structural drawings",
-        "Building code compliance check",
-        "2 revisions included"
-      ],
-      cta: "Start Deck Project",
-      link: "/services/deck",
-      delay: 100
-    },
-    {
-      icon: (
+      );
+    case 'patio':
+      return (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-primary">
           <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
         </svg>
-      ),
-      title: "Patio Design Plans",
-      description: "Custom patio design drawings with detailed hardscaping and drainage specifications.",
-      regularPrice: 449,
-      discountPercentage: 10,
-      features: [
-        "Detailed paving pattern layout",
-        "Drainage plan and elevations",
-        "Material specifications list",
-        "Construction detail drawings",
-        "Unlimited digital revisions"
-      ],
-      cta: "Design Your Patio",
-      link: "/services/patio",
-      delay: 200
-    },
-    {
-      icon: (
+      );
+    case 'pergola':
+      return (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-primary">
           <path d="M3 9h18M3 15h18M9 3v18M15 3v18" />
         </svg>
-      ),
-      title: "Pergola Blueprints",
-      description: "Custom pergola design with detailed construction drawings and specifications.",
-      regularPrice: 399,
-      discountPercentage: 20,
-      features: [
-        "Customized pergola dimensions",
-        "Structural connection details",
-        "Material and hardware list",
-        "Roof/shade option details",
-        "3D rendering of final design"
-      ],
-      cta: "Get Pergola Plans",
-      link: "/services/pergola",
-      delay: 300
-    },
-    {
-      icon: (
+      );
+    case 'kitchen':
+      return (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-primary">
           <path d="M9 5H2v14h7M9 5v14M9 5h6.5a2.5 2.5 0 0 1 0 5H9M16 13h2a2 2 0 0 1 0 4h-2M18 13v-3M18 17v3" />
         </svg>
-      ),
-      title: "Outdoor Kitchen Plans",
-      description: "Comprehensive outdoor kitchen design with utility planning and appliance layout.",
-      regularPrice: 699,
-      discountPercentage: 12,
-      features: [
-        "Detailed counter and cabinet drawings",
-        "Utility line planning (gas, water, electric)",
-        "Appliance specification and layout",
-        "Construction and installation details",
-        "Material selection guidance"
-      ],
-      cta: "Design Outdoor Kitchen",
-      link: "/services/outdoor-kitchen",
-      delay: 400
-    },
-    {
-      icon: (
+      );
+    case 'addition':
+    case 'adu':
+      return (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-primary">
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
           <polyline points="9 22 9 12 15 12 15 22" />
         </svg>
-      ),
-      title: "Home Addition/ADU Plans",
-      description: "Comprehensive home addition and ADU design documents ready for permit submission.",
-      regularPrice: 1299,
-      discountPercentage: 10,
-      features: [
-        "Complete architectural plans",
-        "Structural engineering calculations",
-        "Mechanical, electrical & plumbing",
-        "Title 24 energy compliance",
-        "Permit application assistance"
-      ],
-      cta: "Plan Your Addition",
-      link: "/services/home-addition",
-      delay: 500
-    }
-  ];
+      );
+    default:
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-primary">
+          <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" />
+        </svg>
+      );
+  }
+};
+
+// Fallback services in case of data loading issues
+const fallbackServices: ServiceCardProps[] = [
+  {
+    icon: getServiceIcon('deck'),
+    title: "Deck Drawing Services",
+    description: "Professional deck design drawings with detailed specifications for permit approval.",
+    regularPrice: 499,
+    discountPercentage: 15,
+    features: [
+      "3D visualization of your deck",
+      "Complete material specifications",
+      "Detailed structural drawings",
+      "Building code compliance check",
+      "2 revisions included"
+    ],
+    cta: "Start Deck Project",
+    link: "/services/deck",
+    delay: 100
+  },
+  {
+    icon: getServiceIcon('patio'),
+    title: "Patio Design Plans",
+    description: "Custom patio design drawings with detailed hardscaping and drainage specifications.",
+    regularPrice: 449,
+    discountPercentage: 10,
+    features: [
+      "Detailed paving pattern layout",
+      "Drainage plan and elevations",
+      "Material specifications list",
+      "Construction detail drawings",
+      "Unlimited digital revisions"
+    ],
+    cta: "Design Your Patio",
+    link: "/services/patio",
+    delay: 200
+  },
+  {
+    icon: getServiceIcon('pergola'),
+    title: "Pergola Blueprints",
+    description: "Custom pergola design with detailed construction drawings and specifications.",
+    regularPrice: 399,
+    discountPercentage: 20,
+    features: [
+      "Customized pergola dimensions",
+      "Structural connection details",
+      "Material and hardware list",
+      "Roof/shade option details",
+      "3D rendering of final design"
+    ],
+    cta: "Get Pergola Plans",
+    link: "/services/pergola",
+    delay: 300
+  }
+];
+
+const Services = () => {
+  const servicesRef = useRef<HTMLDivElement>(null);
+  const [services, setServices] = useState<ServiceCardProps[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getActiveServices();
+        
+        if (data && data.length > 0) {
+          // Transform the service data to match the ServiceCardProps format
+          const transformedServices = data.map((service, index) => {
+            return {
+              icon: getServiceIcon(service.category),
+              title: service.title,
+              description: service.shortDescription,
+              regularPrice: service.regularPrice || service.basePrice,
+              discountPercentage: service.discountPercentage || 0,
+              features: service.features || [],
+              cta: service.cta || "Learn More",
+              link: service.link || `/services/${service.id}`,
+              delay: index * 100
+            };
+          });
+          
+          setServices(transformedServices);
+        } else {
+          // Use fallback services if no data is returned
+          setServices(fallbackServices);
+        }
+      } catch (error) {
+        console.error("Error fetching services:", error);
+        toast({
+          title: "Error loading services",
+          description: "Using default services instead.",
+          variant: "destructive",
+        });
+        setServices(fallbackServices);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchServices();
+  }, [toast]);
+
+  // Display at most 5 services
+  const displayedServices = services.slice(0, 5);
 
   return (
     <section id="services" className="section-padding bg-zinc-50" ref={servicesRef}>
@@ -199,7 +239,7 @@ const Services = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {services.map((service, index) => (
+          {displayedServices.map((service, index) => (
             <ServiceCard key={index} {...service} />
           ))}
         </div>

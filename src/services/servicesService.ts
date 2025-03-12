@@ -12,6 +12,10 @@ export interface Service {
   features: string[];
   active: boolean;
   image: string;
+  regularPrice?: number;
+  discountPercentage?: number;
+  cta?: string;
+  link?: string;
 }
 
 const COLLECTION_NAME = 'services';

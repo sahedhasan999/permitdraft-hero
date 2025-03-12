@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { DollarSign, CheckCircle, Trash2, ChevronUp, ChevronDown, Loader2 } from 'lucide-react';
+import { DollarSign, CheckCircle, Trash2, ChevronUp, ChevronDown, Loader2, Tag } from 'lucide-react';
 import { Service } from '@/services/servicesService';
 
 interface ServiceDialogProps {
@@ -150,17 +150,71 @@ const ServiceDialog = ({
             />
           </div>
           
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="basePrice">Base Price ($)</Label>
+              <div className="relative">
+                <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  id="basePrice" 
+                  type="number"
+                  className="pl-9"
+                  value={currentService?.basePrice || ''} 
+                  onChange={(e) => handleInputChange('basePrice', parseFloat(e.target.value) || 0)}
+                  placeholder="0.00"
+                />
+              </div>
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="regularPrice">Regular Price ($)</Label>
+              <div className="relative">
+                <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  id="regularPrice" 
+                  type="number"
+                  className="pl-9"
+                  value={currentService?.regularPrice || ''} 
+                  onChange={(e) => handleInputChange('regularPrice', parseFloat(e.target.value) || 0)}
+                  placeholder="0.00"
+                />
+              </div>
+            </div>
+          </div>
+          
           <div className="grid gap-2">
-            <Label htmlFor="price">Base Price ($)</Label>
+            <Label htmlFor="discountPercentage">Discount Percentage (%)</Label>
             <div className="relative">
-              <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Tag className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input 
-                id="price" 
+                id="discountPercentage" 
                 type="number"
                 className="pl-9"
-                value={currentService?.basePrice || ''} 
-                onChange={(e) => handleInputChange('basePrice', parseFloat(e.target.value) || 0)}
-                placeholder="0.00"
+                value={currentService?.discountPercentage || ''} 
+                onChange={(e) => handleInputChange('discountPercentage', parseFloat(e.target.value) || 0)}
+                placeholder="0"
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="cta">Call to Action Text</Label>
+              <Input 
+                id="cta" 
+                value={currentService?.cta || ''} 
+                onChange={(e) => handleInputChange('cta', e.target.value)}
+                placeholder="e.g. Get Started"
+              />
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="link">Service Page Link</Label>
+              <Input 
+                id="link" 
+                value={currentService?.link || ''} 
+                onChange={(e) => handleInputChange('link', e.target.value)}
+                placeholder="e.g. /services/deck"
               />
             </div>
           </div>

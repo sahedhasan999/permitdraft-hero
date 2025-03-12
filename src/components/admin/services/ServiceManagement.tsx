@@ -60,9 +60,13 @@ const ServiceManagement = () => {
       shortDescription: '',
       category: 'Outdoor',
       basePrice: 0,
+      regularPrice: 0,
+      discountPercentage: 0,
       features: [],
       active: true,
-      image: ''
+      image: '',
+      cta: 'Get Started',
+      link: '/services'
     });
     setIsEditing(false);
     setIsDialogOpen(true);
@@ -119,6 +123,17 @@ const ServiceManagement = () => {
       if (isEditing && currentService.id) {
         // Update existing service
         const { id, ...serviceData } = currentService as Service;
+        
+        // Ensure regularPrice is set if not provided
+        if (!serviceData.regularPrice && serviceData.basePrice) {
+          serviceData.regularPrice = serviceData.basePrice;
+        }
+        
+        // Calculate discounted price if not already set
+        if (serviceData.regularPrice && serviceData.discountPercentage) {
+          serviceData.basePrice = serviceData.regularPrice - (serviceData.regularPrice * (serviceData.discountPercentage / 100));
+        }
+        
         await updateService(id, serviceData);
         setServices(services.map(s => s.id === id ? { ...serviceData, id } as Service : s));
         toast({
@@ -128,6 +143,26 @@ const ServiceManagement = () => {
       } else {
         // Add new service
         const serviceData = currentService as Omit<Service, 'id'>;
+        
+        // Ensure regularPrice is set if not provided
+        if (!serviceData.regularPrice && serviceData.basePrice) {
+          serviceData.regularPrice = serviceData.basePrice;
+        }
+        
+        // Calculate discounted price if not already set
+        if (serviceData.regularPrice && serviceData.discountPercentage) {
+          serviceData.basePrice = serviceData.regularPrice - (serviceData.regularPrice * (serviceData.discountPercentage / 100));
+        }
+        
+        // Ensure CTA and link are set
+        if (!serviceData.cta) {
+          serviceData.cta = 'Get Started';
+        }
+        
+        if (!serviceData.link) {
+          serviceData.link = '/services';
+        }
+        
         const id = await addService(serviceData);
         setServices([...services, { ...serviceData, id }]);
         toast({
