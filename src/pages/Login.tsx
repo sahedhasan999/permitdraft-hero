@@ -1,0 +1,66 @@
+import React, { useState, useEffect } from 'react';
+import { Navigate, Link } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import Navbar from '@/components/layout/Navbar';
+import LoginForm from '@/components/auth/LoginForm';
+import SignUpDialog from '@/components/auth/SignUpDialog';
+
+const Login = () => {
+  const [showSignUp, setShowSignUp] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const { user, isAdmin } = useAuth();
+  
+  // Redirect if already logged in
+  if (user) {
+    if (isAdmin) {
+      return <Navigate to="/admin/dashboard" replace />;
+    } else {
+      return <Navigate to="/client/dashboard" replace />;
+    }
+  }
+  
+  // Listen for custom event to open signup dialog
+  useEffect(() => {
+    const handleOpenSignUp = () => setShowSignUp(true);
+    window.addEventListener('open-signup', handleOpenSignUp);
+    
+    return () => {
+      window.removeEventListener('open-signup', handleOpenSignUp);
+    };
+  }, []);
+  
+  const handleSignupSuccess = (email: string, password: string) => {
+    // Auto-fill the login form with the signup credentials
+    setEmail(email);
+    setPassword(password);
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <main className="pt-28 lg:pt-32 pb-24">
+        <div className="flex flex-col justify-center items-center p-4">
+          <LoginForm />
+          
+          {/* Admin login link */}
+          <div className="mt-4 text-center">
+            <p className="text-sm text-muted-foreground">
+              <Link to="/admin/login" className="text-primary hover:underline focus:outline-none">
+                Admin Login
+              </Link>
+            </p>
+          </div>
+        </div>
+      </main>
+
+      <SignUpDialog 
+        open={showSignUp} 
+        onOpenChange={setShowSignUp}
+        onSuccess={handleSignupSuccess}
+      />
+    </div>
+  );
+};
+
+export default Login;
