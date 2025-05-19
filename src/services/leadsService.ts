@@ -1,10 +1,20 @@
-import { db } from '@/config/firebase';
+
+import { db, storage } from '@/config/firebase';
 import { collection, doc, getDocs, addDoc, updateDoc, deleteDoc, query, where, orderBy, limit, Timestamp } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL, listAll } from 'firebase/storage';
 
 interface Note {
   id: string;
   content: string;
   date: string;
+}
+
+export interface FileAttachment {
+  name: string;
+  url: string;
+  type: string;
+  size: number;
+  uploadedAt: Date;
 }
 
 export interface Lead {
@@ -19,11 +29,13 @@ export interface Lead {
   createdAt: Date;
   updatedAt: Date;
   notes?: Note[];
+  attachments?: FileAttachment[];
+  additionalDetails?: string;
 }
 
 const COLLECTION_NAME = 'leads';
 
-export const createLead = async (leadData: Omit<Lead, 'id' | 'createdAt' | 'updatedAt' | 'status'>): Promise<string> => {
+export const createLead = async (leadData: any): Promise<string> => {
   try {
     const now = new Date();
     const leadToAdd = {
@@ -33,8 +45,39 @@ export const createLead = async (leadData: Omit<Lead, 'id' | 'createdAt' | 'upda
       updatedAt: now
     };
 
-    const docRef = await addDoc(collection(db, COLLECTION_NAME), leadToAdd);
-    return docRef.id;
+    const { files, ...leadDataWithoutFiles } = leadToAdd;
+    
+    // First create the lead document
+    const docRef = await addDoc(collection(db, COLLECTION_NAME), leadDataWithoutFiles);
+    const leadId = docRef.id;
+    
+    // Handle file uploads if any
+    if (files && files.length > 0) {
+      const attachments: FileAttachment[] = [];
+      
+      for (const file of files) {
+        const fileName = `${Date.now()}-${file.name}`;
+        const storageRef = ref(storage, `attachments/lead-${leadId}/${fileName}`);
+        
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+        
+        attachments.push({
+          name: file.name,
+          url,
+          type: file.name.split('.').pop() || 'unknown',
+          size: file.size,
+          uploadedAt: now
+        });
+      }
+      
+      // Update the lead document with attachment references
+      if (attachments.length > 0) {
+        await updateDoc(doc(db, COLLECTION_NAME, leadId), { attachments });
+      }
+    }
+    
+    return leadId;
   } catch (error) {
     console.error('Error creating lead:', error);
     throw error;
@@ -162,6 +205,34 @@ export const deleteLead = async (id: string): Promise<void> => {
     await deleteDoc(docRef);
   } catch (error) {
     console.error("Error deleting lead:", error);
+    throw error;
+  }
+};
+
+// New function to upload attachments for a lead
+export const uploadLeadAttachments = async (leadId: string, files: File[]): Promise<FileAttachment[]> => {
+  try {
+    const attachments: FileAttachment[] = [];
+    
+    for (const file of files) {
+      const fileName = `${Date.now()}-${file.name}`;
+      const storageRef = ref(storage, `attachments/lead-${leadId}/${fileName}`);
+      
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      
+      attachments.push({
+        name: file.name,
+        url,
+        type: file.name.split('.').pop() || 'unknown',
+        size: file.size,
+        uploadedAt: new Date()
+      });
+    }
+    
+    return attachments;
+  } catch (error) {
+    console.error("Error uploading attachments:", error);
     throw error;
   }
 };

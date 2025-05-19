@@ -417,7 +417,7 @@ const Leads = () => {
       {/* Lead Detail Modal */}
       {isDetailOpen && selectedLead && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-card rounded-lg shadow-lg max-w-3xl w-full max-h-[80vh] overflow-y-auto">
+          <div className="bg-card rounded-lg shadow-lg max-w-4xl w-full max-h-[80vh] overflow-y-auto">
             <div className="px-6 py-4 border-b border-border flex justify-between items-center">
               <h2 className="text-xl font-semibold">Lead Details: {selectedLead.name}</h2>
               <button
@@ -428,125 +428,31 @@ const Leads = () => {
               </button>
             </div>
             
-            <div className="p-6 space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Contact Information</h3>
-                  <p className="font-medium">{selectedLead.name}</p>
-                  <p className="text-sm">{selectedLead.email}</p>
-                  <p className="text-sm">{selectedLead.phone}</p>
-                </div>
-                
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Project Information</h3>
-                  <p><span className="font-medium">Type:</span> {selectedLead.projectType}</p>
-                  {selectedLead.squareFootage && (
-                    <p><span className="font-medium">Size:</span> {selectedLead.squareFootage} sq ft</p>
-                  )}
-                  <p><span className="font-medium">Date Submitted:</span> {new Date(selectedLead.createdAt).toLocaleDateString()}</p>
-                </div>
-              </div>
-              
-              <div className="border-t border-border pt-4">
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="text-sm font-medium text-muted-foreground">Status</h3>
-                  <select
-                    value={selectedLead.status}
-                    onChange={(e) => handleStatusChange(selectedLead.id, e.target.value as Lead['status'])}
-                    className={`px-2 py-1 rounded text-xs font-medium border-0 ${
-                      selectedLead.status === 'new' ? 'bg-blue-100 text-blue-800' :
-                      selectedLead.status === 'contacted' ? 'bg-yellow-100 text-yellow-800' :
-                      selectedLead.status === 'converted' ? 'bg-green-100 text-green-800' :
-                      selectedLead.status === 'lost' ? 'bg-red-100 text-red-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}
-                  >
-                    <option value="new">New</option>
-                    <option value="contacted">Contacted</option>
-                    <option value="converted">Converted</option>
-                    <option value="lost">Lost</option>
-                  </select>
-                </div>
-              </div>
-              
-              <div className="border-t border-border pt-4">
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="text-sm font-medium text-muted-foreground">Follow-up Reminder</h3>
-                  {selectedLead.followUpDate && (
-                    <button 
-                      onClick={clearFollowUpReminder}
-                      className="text-xs text-red-500 hover:text-red-600"
-                    >
-                      Clear Reminder
-                    </button>
-                  )}
-                </div>
-                
-                <div className="flex items-end gap-2">
-                  <div className="flex-1">
-                    <div className="relative flex items-center">
-                      <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <input
-                        type="date"
-                        value={followUpDate}
-                        onChange={(e) => setFollowUpDate(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-input rounded-md focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
-                      />
-                    </div>
-                  </div>
-                  <AnimatedButton
-                    variant="primary"
-                    size="sm"
-                    onClick={setFollowUpReminder}
-                    disabled={!followUpDate}
-                  >
-                    Set Reminder
-                  </AnimatedButton>
-                </div>
-              </div>
-              
-              <div className="border-t border-border pt-4">
-                <h3 className="text-sm font-medium text-muted-foreground mb-2">Notes</h3>
-                {selectedLead.notes && selectedLead.notes.length > 0 ? (
-                  <div className="space-y-3 mb-4">
-                    {selectedLead.notes.map((note) => (
-                      <div key={note.id} className="bg-muted p-3 rounded">
-                        <p className="text-sm">{note.content}</p>
-                        <p className="text-xs text-muted-foreground mt-1">{note.date}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground mb-4">No notes yet.</p>
-                )}
-                
-                <div className="flex items-start gap-2">
-                  <div className="flex-1">
-                    <div className="relative">
-                      <MessageSquare className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <textarea
-                        placeholder="Add a note..."
-                        value={newNote}
-                        onChange={(e) => setNewNote(e.target.value)}
-                        rows={3}
-                        className="w-full pl-10 pr-4 py-2 border border-input rounded-md focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
-                      ></textarea>
-                    </div>
-                  </div>
-                  <AnimatedButton
-                    variant="primary"
-                    size="sm"
-                    onClick={addNote}
-                    iconLeft={<Plus className="h-4 w-4" />}
-                    disabled={!newNote.trim()}
-                  >
-                    Add
-                  </AnimatedButton>
-                </div>
-              </div>
+            <div className="p-6">
+              <LeadDetail leadId={selectedLead.id} userId="admin" />
             </div>
             
-            <div className="px-6 py-4 border-t border-border flex justify-end">
+            <div className="px-6 py-4 border-t border-border flex justify-between">
+              <div>
+                <h3 className="text-sm font-medium text-muted-foreground mb-2">Status</h3>
+                <select
+                  value={selectedLead.status}
+                  onChange={(e) => handleStatusChange(selectedLead.id, e.target.value as Lead['status'])}
+                  className={`px-2 py-1 rounded text-xs font-medium border-0 ${
+                    selectedLead.status === 'new' ? 'bg-blue-100 text-blue-800' :
+                    selectedLead.status === 'contacted' ? 'bg-yellow-100 text-yellow-800' :
+                    selectedLead.status === 'converted' ? 'bg-green-100 text-green-800' :
+                    selectedLead.status === 'lost' ? 'bg-red-100 text-red-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}
+                >
+                  <option value="new">New</option>
+                  <option value="contacted">Contacted</option>
+                  <option value="converted">Converted</option>
+                  <option value="lost">Lost</option>
+                </select>
+              </div>
+              
               <button
                 onClick={closeLeadDetail}
                 className="text-sm font-medium text-muted-foreground hover:text-foreground px-4 py-2"
