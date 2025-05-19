@@ -100,6 +100,7 @@ const Quote = () => {
 
     setIsSubmitting(true);
     try {
+      // createLead now handles file uploads to the Clients_Attachement folder
       const leadId = await createLead(formData);
       await notifyNewLead(leadId, formData.name);
       

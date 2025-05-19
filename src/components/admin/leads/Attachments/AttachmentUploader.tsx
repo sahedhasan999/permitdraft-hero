@@ -48,7 +48,7 @@ const AttachmentUploader: React.FC<AttachmentUploaderProps> = ({ leadId, userId 
       }
       
       // If no attachments in Firestore, check storage
-      const storageRef = ref(storage, `attachments/lead-${leadId}`);
+      const storageRef = ref(storage, `Clients_Attachement/${leadId}`);
       const listResult = await listAll(storageRef).catch(() => ({ items: [] }));
       
       const fetchedAttachments: FileAttachment[] = [];
@@ -91,7 +91,7 @@ const AttachmentUploader: React.FC<AttachmentUploaderProps> = ({ leadId, userId 
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const fileName = `${Date.now()}-${file.name}`;
-        const storageRef = ref(storage, `attachments/lead-${leadId}/${fileName}`);
+        const storageRef = ref(storage, `Clients_Attachement/${leadId}/${fileName}`);
         
         await uploadBytes(storageRef, file);
         const url = await getDownloadURL(storageRef);

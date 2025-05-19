@@ -1,4 +1,3 @@
-
 import { db, storage } from '@/config/firebase';
 import { collection, doc, getDocs, addDoc, updateDoc, deleteDoc, query, where, orderBy, limit, Timestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, listAll } from 'firebase/storage';
@@ -57,7 +56,7 @@ export const createLead = async (leadData: any): Promise<string> => {
       
       for (const file of files) {
         const fileName = `${Date.now()}-${file.name}`;
-        const storageRef = ref(storage, `attachments/lead-${leadId}/${fileName}`);
+        const storageRef = ref(storage, `Clients_Attachement/${leadId}/${fileName}`);
         
         await uploadBytes(storageRef, file);
         const url = await getDownloadURL(storageRef);
@@ -216,7 +215,7 @@ export const uploadLeadAttachments = async (leadId: string, files: File[]): Prom
     
     for (const file of files) {
       const fileName = `${Date.now()}-${file.name}`;
-      const storageRef = ref(storage, `attachments/lead-${leadId}/${fileName}`);
+      const storageRef = ref(storage, `Clients_Attachement/${leadId}/${fileName}`);
       
       await uploadBytes(storageRef, file);
       const url = await getDownloadURL(storageRef);
