@@ -1,4 +1,4 @@
-import { db, storage } from '@/config/firebase';
+import { db, storage, handleStorageError } from '@/config/firebase';
 import { collection, doc, getDocs, addDoc, updateDoc, deleteDoc, query, where, orderBy, limit, Timestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, listAll } from 'firebase/storage';
 
@@ -55,19 +55,24 @@ export const createLead = async (leadData: any): Promise<string> => {
       const attachments: FileAttachment[] = [];
       
       for (const file of files) {
-        const fileName = `${Date.now()}-${file.name}`;
-        const storageRef = ref(storage, `Clients_Attachement/${leadId}/${fileName}`);
-        
-        await uploadBytes(storageRef, file);
-        const url = await getDownloadURL(storageRef);
-        
-        attachments.push({
-          name: file.name,
-          url,
-          type: file.name.split('.').pop() || 'unknown',
-          size: file.size,
-          uploadedAt: now
-        });
+        try {
+          const fileName = `${Date.now()}-${file.name}`;
+          const storageRef = ref(storage, `Clients_Attachement/${leadId}/${fileName}`);
+          
+          await uploadBytes(storageRef, file);
+          const url = await getDownloadURL(storageRef);
+          
+          attachments.push({
+            name: file.name,
+            url,
+            type: file.name.split('.').pop() || 'unknown',
+            size: file.size,
+            uploadedAt: now
+          });
+        } catch (error) {
+          handleStorageError(error);
+          console.error(`Failed to upload file ${file.name}:`, error);
+        }
       }
       
       // Update the lead document with attachment references
@@ -214,19 +219,24 @@ export const uploadLeadAttachments = async (leadId: string, files: File[]): Prom
     const attachments: FileAttachment[] = [];
     
     for (const file of files) {
-      const fileName = `${Date.now()}-${file.name}`;
-      const storageRef = ref(storage, `Clients_Attachement/${leadId}/${fileName}`);
-      
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
-      
-      attachments.push({
-        name: file.name,
-        url,
-        type: file.name.split('.').pop() || 'unknown',
-        size: file.size,
-        uploadedAt: new Date()
-      });
+      try {
+        const fileName = `${Date.now()}-${file.name}`;
+        const storageRef = ref(storage, `Clients_Attachement/${leadId}/${fileName}`);
+        
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+        
+        attachments.push({
+          name: file.name,
+          url,
+          type: file.name.split('.').pop() || 'unknown',
+          size: file.size,
+          uploadedAt: new Date()
+        });
+      } catch (error) {
+        handleStorageError(error);
+        console.error(`Failed to upload file ${file.name}:`, error);
+      }
     }
     
     return attachments;

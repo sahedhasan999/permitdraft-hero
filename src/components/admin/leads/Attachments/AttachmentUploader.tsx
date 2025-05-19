@@ -1,6 +1,6 @@
 
 import React, { useRef, useState, useEffect } from 'react';
-import { storage, db } from '@/config/firebase';
+import { storage, db, handleStorageError } from '@/config/firebase';
 import { ref, uploadBytes, getDownloadURL, listAll } from 'firebase/storage';
 import { doc, updateDoc, getDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
@@ -48,28 +48,37 @@ const AttachmentUploader: React.FC<AttachmentUploaderProps> = ({ leadId, userId 
       }
       
       // If no attachments in Firestore, check storage
-      const storageRef = ref(storage, `Clients_Attachement/${leadId}`);
-      const listResult = await listAll(storageRef).catch(() => ({ items: [] }));
-      
-      const fetchedAttachments: FileAttachment[] = [];
-      
-      for (const item of listResult.items) {
-        const url = await getDownloadURL(item);
-        fetchedAttachments.push({
-          name: item.name,
-          url,
-          type: item.name.split('.').pop() || 'unknown',
-          size: 0, // Size not available from listAll
-          uploadedAt: new Date()
-        });
+      try {
+        const storageRef = ref(storage, `Clients_Attachement/${leadId}`);
+        const listResult = await listAll(storageRef).catch(() => ({ items: [] }));
+        
+        const fetchedAttachments: FileAttachment[] = [];
+        
+        for (const item of listResult.items) {
+          try {
+            const url = await getDownloadURL(item);
+            fetchedAttachments.push({
+              name: item.name,
+              url,
+              type: item.name.split('.').pop() || 'unknown',
+              size: 0, // Size not available from listAll
+              uploadedAt: new Date()
+            });
+          } catch (error) {
+            handleStorageError(error);
+          }
+        }
+        
+        // Save to Firestore for future reference if we found items
+        if (fetchedAttachments.length > 0) {
+          await updateDoc(leadDocRef, { attachments: fetchedAttachments });
+        }
+        
+        setAttachments(fetchedAttachments);
+      } catch (error) {
+        handleStorageError(error);
+        console.error("Error accessing storage:", error);
       }
-      
-      // Save to Firestore for future reference if we found items
-      if (fetchedAttachments.length > 0) {
-        await updateDoc(leadDocRef, { attachments: fetchedAttachments });
-      }
-      
-      setAttachments(fetchedAttachments);
     } catch (err) {
       console.error("Error fetching attachments:", err);
     } finally {
@@ -89,20 +98,25 @@ const AttachmentUploader: React.FC<AttachmentUploaderProps> = ({ leadId, userId 
       const newAttachments: FileAttachment[] = [];
       
       for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const fileName = `${Date.now()}-${file.name}`;
-        const storageRef = ref(storage, `Clients_Attachement/${leadId}/${fileName}`);
-        
-        await uploadBytes(storageRef, file);
-        const url = await getDownloadURL(storageRef);
-        
-        newAttachments.push({
-          name: file.name,
-          url,
-          type: file.name.split('.').pop() || 'unknown',
-          size: file.size,
-          uploadedAt: new Date()
-        });
+        try {
+          const file = files[i];
+          const fileName = `${Date.now()}-${file.name}`;
+          const storageRef = ref(storage, `Clients_Attachement/${leadId}/${fileName}`);
+          
+          await uploadBytes(storageRef, file);
+          const url = await getDownloadURL(storageRef);
+          
+          newAttachments.push({
+            name: file.name,
+            url,
+            type: file.name.split('.').pop() || 'unknown',
+            size: file.size,
+            uploadedAt: new Date()
+          });
+        } catch (error) {
+          handleStorageError(error);
+          console.error(`Failed to upload file: ${error}`);
+        }
       }
       
       // Update Firestore with all attachments
