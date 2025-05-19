@@ -56,18 +56,20 @@ const RecentLeads = () => {
                       <div className="text-xs text-muted-foreground">{lead.email}</div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{lead.project}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{lead.projectType}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      lead.status === 'New' ? 'bg-blue-100 text-blue-800' :
-                      lead.status === 'Contacted' ? 'bg-purple-100 text-purple-800' :
-                      lead.status === 'Converted' ? 'bg-green-100 text-green-800' :
+                      lead.status === 'new' ? 'bg-blue-100 text-blue-800' :
+                      lead.status === 'contacted' ? 'bg-purple-100 text-purple-800' :
+                      lead.status === 'converted' ? 'bg-green-100 text-green-800' :
                       'bg-gray-100 text-gray-800'
                     }`}>
-                      {lead.status}
+                      {lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{lead.date}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    {new Date(lead.createdAt).toLocaleDateString()}
+                  </td>
                 </tr>
               ))}
             </tbody>

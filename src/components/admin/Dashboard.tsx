@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ServiceManager } from './services/ServiceManager';
+import ServiceManager from './services/ServiceManager';
 import { CarouselManager } from './carousel/CarouselManager';
 import { LeadsManager } from './leads/LeadsManager';
 

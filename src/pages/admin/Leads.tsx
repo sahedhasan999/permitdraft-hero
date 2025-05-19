@@ -4,6 +4,7 @@ import { Search, Filter, ChevronDown, ChevronUp, Calendar, Bell, MessageSquare, 
 import { AnimatedButton } from '@/components/ui/AnimatedButton';
 import { useToast } from '@/hooks/use-toast';
 import { Lead, getLeads, updateLeadStatus, updateLead } from '@/services/leadsService';
+import LeadDetail from '@/components/admin/leads/LeadDetail';
 
 interface Note {
   id: string;
