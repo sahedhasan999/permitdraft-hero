@@ -28,6 +28,7 @@ const AttachmentUploader: React.FC<AttachmentUploaderProps> = ({ leadId, userId 
   const [success, setSuccess] = useState<string | null>(null);
   const [attachments, setAttachments] = useState<FileAttachment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [corsStatus, setCorsStatus] = useState<'unknown' | 'success' | 'failed'>('unknown');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -37,6 +38,7 @@ const AttachmentUploader: React.FC<AttachmentUploaderProps> = ({ leadId, userId 
   const fetchAttachments = async () => {
     try {
       setLoading(true);
+      setCorsStatus('unknown');
       // Try to get attachments from Firestore first
       const leadDocRef = doc(db, 'leads', leadId);
       const docSnap = await getDoc(leadDocRef);
@@ -49,8 +51,19 @@ const AttachmentUploader: React.FC<AttachmentUploaderProps> = ({ leadId, userId 
       
       // If no attachments in Firestore, check storage
       try {
+        console.log(`Checking storage folder: Clients_Attachement/${leadId}`);
         const storageRef = ref(storage, `Clients_Attachement/${leadId}`);
-        const listResult = await listAll(storageRef).catch(() => ({ items: [] }));
+        const listResult = await listAll(storageRef).catch((err) => {
+          const errorResult = handleStorageError(err);
+          if (errorResult.type === 'cors') {
+            setCorsStatus('failed');
+            throw new Error('CORS configuration issue detected');
+          }
+          return { items: [] };
+        });
+        
+        setCorsStatus('success');
+        console.log(`Found ${listResult.items.length} items in storage`);
         
         const fetchedAttachments: FileAttachment[] = [];
         
@@ -65,7 +78,10 @@ const AttachmentUploader: React.FC<AttachmentUploaderProps> = ({ leadId, userId 
               uploadedAt: new Date()
             });
           } catch (error) {
-            handleStorageError(error);
+            const errorResult = handleStorageError(error);
+            if (errorResult.type === 'cors') {
+              setCorsStatus('failed');
+            }
           }
         }
         
@@ -76,7 +92,10 @@ const AttachmentUploader: React.FC<AttachmentUploaderProps> = ({ leadId, userId 
         
         setAttachments(fetchedAttachments);
       } catch (error) {
-        handleStorageError(error);
+        const errorResult = handleStorageError(error);
+        if (errorResult.type === 'cors') {
+          setCorsStatus('failed');
+        }
         console.error("Error accessing storage:", error);
       }
     } catch (err) {
@@ -96,15 +115,21 @@ const AttachmentUploader: React.FC<AttachmentUploaderProps> = ({ leadId, userId 
     
     try {
       const newAttachments: FileAttachment[] = [];
+      let corsIssueDetected = false;
       
       for (let i = 0; i < files.length; i++) {
         try {
           const file = files[i];
           const fileName = `${Date.now()}-${file.name}`;
+          
+          console.log(`Attempting to upload to: Clients_Attachement/${leadId}/${fileName}`);
           const storageRef = ref(storage, `Clients_Attachement/${leadId}/${fileName}`);
           
           await uploadBytes(storageRef, file);
+          console.log("File bytes uploaded successfully");
+          
           const url = await getDownloadURL(storageRef);
+          console.log("Download URL obtained successfully:", url.substring(0, 50) + "...");
           
           newAttachments.push({
             name: file.name,
@@ -113,23 +138,39 @@ const AttachmentUploader: React.FC<AttachmentUploaderProps> = ({ leadId, userId 
             size: file.size,
             uploadedAt: new Date()
           });
+          
+          // If we get here, CORS is working
+          setCorsStatus('success');
         } catch (error) {
-          handleStorageError(error);
+          const errorResult = handleStorageError(error);
+          if (errorResult.type === 'cors') {
+            corsIssueDetected = true;
+            setCorsStatus('failed');
+          }
           console.error(`Failed to upload file: ${error}`);
         }
       }
       
-      // Update Firestore with all attachments
-      const leadDocRef = doc(db, 'leads', leadId);
-      const updatedAttachments = [...attachments, ...newAttachments];
-      await updateDoc(leadDocRef, { attachments: updatedAttachments });
-      
-      setAttachments(updatedAttachments);
-      setSuccess('Attachments uploaded successfully!');
-      toast({
-        title: "Success",
-        description: `${newAttachments.length} file(s) uploaded successfully.`,
-      });
+      if (corsIssueDetected) {
+        setError('CORS configuration issue detected. Some files may not have uploaded correctly.');
+        toast({
+          title: "CORS Issue Detected",
+          description: "There may be issues with your Firebase Storage configuration.",
+          variant: "destructive"
+        });
+      } else if (newAttachments.length > 0) {
+        // Update Firestore with all attachments
+        const leadDocRef = doc(db, 'leads', leadId);
+        const updatedAttachments = [...attachments, ...newAttachments];
+        await updateDoc(leadDocRef, { attachments: updatedAttachments });
+        
+        setAttachments(updatedAttachments);
+        setSuccess('Attachments uploaded successfully!');
+        toast({
+          title: "Success",
+          description: `${newAttachments.length} file(s) uploaded successfully.`,
+        });
+      }
       
       // Reset file input
       if (fileInputRef.current) {
@@ -203,6 +244,16 @@ const AttachmentUploader: React.FC<AttachmentUploaderProps> = ({ leadId, userId 
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium">Attachments</h3>
+        {corsStatus === 'failed' && (
+          <div className="text-xs text-red-500 bg-red-50 px-2 py-1 rounded">
+            CORS issues detected
+          </div>
+        )}
+        {corsStatus === 'success' && (
+          <div className="text-xs text-green-500 bg-green-50 px-2 py-1 rounded">
+            Storage connection OK
+          </div>
+        )}
         <input
           type="file"
           ref={fileInputRef}

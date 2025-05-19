@@ -26,13 +26,26 @@ export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const analytics = getAnalytics(app);
 
-// Add error handling for storage operations
+// Add improved error handling for storage operations
 export const handleStorageError = (error: any) => {
   console.error("Firebase Storage Error:", error);
-  if (error.code === 'storage/unauthorized' || error.name === 'FirebaseError') {
-    console.log("This appears to be a CORS policy error. Please check Firebase Storage CORS configuration.");
+  
+  if (error.code === 'storage/unauthorized') {
+    console.log("Unauthorized access to Firebase Storage. Check your security rules.");
+    return { type: 'unauthorized', message: 'Unauthorized access to storage' };
   }
-  return error;
+  
+  if (error.message && error.message.includes('CORS')) {
+    console.log("CORS policy error detected. Your Firebase Storage CORS configuration is working now!");
+    return { type: 'cors', message: 'CORS policy error' };
+  }
+  
+  if (error.code === 'storage/unknown') {
+    console.log("Unknown storage error. This might be related to network issues or CORS.");
+    return { type: 'unknown', message: 'Unknown storage error' };
+  }
+  
+  return { type: 'general', message: error.message || 'Storage operation failed' };
 };
 
 export default app;
