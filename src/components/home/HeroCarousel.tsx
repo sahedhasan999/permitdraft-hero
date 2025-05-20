@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { CarouselImage, getActiveCarouselImages } from '@/services/carouselService';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -25,6 +26,7 @@ export const HeroCarousel: React.FC = () => {
 
   const loadImages = async () => {
     try {
+      // Only fetch active images
       const fetchedImages = await getActiveCarouselImages();
       setImages(fetchedImages);
     } catch (error) {

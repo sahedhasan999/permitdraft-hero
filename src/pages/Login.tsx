@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { Navigate, Link } from 'react-router-dom';
+import { Navigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/layout/Navbar';
 import LoginForm from '@/components/auth/LoginForm';
@@ -10,14 +11,16 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { user, isAdmin } = useAuth();
+  const location = useLocation();
+  
+  // Get the redirect URL from location state
+  const redirectTo = (location.state as any)?.from?.pathname || 
+                    (location.state as any)?.redirectTo ||
+                    (isAdmin ? '/admin/dashboard' : '/client/dashboard');
   
   // Redirect if already logged in
   if (user) {
-    if (isAdmin) {
-      return <Navigate to="/admin/dashboard" replace />;
-    } else {
-      return <Navigate to="/client/dashboard" replace />;
-    }
+    return <Navigate to={redirectTo} replace />;
   }
   
   // Listen for custom event to open signup dialog
@@ -41,7 +44,7 @@ const Login = () => {
       <Navbar />
       <main className="pt-28 lg:pt-32 pb-24">
         <div className="flex flex-col justify-center items-center p-4">
-          <LoginForm />
+          <LoginForm redirectTo={redirectTo} />
           
           {/* Admin login link */}
           <div className="mt-4 text-center">
@@ -58,6 +61,7 @@ const Login = () => {
         open={showSignUp} 
         onOpenChange={setShowSignUp}
         onSuccess={handleSignupSuccess}
+        redirectTo={redirectTo}
       />
     </div>
   );

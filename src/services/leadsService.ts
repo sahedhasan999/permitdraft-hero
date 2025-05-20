@@ -1,6 +1,7 @@
 import { db, storage, handleStorageError } from '@/config/firebase';
 import { collection, doc, getDocs, addDoc, updateDoc, deleteDoc, query, where, orderBy, limit, Timestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, listAll } from 'firebase/storage';
+import { createOrder } from './orderService';
 
 interface Note {
   id: string;
@@ -196,10 +197,56 @@ export const updateLead = async (id: string, lead: Partial<Omit<Lead, 'id'>>): P
 export const updateLeadStatus = async (id: string, status: Lead['status']): Promise<void> => {
   try {
     const docRef = doc(db, COLLECTION_NAME, id);
+    
+    // New functionality: If status is 'converted', create an order
+    if (status === 'converted') {
+      // First, get the lead data to create the order
+      const leadData = await doc(db, COLLECTION_NAME, id).get();
+      const lead = leadData.data() as Lead;
+      
+      // Create an order from the lead data
+      await convertLeadToOrder(id);
+    }
+    
     await updateDoc(docRef, { status });
   } catch (error) {
     console.error("Error updating lead status:", error);
     throw error;
+  }
+};
+
+// New function to convert lead to order
+export const convertLeadToOrder = async (leadId: string): Promise<string | null> => {
+  try {
+    // Get lead data
+    const leadDoc = await doc(db, COLLECTION_NAME, leadId).get();
+    if (!leadDoc.exists()) {
+      console.error("Lead not found");
+      return null;
+    }
+    
+    const leadData = leadDoc.data() as Lead;
+    
+    // Create an order from the lead data
+    const orderData = {
+      name: leadData.name,
+      email: leadData.email,
+      phone: leadData.phone,
+      projectType: leadData.projectType,
+      squareFootage: parseInt(leadData.squareFootage || '0'),
+      additionalServices: {
+        sitePlan: false,
+        materialList: false,
+        render3D: false
+      }
+    };
+    
+    // Create the order
+    const orderId = await createOrder(leadData.userId || 'guest', orderData);
+    return orderId;
+  } catch (error) {
+    console.error("Error converting lead to order:", error);
+    return null;
   }
 };
 

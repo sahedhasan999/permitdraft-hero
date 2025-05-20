@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useFirebase } from '@/contexts/FirebaseContext';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -10,9 +9,11 @@ interface ProtectedRouteProps {
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { user, isLoading, isAdmin } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   
   // Check if this is an admin route
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const isClientRoute = location.pathname.startsWith('/client');
   
   // Debug log authentication state
   useEffect(() => {
@@ -22,7 +23,22 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
       path: location.pathname,
       isAdminRoute 
     });
-  }, [user, isAdmin, location.pathname, isAdminRoute]);
+
+    // Keep the user on the right section after page reload
+    if (user && !isLoading) {
+      if (isAdminRoute && !isAdmin) {
+        navigate('/client/dashboard', { 
+          state: { 
+            accessDenied: true, 
+            message: "You don't have permission to access the admin area." 
+          },
+          replace: true
+        });
+      } else if (isClientRoute && isAdmin) {
+        navigate('/admin/dashboard', { replace: true });
+      }
+    }
+  }, [user, isAdmin, isLoading, location.pathname, isAdminRoute, isClientRoute, navigate]);
 
   if (isLoading) {
     // Show loading spinner while checking auth status

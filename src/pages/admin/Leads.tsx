@@ -3,7 +3,7 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import { Search, Filter, ChevronDown, ChevronUp, Calendar, Bell, MessageSquare, Plus } from 'lucide-react';
 import { AnimatedButton } from '@/components/ui/AnimatedButton';
 import { useToast } from '@/hooks/use-toast';
-import { Lead, getLeads, updateLeadStatus, updateLead } from '@/services/leadsService';
+import { Lead, getLeads, updateLeadStatus, updateLead, convertLeadToOrder } from '@/services/leadsService';
 import LeadDetail from '@/components/admin/leads/LeadDetail';
 
 interface Note {
@@ -108,7 +108,10 @@ const Leads = () => {
 
   const handleStatusChange = async (leadId: string, newStatus: Lead['status']) => {
     try {
+      // Update status in database
       await updateLeadStatus(leadId, newStatus);
+      
+      // Update local state
       setLeads(leads.map(lead => 
         lead.id === leadId ? { ...lead, status: newStatus } : lead
       ));
@@ -121,6 +124,17 @@ const Leads = () => {
         title: "Status updated",
         description: `Lead status changed to ${newStatus}`,
       });
+      
+      // If status is converted, create an order and show additional toast
+      if (newStatus === 'converted') {
+        const orderId = await convertLeadToOrder(leadId);
+        if (orderId) {
+          toast({
+            title: "Order created",
+            description: "An order has been automatically created from this lead",
+          });
+        }
+      }
     } catch (error) {
       console.error('Error updating status:', error);
       toast({
