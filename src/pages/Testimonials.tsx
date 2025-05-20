@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import Navbar from "@/components/layout/Navbar";
 import { AnimatedButton } from "@/components/ui/AnimatedButton";
@@ -82,10 +83,10 @@ const Testimonials = () => {
       // If logged in, go directly to quote page
       navigate('/quote');
     } else {
-      // If not logged in, redirect to login with a state that indicates to show signup
+      // If not logged in, redirect to login with a state that indicates to show signup immediately
       navigate('/login', { 
         state: { 
-          redirectTo: '/quote',
+          redirectTo: '/',
           showSignUp: true
         } 
       });

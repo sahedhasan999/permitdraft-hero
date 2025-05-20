@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -13,11 +12,10 @@ const CTASection: React.FC = () => {
       // If logged in, go directly to order page
       navigate('/order');
     } else {
-      // If not logged in, redirect to login with a state that indicates to show signup
-      // and where to go after signup
+      // If not logged in, redirect to login with state that indicates to show signup immediately
       navigate('/login', { 
         state: { 
-          redirectTo: '/order',
+          redirectTo: '/',
           showSignUp: true
         } 
       });

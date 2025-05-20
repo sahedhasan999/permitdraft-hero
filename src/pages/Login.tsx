@@ -35,7 +35,7 @@ const Login = () => {
   // Get prefill data if any
   const prefillData = locationState.prefillData || {};
   
-  // Check if we should show signup dialog automatically
+  // Check if we should show signup dialog automatically - do this immediately
   useEffect(() => {
     if (locationState.showSignUp) {
       setShowSignUp(true);

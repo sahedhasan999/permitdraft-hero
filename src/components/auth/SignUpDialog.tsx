@@ -7,6 +7,7 @@ import { AnimatedButton } from '@/components/ui/AnimatedButton';
 import { UserPlus, Apple, Mail } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useNavigate } from 'react-router-dom';
 import { 
   Dialog,
   DialogContent,
@@ -42,6 +43,7 @@ const SignUpDialog: React.FC<SignUpDialogProps> = ({
   const { signUp } = useFirebase();
   const { login } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,7 +63,9 @@ const SignUpDialog: React.FC<SignUpDialogProps> = ({
       
       onOpenChange(false);
       
-      // No need to call onSuccess as we're already logged in
+      // Always redirect to home page after signup
+      navigate('/', { replace: true });
+      
     } catch (error) {
       toast({
         title: "Sign up failed",
