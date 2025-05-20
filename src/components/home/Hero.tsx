@@ -1,17 +1,21 @@
+
 import React, { useEffect, useRef } from "react";
 import { ArrowRight, Heart, Clock, ArrowUpRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { AnimatedButton } from "../ui/AnimatedButton";
 import { GlassMorphismCard } from "../ui/GlassMorphismCard";
 import { ImageCarousel } from "../ui/ImageCarousel";
 import { scrollParallax } from "@/utils/transitions";
 import { useContent } from "@/contexts/ContentContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Hero = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const decorativeElement1 = useRef<HTMLDivElement>(null);
   const decorativeElement2 = useRef<HTMLDivElement>(null);
   const decorativeElement3 = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const { user } = useAuth();
   
   // Get carousel images from content context
   const { carouselImages } = useContent();
@@ -39,6 +43,21 @@ const Hero = () => {
       window.removeEventListener("mousemove", handleMouseMove);
     };
   }, []);
+  
+  const handleStartProject = () => {
+    if (user) {
+      // If logged in, go directly to order page
+      navigate('/order');
+    } else {
+      // If not logged in, redirect to login with state that indicates to show signup immediately
+      navigate('/login', { 
+        state: { 
+          redirectTo: '/',
+          showSignUp: true
+        } 
+      });
+    }
+  };
 
   return (
     <div 
@@ -76,24 +95,22 @@ const Hero = () => {
               Professional architectural drafting services specializing in outdoor space designs for US permit applications. High-quality drawings at competitive prices.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/quote">
-                <AnimatedButton 
-                  variant="primary" 
-                  size="lg" 
-                  iconRight={<ArrowRight size={16} />}
-                >
-                  Get a Quote
-                </AnimatedButton>
-              </Link>
-              <Link to="/order">
-                <AnimatedButton 
-                  variant="outline" 
-                  size="lg" 
-                  iconRight={<ArrowUpRight size={16} />}
-                >
-                  Start Your Project
-                </AnimatedButton>
-              </Link>
+              <AnimatedButton 
+                variant="primary" 
+                size="lg" 
+                iconRight={<ArrowRight size={16} />}
+                onClick={() => navigate('/quote')}
+              >
+                Get a Quote
+              </AnimatedButton>
+              <AnimatedButton 
+                variant="outline" 
+                size="lg" 
+                iconRight={<ArrowUpRight size={16} />}
+                onClick={handleStartProject}
+              >
+                Start Your Project
+              </AnimatedButton>
             </div>
             <div className="mt-6 flex items-center text-muted-foreground">
               <div className="flex -space-x-2 mr-3">

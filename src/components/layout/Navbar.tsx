@@ -1,9 +1,11 @@
+
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, ChevronDown, ArrowRight } from "lucide-react";
 import { AnimatedButton } from "../ui/AnimatedButton";
 import { cn } from "@/lib/utils";
 import { getServicesForNavigation, Service } from "@/services/servicesService";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface NavLink {
   title: string;
@@ -25,6 +27,8 @@ const Navbar = () => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -59,6 +63,25 @@ const Navbar = () => {
 
   const closeDropdown = () => {
     setActiveDropdown(null);
+  };
+  
+  const handleStartProject = () => {
+    if (user) {
+      // If logged in, go directly to order page
+      navigate('/order');
+    } else {
+      // If not logged in, redirect to login with state that indicates to show signup immediately
+      navigate('/login', { 
+        state: { 
+          redirectTo: '/',
+          showSignUp: true
+        } 
+      });
+    }
+  };
+
+  const handleLogin = () => {
+    navigate('/login');
   };
 
   useEffect(() => {
@@ -146,15 +169,19 @@ const Navbar = () => {
         </nav>
 
         <div className="hidden md:flex items-center space-x-4">
-          <Link to="/order">
-            <button className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center transition-colors">
-              Start Your Project
-              <ArrowRight size={16} className="ml-2" />
-            </button>
-          </Link>
-          <Link to="/login" className="text-sm font-medium hover:text-teal-600 transition-colors">
+          <button 
+            className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center transition-colors"
+            onClick={handleStartProject}
+          >
+            Start Your Project
+            <ArrowRight size={16} className="ml-2" />
+          </button>
+          <button 
+            onClick={handleLogin} 
+            className="text-sm font-medium hover:text-teal-600 transition-colors"
+          >
             Login
-          </Link>
+          </button>
         </div>
 
         {/* Mobile Menu Button */}
@@ -218,15 +245,25 @@ const Navbar = () => {
             </nav>
 
             <div className="mt-6 space-y-4 px-4">
-              <Link to="/order">
-                <button className="w-full bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center transition-colors">
-                  Start Your Project
-                  <ArrowRight size={16} className="ml-2" />
-                </button>
-              </Link>
-              <Link to="/login" className="block text-center text-sm font-medium hover:text-teal-600 transition-colors">
+              <button
+                className="w-full bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center transition-colors"
+                onClick={() => {
+                  toggleMenu();
+                  handleStartProject();
+                }}
+              >
+                Start Your Project
+                <ArrowRight size={16} className="ml-2" />
+              </button>
+              <button 
+                onClick={() => {
+                  toggleMenu();
+                  handleLogin();
+                }}
+                className="block w-full text-center text-sm font-medium hover:text-teal-600 transition-colors"
+              >
                 Login
-              </Link>
+              </button>
             </div>
           </div>
         </div>
