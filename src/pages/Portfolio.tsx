@@ -1,8 +1,10 @@
+
 import React, { useEffect } from "react";
 import Navbar from "@/components/layout/Navbar";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { AnimatedButton } from "@/components/ui/AnimatedButton";
+import { useAuth } from "@/contexts/AuthContext";
 
 const projects = [
   {
@@ -50,10 +52,44 @@ const projects = [
 ];
 
 const Portfolio = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  
   useEffect(() => {
     window.scrollTo(0, 0);
     document.title = "Portfolio | PermitDraft Pro";
   }, []);
+
+  const handleStartProject = () => {
+    if (user) {
+      // If logged in, go directly to order page
+      navigate('/quote');
+    } else {
+      // If not logged in, redirect to login with a state that indicates to show signup
+      navigate('/login', { 
+        state: { 
+          redirectTo: '/quote',
+          showSignUp: true
+        } 
+      });
+    }
+  };
+
+  const handleSimilarDesign = (projectType: string) => {
+    if (user) {
+      // If logged in, go directly to quote page with prefilled project type
+      navigate('/quote', { state: { prefillProjectType: projectType } });
+    } else {
+      // If not logged in, redirect to login with a state to show signup
+      navigate('/login', { 
+        state: { 
+          redirectTo: '/quote',
+          showSignUp: true,
+          prefillData: { projectType }
+        } 
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -83,25 +119,27 @@ const Portfolio = () => {
                   </span>
                   <h2 className="text-xl font-bold mb-2">{project.title}</h2>
                   <p className="text-gray-600 mb-4">{project.description}</p>
-                  <Link to="/quote" className="text-teal-600 font-medium hover:text-teal-800 inline-flex items-center">
+                  <button 
+                    onClick={() => handleSimilarDesign(project.category)}
+                    className="text-teal-600 font-medium hover:text-teal-800 inline-flex items-center"
+                  >
                     Get a similar design
                     <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
+                  </button>
                 </div>
               </div>
             ))}
           </div>
 
           <div className="mt-16 text-center">
-            <Link to="/quote">
-              <AnimatedButton 
-                variant="primary" 
-                size="lg" 
-                iconRight={<ArrowRight size={16} />}
-              >
-                Start Your Project
-              </AnimatedButton>
-            </Link>
+            <AnimatedButton 
+              variant="primary" 
+              size="lg" 
+              iconRight={<ArrowRight size={16} />}
+              onClick={handleStartProject}
+            >
+              Start Your Project
+            </AnimatedButton>
           </div>
         </div>
       </main>

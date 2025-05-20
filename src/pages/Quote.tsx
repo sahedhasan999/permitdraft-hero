@@ -5,7 +5,7 @@ import { CheckCircle, Upload, X, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { createLead, validateLeadData } from '@/services/leadsService';
 import { notifyNewLead } from '@/services/notificationService';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Loader2 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const projectTypes = [
   'Deck',
@@ -56,11 +57,18 @@ interface FileWithPreview extends File {
 }
 
 const Quote = () => {
+  const location = useLocation();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  
+  // Extract any prefill data from location state
+  const prefillData = location.state || {};
+  
   const [formData, setFormData] = useState<FormData>({
-    projectType: '',
+    projectType: prefillData.prefillProjectType || '',
     squareFootage: '',
-    email: '',
-    name: '',
+    email: user?.email || prefillData.email || '',
+    name: user?.displayName || prefillData.name || '',
     phone: '',
     timeline: 'asap',
     additionalDetails: '',
@@ -72,12 +80,20 @@ const Quote = () => {
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-  const navigate = useNavigate();
-
+  
   useEffect(() => {
     window.scrollTo(0, 0);
     document.title = "Get a Quote | PermitDraft Pro";
-  }, []);
+    
+    // Update form if user logs in after page loads
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        email: prev.email || user.email || '',
+        name: prev.name || user.displayName || ''
+      }));
+    }
+  }, [user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

@@ -13,8 +13,14 @@ const CTASection: React.FC = () => {
       // If logged in, go directly to order page
       navigate('/order');
     } else {
-      // If not logged in, redirect to login with a state that indicates where to go after login
-      navigate('/login', { state: { redirectTo: '/order' } });
+      // If not logged in, redirect to login with a state that indicates to show signup
+      // and where to go after signup
+      navigate('/login', { 
+        state: { 
+          redirectTo: '/order',
+          showSignUp: true
+        } 
+      });
     }
   };
   

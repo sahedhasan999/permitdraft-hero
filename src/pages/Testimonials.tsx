@@ -1,8 +1,9 @@
 import React, { useEffect } from "react";
 import Navbar from "@/components/layout/Navbar";
 import { AnimatedButton } from "@/components/ui/AnimatedButton";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, Star } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const testimonials = [
   {
@@ -68,10 +69,28 @@ const testimonials = [
 ];
 
 const Testimonials = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  
   useEffect(() => {
     window.scrollTo(0, 0);
     document.title = "Testimonials | PermitDraft Pro";
   }, []);
+
+  const handleStartProject = () => {
+    if (user) {
+      // If logged in, go directly to quote page
+      navigate('/quote');
+    } else {
+      // If not logged in, redirect to login with a state that indicates to show signup
+      navigate('/login', { 
+        state: { 
+          redirectTo: '/quote',
+          showSignUp: true
+        } 
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -121,15 +140,14 @@ const Testimonials = () => {
               <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
                 Join our satisfied customers and get professional drafting services for your outdoor project today.
               </p>
-              <Link to="/quote">
-                <AnimatedButton 
-                  variant="primary" 
-                  size="lg" 
-                  iconRight={<ArrowRight size={16} />}
-                >
-                  Get a Free Quote
-                </AnimatedButton>
-              </Link>
+              <AnimatedButton 
+                variant="primary" 
+                size="lg" 
+                iconRight={<ArrowRight size={16} />}
+                onClick={handleStartProject}
+              >
+                Get a Free Quote
+              </AnimatedButton>
             </div>
           </div>
         </div>

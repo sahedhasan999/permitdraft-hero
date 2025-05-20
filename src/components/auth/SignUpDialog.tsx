@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useFirebase } from '@/contexts/FirebaseContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { AnimatedButton } from '@/components/ui/AnimatedButton';
 import { UserPlus, Apple, Mail } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -20,20 +21,26 @@ interface SignUpDialogProps {
   onOpenChange: (open: boolean) => void;
   onSuccess: (email: string, password: string) => void;
   redirectTo?: string;
+  prefillData?: {
+    name?: string;
+    email?: string;
+  };
 }
 
 const SignUpDialog: React.FC<SignUpDialogProps> = ({ 
   open, 
   onOpenChange,
   onSuccess,
-  redirectTo
+  redirectTo,
+  prefillData = {}
 }) => {
-  const [signUpEmail, setSignUpEmail] = useState('');
+  const [signUpEmail, setSignUpEmail] = useState(prefillData.email || '');
   const [signUpPassword, setSignUpPassword] = useState('');
-  const [displayName, setDisplayName] = useState('');
+  const [displayName, setDisplayName] = useState(prefillData.name || '');
   const [isSigningUp, setIsSigningUp] = useState(false);
   
   const { signUp } = useFirebase();
+  const { login } = useAuth();
   const { toast } = useToast();
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -41,13 +48,20 @@ const SignUpDialog: React.FC<SignUpDialogProps> = ({
     setIsSigningUp(true);
     
     try {
+      // Step 1: Create account
       await signUp(signUpEmail, signUpPassword, displayName);
+      
+      // Step 2: Auto login
+      await login(signUpEmail, signUpPassword);
+      
       toast({
-        title: "Account created successfully",
-        description: "You can now log in with your credentials",
+        title: "Success",
+        description: "Account created and logged in successfully!",
       });
+      
       onOpenChange(false);
-      onSuccess(signUpEmail, signUpPassword);
+      
+      // No need to call onSuccess as we're already logged in
     } catch (error) {
       toast({
         title: "Sign up failed",

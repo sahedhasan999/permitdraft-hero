@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -9,17 +10,33 @@ import { Label } from '@/components/ui/label';
 
 interface LoginFormProps {
   redirectTo?: string;
+  initialEmail?: string;
+  initialPassword?: string;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ redirectTo }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+const LoginForm: React.FC<LoginFormProps> = ({ 
+  redirectTo,
+  initialEmail = '',
+  initialPassword = ''
+}) => {
+  const [email, setEmail] = useState(initialEmail);
+  const [password, setPassword] = useState(initialPassword);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { login, isAdmin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Update the email/password if they change (for example from parent component)
+  useEffect(() => {
+    if (initialEmail) {
+      setEmail(initialEmail);
+    }
+    if (initialPassword) {
+      setPassword(initialPassword);
+    }
+  }, [initialEmail, initialPassword]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
