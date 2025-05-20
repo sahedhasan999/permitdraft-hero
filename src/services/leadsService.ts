@@ -1,6 +1,6 @@
 
 import { db, storage } from '@/config/firebase';
-import { collection, doc, getDocs, addDoc, updateDoc, getDoc, query, where, orderBy, limit } from 'firebase/firestore';
+import { collection, doc, getDocs, addDoc, updateDoc, getDoc, query, where, orderBy, limit as firestoreLimit } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -34,13 +34,14 @@ export interface Lead {
   attachments?: FileAttachment[];
   additionalDetails?: string;
   userId?: string;
+  orderId?: string;
 }
 
 // Function to get recent leads
 export const getRecentLeads = async (limit: number = 5): Promise<Lead[]> => {
   try {
     const leadsRef = collection(db, 'leads');
-    const q = query(leadsRef, orderBy('createdAt', 'desc'), limit(limit));
+    const q = query(leadsRef, orderBy('createdAt', 'desc'), firestoreLimit(limit));
     const snapshot = await getDocs(q);
     
     return snapshot.docs.map(doc => {
