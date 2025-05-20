@@ -19,12 +19,14 @@ interface SignUpDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: (email: string, password: string) => void;
+  redirectTo?: string;
 }
 
 const SignUpDialog: React.FC<SignUpDialogProps> = ({ 
   open, 
   onOpenChange,
-  onSuccess
+  onSuccess,
+  redirectTo
 }) => {
   const [signUpEmail, setSignUpEmail] = useState('');
   const [signUpPassword, setSignUpPassword] = useState('');

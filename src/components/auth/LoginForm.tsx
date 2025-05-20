@@ -7,7 +7,11 @@ import { LogIn, Lock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-const LoginForm = () => {
+interface LoginFormProps {
+  redirectTo?: string;
+}
+
+const LoginForm: React.FC<LoginFormProps> = ({ redirectTo }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,7 +42,11 @@ const LoginForm = () => {
             title: "Login successful",
             description: "Welcome to your dashboard",
           });
-          navigate('/client/dashboard', { replace: true });
+          if (redirectTo) {
+            navigate(redirectTo, { replace: true });
+          } else {
+            navigate('/client/dashboard', { replace: true });
+          }
         }
         setIsSubmitting(false);
       }, 500);
