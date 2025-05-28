@@ -21,13 +21,13 @@ const About = () => {
               <div>
                 <h2 className="text-2xl font-bold mb-4">Our Story</h2>
                 <p className="text-muted-foreground mb-4">
-                  PermitDraftPro was founded in 2018 by a team of experienced architects and designers who recognized a gap in the market for specialized outdoor space drafting services.
+                  PermitDraftPro was founded in 2024 by a team of experienced engineers and designers who recognized a gap in the market for specialized outdoor space drafting services.
                 </p>
                 <p className="text-muted-foreground mb-4">
                   With the increasing popularity of outdoor living spaces, we saw homeowners and contractors struggling with the complex permitting process required for these projects.
                 </p>
                 <p className="text-muted-foreground">
-                  Our mission is to simplify the permit application process by providing high-quality architectural drawings that meet or exceed local code requirements, helping our clients get their projects approved faster.
+                  Our mission is to simplify the permit application process by providing high-quality drawings that meet or exceed local code requirements, helping our clients get their projects approved faster.
                 </p>
               </div>
               <div>
