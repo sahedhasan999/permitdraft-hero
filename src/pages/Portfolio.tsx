@@ -82,14 +82,20 @@ const Portfolio = () => {
                 onClick={() => handleItemClick(project)}
               >
                 <div className="h-64 overflow-hidden relative">
-                  <img 
-                    src={project.images[0]} 
-                    alt={project.title}
-                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105 pointer-events-none"
-                    draggable={false}
-                    onContextMenu={(e) => e.preventDefault()}
-                  />
-                  {project.images.length > 1 && (
+                  {project.images && project.images.length > 0 ? (
+                    <img 
+                      src={project.images[0]} 
+                      alt={project.title}
+                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-105 pointer-events-none"
+                      draggable={false}
+                      onContextMenu={(e) => e.preventDefault()}
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <span className="text-gray-500">No image available</span>
+                    </div>
+                  )}
+                  {project.images && project.images.length > 1 && (
                     <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
                       +{project.images.length - 1} more
                     </div>
