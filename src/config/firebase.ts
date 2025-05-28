@@ -1,7 +1,7 @@
 
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, OAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getAnalytics } from "firebase/analytics";
@@ -25,6 +25,12 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const analytics = getAnalytics(app);
+
+// Initialize Google Auth Provider
+export const googleProvider = new GoogleAuthProvider();
+
+// Initialize Apple Auth Provider
+export const appleProvider = new OAuthProvider('apple.com');
 
 // Add improved error handling for storage operations
 export const handleStorageError = (error: any) => {

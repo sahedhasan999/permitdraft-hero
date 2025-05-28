@@ -7,9 +7,10 @@ import {
   onAuthStateChanged,
   updateProfile,
   browserLocalPersistence,
-  setPersistence
+  setPersistence,
+  signInWithPopup
 } from 'firebase/auth';
-import { auth } from '@/config/firebase';
+import { auth, googleProvider, appleProvider } from '@/config/firebase';
 
 interface FirebaseContextType {
   currentUser: User | null;
@@ -17,6 +18,8 @@ interface FirebaseContextType {
   signUp: (email: string, password: string, displayName: string) => Promise<User>;
   signIn: (email: string, password: string) => Promise<User>;
   signOut: () => Promise<void>;
+  signInWithGoogle: () => Promise<User>;
+  signInWithApple: () => Promise<User>;
 }
 
 const FirebaseContext = createContext<FirebaseContextType | undefined>(undefined);
@@ -66,12 +69,34 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     await firebaseSignOut(auth);
   };
 
+  const signInWithGoogle = async (): Promise<User> => {
+    try {
+      const userCredential = await signInWithPopup(auth, googleProvider);
+      return userCredential.user;
+    } catch (error) {
+      console.error("Error signing in with Google:", error);
+      throw error;
+    }
+  };
+
+  const signInWithApple = async (): Promise<User> => {
+    try {
+      const userCredential = await signInWithPopup(auth, appleProvider);
+      return userCredential.user;
+    } catch (error) {
+      console.error("Error signing in with Apple:", error);
+      throw error;
+    }
+  };
+
   const value = {
     currentUser,
     isLoading,
     signUp,
     signIn,
-    signOut
+    signOut,
+    signInWithGoogle,
+    signInWithApple
   };
 
   return (

@@ -38,8 +38,10 @@ const SignUpDialog: React.FC<SignUpDialogProps> = ({
   const [signUpPassword, setSignUpPassword] = useState('');
   const [displayName, setDisplayName] = useState(prefillData.name || '');
   const [isSigningUp, setIsSigningUp] = useState(false);
+  const [isSigningInWithGoogle, setIsSigningInWithGoogle] = useState(false);
+  const [isSigningInWithApple, setIsSigningInWithApple] = useState(false);
   
-  const { signUp } = useFirebase();
+  const { signUp, signInWithGoogle, signInWithApple } = useFirebase();
   const { login } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -76,18 +78,46 @@ const SignUpDialog: React.FC<SignUpDialogProps> = ({
     }
   };
 
-  const handleGoogleSignUp = () => {
-    toast({
-      title: "Google sign-up",
-      description: "Google authentication is not implemented yet",
-    });
+  const handleGoogleSignUp = async () => {
+    setIsSigningInWithGoogle(true);
+    try {
+      await signInWithGoogle();
+      toast({
+        title: "Success",
+        description: "Successfully signed in with Google!",
+      });
+      onOpenChange(false);
+      navigate('/', { replace: true });
+    } catch (error) {
+      toast({
+        title: "Google sign-in failed",
+        description: (error as Error).message || "Unable to sign in with Google",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSigningInWithGoogle(false);
+    }
   };
 
-  const handleAppleSignUp = () => {
-    toast({
-      title: "Apple sign-up",
-      description: "Apple authentication is not implemented yet",
-    });
+  const handleAppleSignUp = async () => {
+    setIsSigningInWithApple(true);
+    try {
+      await signInWithApple();
+      toast({
+        title: "Success",
+        description: "Successfully signed in with Apple!",
+      });
+      onOpenChange(false);
+      navigate('/', { replace: true });
+    } catch (error) {
+      toast({
+        title: "Apple sign-in failed",
+        description: (error as Error).message || "Unable to sign in with Apple",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSigningInWithApple(false);
+    }
   };
 
   return (
@@ -107,6 +137,8 @@ const SignUpDialog: React.FC<SignUpDialogProps> = ({
             size="lg"
             onClick={handleGoogleSignUp}
             className="flex items-center justify-center"
+            isLoading={isSigningInWithGoogle}
+            disabled={isSigningUp || isSigningInWithApple}
           >
             <svg viewBox="0 0 24 24" className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -123,6 +155,8 @@ const SignUpDialog: React.FC<SignUpDialogProps> = ({
             size="lg"
             onClick={handleAppleSignUp}
             className="flex items-center justify-center"
+            isLoading={isSigningInWithApple}
+            disabled={isSigningUp || isSigningInWithGoogle}
           >
             <Apple className="h-5 w-5 mr-2" />
             Continue with Apple
@@ -183,6 +217,7 @@ const SignUpDialog: React.FC<SignUpDialogProps> = ({
               size="lg"
               fullWidth
               isLoading={isSigningUp}
+              disabled={isSigningInWithGoogle || isSigningInWithApple}
               iconLeft={<Mail className="h-4 w-4" />}
             >
               Sign up with Email
