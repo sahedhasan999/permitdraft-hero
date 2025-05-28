@@ -14,7 +14,7 @@ interface PortfolioPopupProps {
 export const PortfolioPopup: React.FC<PortfolioPopupProps> = ({ item, isOpen, onClose }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  if (!item) return null;
+  if (!item || !item.images || item.images.length === 0) return null;
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % item.images.length);
