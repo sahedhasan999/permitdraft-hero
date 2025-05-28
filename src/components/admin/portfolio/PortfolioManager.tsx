@@ -228,12 +228,18 @@ export const PortfolioManager: React.FC = () => {
               {activeItems.map((item) => (
                 <div key={item.id} className="bg-white rounded-lg overflow-hidden shadow-md">
                   <div className="h-48 overflow-hidden relative">
-                    <img 
-                      src={item.images[0]} 
-                      alt={item.title}
-                      className="w-full h-full object-cover" 
-                    />
-                    {item.images.length > 1 && (
+                    {item.images && item.images.length > 0 ? (
+                      <img 
+                        src={item.images[0]} 
+                        alt={item.title}
+                        className="w-full h-full object-cover" 
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-gray-500">No image available</span>
+                      </div>
+                    )}
+                    {item.images && item.images.length > 1 && (
                       <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
                         +{item.images.length - 1} more
                       </div>
@@ -272,12 +278,18 @@ export const PortfolioManager: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="aspect-[4/3] overflow-hidden rounded-md bg-muted mb-2 relative">
-                  <img 
-                    src={item.images[0]} 
-                    alt={item.title}
-                    className="object-cover w-full h-full"
-                  />
-                  {item.images.length > 1 && (
+                  {item.images && item.images.length > 0 ? (
+                    <img 
+                      src={item.images[0]} 
+                      alt={item.title}
+                      className="object-cover w-full h-full"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <span className="text-gray-500">No image available</span>
+                    </div>
+                  )}
+                  {item.images && item.images.length > 1 && (
                     <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
                       {item.images.length} images
                     </div>
@@ -425,11 +437,17 @@ export const PortfolioManager: React.FC = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="my-4 aspect-[4/3] rounded overflow-hidden bg-muted">
-            <img 
-              src={currentItem?.images?.[0]} 
-              alt="To be deleted" 
-              className="w-full h-full object-cover"
-            />
+            {currentItem?.images && currentItem.images.length > 0 ? (
+              <img 
+                src={currentItem.images[0]} 
+                alt="To be deleted" 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                <span className="text-gray-500">No image available</span>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>Cancel</Button>
