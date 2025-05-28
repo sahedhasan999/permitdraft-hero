@@ -1,16 +1,19 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "@/components/layout/Navbar";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { AnimatedButton } from "@/components/ui/AnimatedButton";
 import { useAuth } from "@/contexts/AuthContext";
-import { usePortfolio } from "@/contexts/PortfolioContext";
+import { usePortfolio, PortfolioItem } from "@/contexts/PortfolioContext";
+import { PortfolioPopup } from "@/components/portfolio/PortfolioPopup";
 
 const Portfolio = () => {
   const { user } = useAuth();
   const { portfolioItems } = usePortfolio();
   const navigate = useNavigate();
+  const [selectedItem, setSelectedItem] = useState<PortfolioItem | null>(null);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
   
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -44,6 +47,16 @@ const Portfolio = () => {
     }
   };
 
+  const handleItemClick = (item: PortfolioItem) => {
+    setSelectedItem(item);
+    setIsPopupOpen(true);
+  };
+
+  const handleClosePopup = () => {
+    setIsPopupOpen(false);
+    setSelectedItem(null);
+  };
+
   // Filter active portfolio items and sort by order
   const activePortfolioItems = portfolioItems
     .filter(item => item.active)
@@ -63,15 +76,24 @@ const Portfolio = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {activePortfolioItems.map((project) => (
-              <div key={project.id} className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
-                <div className="h-64 overflow-hidden">
+              <div 
+                key={project.id} 
+                className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+                onClick={() => handleItemClick(project)}
+              >
+                <div className="h-64 overflow-hidden relative">
                   <img 
-                    src={project.image} 
+                    src={project.images[0]} 
                     alt={project.title}
                     className="w-full h-full object-cover transition-transform duration-500 hover:scale-105 pointer-events-none"
                     draggable={false}
                     onContextMenu={(e) => e.preventDefault()}
                   />
+                  {project.images.length > 1 && (
+                    <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
+                      +{project.images.length - 1} more
+                    </div>
+                  )}
                 </div>
                 <div className="p-6">
                   <span className="inline-block px-3 py-1 text-xs font-semibold bg-teal-100 text-teal-800 rounded-full mb-3">
@@ -80,7 +102,10 @@ const Portfolio = () => {
                   <h2 className="text-xl font-bold mb-2">{project.title}</h2>
                   <p className="text-gray-600 mb-4">{project.description}</p>
                   <button 
-                    onClick={() => handleSimilarDesign(project.category)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSimilarDesign(project.category);
+                    }}
                     className="text-teal-600 font-medium hover:text-teal-800 inline-flex items-center"
                   >
                     Get a similar design
@@ -109,6 +134,12 @@ const Portfolio = () => {
           </div>
         </div>
       </main>
+
+      <PortfolioPopup 
+        item={selectedItem}
+        isOpen={isPopupOpen}
+        onClose={handleClosePopup}
+      />
     </div>
   );
 };

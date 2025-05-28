@@ -6,7 +6,7 @@ export interface PortfolioItem {
   title: string;
   category: string;
   description: string;
-  image: string;
+  images: string[]; // Changed from 'image' to 'images' array
   active: boolean;
   order: number;
 }
@@ -23,7 +23,7 @@ const initialPortfolioItems: PortfolioItem[] = [
     title: 'Modern Deck Design',
     category: 'Deck',
     description: 'A contemporary deck design with composite materials and glass railings.',
-    image: '/portfolioImages/01.jpg',
+    images: ['/portfolioImages/01.jpg'],
     active: true,
     order: 1
   },
@@ -32,7 +32,7 @@ const initialPortfolioItems: PortfolioItem[] = [
     title: 'Luxury Patio Design',
     category: 'Patio',
     description: 'An elegant patio design featuring natural stone pavers and built-in seating.',
-    image: '/portfolioImages/02.jpg',
+    images: ['/portfolioImages/02.jpg'],
     active: true,
     order: 2
   },
@@ -41,7 +41,7 @@ const initialPortfolioItems: PortfolioItem[] = [
     title: 'Cedar Pergola',
     category: 'Pergola',
     description: 'A beautiful cedar pergola with retractable shade system.',
-    image: '/portfolioImages/03.png',
+    images: ['/portfolioImages/03.png'],
     active: true,
     order: 3
   },
@@ -50,7 +50,7 @@ const initialPortfolioItems: PortfolioItem[] = [
     title: 'Outdoor Kitchen',
     category: 'Outdoor Kitchen',
     description: 'Complete outdoor kitchen with grill and entertainment area.',
-    image: '/portfolioImages/04.jpg',
+    images: ['/portfolioImages/04.jpg'],
     active: true,
     order: 4
   },
@@ -59,7 +59,7 @@ const initialPortfolioItems: PortfolioItem[] = [
     title: 'Home Addition',
     category: 'Home Addition/ADU',
     description: 'Modern home addition with seamless integration.',
-    image: '/portfolioImages/05.jpg',
+    images: ['/portfolioImages/05.jpg'],
     active: true,
     order: 5
   },
@@ -68,7 +68,7 @@ const initialPortfolioItems: PortfolioItem[] = [
     title: 'Multi-Level Deck',
     category: 'Deck',
     description: 'Sophisticated multi-level deck with integrated landscaping.',
-    image: '/portfolioImages/06.jpg',
+    images: ['/portfolioImages/06.jpg'],
     active: true,
     order: 6
   }

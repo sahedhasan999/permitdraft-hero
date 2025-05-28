@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Edit, Trash2, MoveUp, MoveDown, Eye } from 'lucide-react';
+import { Plus, Edit, Trash2, MoveUp, MoveDown, Eye, X, ImagePlus } from 'lucide-react';
 import { usePortfolio, PortfolioItem } from '@/contexts/PortfolioContext';
 import { useToast } from '@/hooks/use-toast';
 
@@ -77,7 +77,7 @@ export const PortfolioManager: React.FC = () => {
       title: '',
       category: 'Deck',
       description: '',
-      image: availableImages[0],
+      images: [availableImages[0]],
       active: true,
       order: portfolioItems.length + 1
     });
@@ -166,6 +166,44 @@ export const PortfolioManager: React.FC = () => {
     }
   };
 
+  const addImageToItem = () => {
+    if (!currentItem) return;
+    const unusedImages = availableImages.filter(img => !currentItem.images?.includes(img));
+    if (unusedImages.length > 0) {
+      setCurrentItem({
+        ...currentItem,
+        images: [...(currentItem.images || []), unusedImages[0]]
+      });
+    }
+  };
+
+  const removeImageFromItem = (index: number) => {
+    if (!currentItem || !currentItem.images) return;
+    const newImages = currentItem.images.filter((_, i) => i !== index);
+    if (newImages.length === 0) {
+      toast({
+        title: "Cannot remove last image",
+        description: "Portfolio items must have at least one image",
+        variant: "destructive"
+      });
+      return;
+    }
+    setCurrentItem({
+      ...currentItem,
+      images: newImages
+    });
+  };
+
+  const updateImageInItem = (index: number, newImage: string) => {
+    if (!currentItem || !currentItem.images) return;
+    const newImages = [...currentItem.images];
+    newImages[index] = newImage;
+    setCurrentItem({
+      ...currentItem,
+      images: newImages
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -189,12 +227,17 @@ export const PortfolioManager: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {activeItems.map((item) => (
                 <div key={item.id} className="bg-white rounded-lg overflow-hidden shadow-md">
-                  <div className="h-48 overflow-hidden">
+                  <div className="h-48 overflow-hidden relative">
                     <img 
-                      src={item.image} 
+                      src={item.images[0]} 
                       alt={item.title}
                       className="w-full h-full object-cover" 
                     />
+                    {item.images.length > 1 && (
+                      <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
+                        +{item.images.length - 1} more
+                      </div>
+                    )}
                   </div>
                   <div className="p-4">
                     <span className="inline-block px-2 py-1 text-xs font-semibold bg-teal-100 text-teal-800 rounded-full mb-2">
@@ -228,12 +271,17 @@ export const PortfolioManager: React.FC = () => {
                 <CardDescription>{item.category}</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="aspect-[4/3] overflow-hidden rounded-md bg-muted mb-2">
+                <div className="aspect-[4/3] overflow-hidden rounded-md bg-muted mb-2 relative">
                   <img 
-                    src={item.image} 
+                    src={item.images[0]} 
                     alt={item.title}
                     className="object-cover w-full h-full"
                   />
+                  {item.images.length > 1 && (
+                    <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
+                      {item.images.length} images
+                    </div>
+                  )}
                 </div>
                 <p className="text-sm text-muted-foreground line-clamp-2">{item.description}</p>
               </CardContent>
@@ -267,7 +315,7 @@ export const PortfolioManager: React.FC = () => {
 
       {/* Edit/Add Item Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{isEditing ? 'Edit Portfolio Item' : 'Add New Portfolio Item'}</DialogTitle>
             <DialogDescription>
@@ -301,28 +349,38 @@ export const PortfolioManager: React.FC = () => {
             </div>
             
             <div className="grid gap-2">
-              <Label htmlFor="image">Image</Label>
-              <Select value={currentItem?.image || availableImages[0]} onValueChange={(value) => setCurrentItem({...currentItem, image: value})}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select an image" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableImages.map((image) => (
-                    <SelectItem key={image} value={image}>
-                      {image.split('/').pop()}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {currentItem?.image && (
-                <div className="mt-2 aspect-[4/3] rounded overflow-hidden bg-muted max-w-xs">
-                  <img 
-                    src={currentItem.image} 
-                    alt="Preview" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
+              <Label>Images</Label>
+              <div className="space-y-2">
+                {currentItem?.images?.map((image, index) => (
+                  <div key={index} className="flex items-center space-x-2 p-2 border rounded">
+                    <img src={image} alt={`Preview ${index + 1}`} className="w-16 h-16 object-cover rounded" />
+                    <Select value={image} onValueChange={(value) => updateImageInItem(index, value)}>
+                      <SelectTrigger className="flex-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableImages.map((img) => (
+                          <SelectItem key={img} value={img}>
+                            {img.split('/').pop()}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => removeImageFromItem(index)}
+                      disabled={(currentItem?.images?.length || 0) <= 1}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                <Button variant="outline" onClick={addImageToItem} className="w-full">
+                  <ImagePlus className="h-4 w-4 mr-2" />
+                  Add Image
+                </Button>
+              </div>
             </div>
             
             <div className="grid gap-2">
@@ -368,7 +426,7 @@ export const PortfolioManager: React.FC = () => {
           </DialogHeader>
           <div className="my-4 aspect-[4/3] rounded overflow-hidden bg-muted">
             <img 
-              src={currentItem?.image} 
+              src={currentItem?.images?.[0]} 
               alt="To be deleted" 
               className="w-full h-full object-cover"
             />
