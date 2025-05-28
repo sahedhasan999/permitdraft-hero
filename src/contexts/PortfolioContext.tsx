@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { portfolioService } from '@/services/portfolioService';
 
 export interface PortfolioItem {
   id: string;
@@ -78,12 +79,25 @@ const PortfolioContext = createContext<PortfolioContextType | undefined>(undefin
 
 export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>(() => {
-    const storedItems = localStorage.getItem('portfolioItems');
-    return storedItems ? JSON.parse(storedItems) : initialPortfolioItems;
+    const sharedItems = portfolioService.getPortfolioItems();
+    return sharedItems || initialPortfolioItems;
   });
 
   useEffect(() => {
-    localStorage.setItem('portfolioItems', JSON.stringify(portfolioItems));
+    // Initialize storage listener for cross-tab updates
+    portfolioService.initStorageListener();
+
+    // Subscribe to changes from the portfolio service
+    const unsubscribe = portfolioService.subscribe((newItems) => {
+      setPortfolioItems(newItems);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    // Update shared storage whenever portfolio items change
+    portfolioService.setPortfolioItems(portfolioItems);
   }, [portfolioItems]);
 
   return (

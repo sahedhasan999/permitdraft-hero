@@ -81,49 +81,6 @@ const About = () => {
                 <p className="text-muted-foreground">We deliver on time, every time, because we understand that delays cost our clients time and money.</p>
               </GlassMorphismCard>
             </div>
-            
-            <h2 className="text-2xl font-bold mb-6 text-center">Our Team</h2>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="text-center">
-                <img 
-                  src="https://randomuser.me/api/portraits/men/32.jpg" 
-                  alt="Team member" 
-                  className="w-32 h-32 rounded-full mx-auto mb-4 object-cover"
-                />
-                <h3 className="font-bold">Michael Johnson</h3>
-                <p className="text-sm text-muted-foreground">Principal Architect</p>
-              </div>
-              
-              <div className="text-center">
-                <img 
-                  src="https://randomuser.me/api/portraits/women/44.jpg" 
-                  alt="Team member" 
-                  className="w-32 h-32 rounded-full mx-auto mb-4 object-cover"
-                />
-                <h3 className="font-bold">Sarah Williams</h3>
-                <p className="text-sm text-muted-foreground">Senior Designer</p>
-              </div>
-              
-              <div className="text-center">
-                <img 
-                  src="https://randomuser.me/api/portraits/men/62.jpg" 
-                  alt="Team member" 
-                  className="w-32 h-32 rounded-full mx-auto mb-4 object-cover"
-                />
-                <h3 className="font-bold">David Chen</h3>
-                <p className="text-sm text-muted-foreground">CAD Specialist</p>
-              </div>
-              
-              <div className="text-center">
-                <img 
-                  src="https://randomuser.me/api/portraits/women/59.jpg" 
-                  alt="Team member" 
-                  className="w-32 h-32 rounded-full mx-auto mb-4 object-cover"
-                />
-                <h3 className="font-bold">Jennifer Lopez</h3>
-                <p className="text-sm text-muted-foreground">Project Manager</p>
-              </div>
-            </div>
           </div>
         </div>
       </main>
