@@ -5,54 +5,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { AnimatedButton } from "@/components/ui/AnimatedButton";
 import { useAuth } from "@/contexts/AuthContext";
-
-const projects = [
-  {
-    id: 1,
-    title: "Modern Deck Design",
-    category: "Deck",
-    description: "A contemporary deck design with composite materials and glass railings.",
-    image: "https://images.unsplash.com/photo-1591825729269-caeb344f6df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-  },
-  {
-    id: 2,
-    title: "Paver Patio with Fire Pit",
-    category: "Patio",
-    description: "An elegant patio design featuring natural stone pavers and a built-in fire pit.",
-    image: "https://images.unsplash.com/photo-1588880331179-bc9b93a8cb5e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-  },
-  {
-    id: 3,
-    title: "Backyard Pergola",
-    category: "Pergola",
-    description: "A cedar pergola with retractable shade system and integrated lighting.",
-    image: "https://images.unsplash.com/photo-1573742889082-5b8469aea25c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-  },
-  {
-    id: 4,
-    title: "Luxury Outdoor Kitchen",
-    category: "Outdoor Kitchen",
-    description: "A complete outdoor kitchen with grill, refrigerator, and pizza oven.",
-    image: "https://images.unsplash.com/photo-1600566752355-35792bedcfea?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-  },
-  {
-    id: 5,
-    title: "Backyard ADU",
-    category: "Home Addition/ADU",
-    description: "A 600 sq ft accessory dwelling unit with modern finishes and full amenities.",
-    image: "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-  },
-  {
-    id: 6,
-    title: "Tiered Deck with Hot Tub",
-    category: "Deck",
-    description: "A multi-level deck featuring built-in seating and hot tub integration.",
-    image: "https://images.unsplash.com/photo-1621631210617-5adc84567272?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-  },
-];
+import { usePortfolio } from "@/contexts/PortfolioContext";
 
 const Portfolio = () => {
   const { user } = useAuth();
+  const { portfolioItems } = usePortfolio();
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -62,10 +19,8 @@ const Portfolio = () => {
 
   const handleStartProject = () => {
     if (user) {
-      // If logged in, go directly to order page
       navigate('/quote');
     } else {
-      // If not logged in, redirect to login with a state that indicates to show signup immediately
       navigate('/login', { 
         state: { 
           redirectTo: '/',
@@ -77,10 +32,8 @@ const Portfolio = () => {
 
   const handleSimilarDesign = (projectType: string) => {
     if (user) {
-      // If logged in, go directly to quote page with prefilled project type
       navigate('/quote', { state: { prefillProjectType: projectType } });
     } else {
-      // If not logged in, redirect to login with a state to show signup immediately
       navigate('/login', { 
         state: { 
           redirectTo: '/',
@@ -91,8 +44,13 @@ const Portfolio = () => {
     }
   };
 
+  // Filter active portfolio items and sort by order
+  const activePortfolioItems = portfolioItems
+    .filter(item => item.active)
+    .sort((a, b) => a.order - b.order);
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background select-none">
       <Navbar />
       <main className="pt-28 lg:pt-32 pb-24">
         <div className="container px-4 mx-auto">
@@ -104,13 +62,15 @@ const Portfolio = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {projects.map((project) => (
+            {activePortfolioItems.map((project) => (
               <div key={project.id} className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
                 <div className="h-64 overflow-hidden">
                   <img 
                     src={project.image} 
                     alt={project.title}
-                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105" 
+                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105 pointer-events-none"
+                    draggable={false}
+                    onContextMenu={(e) => e.preventDefault()}
                   />
                 </div>
                 <div className="p-6">
@@ -130,6 +90,12 @@ const Portfolio = () => {
               </div>
             ))}
           </div>
+
+          {activePortfolioItems.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No portfolio items available at the moment.</p>
+            </div>
+          )}
 
           <div className="mt-16 text-center">
             <AnimatedButton 

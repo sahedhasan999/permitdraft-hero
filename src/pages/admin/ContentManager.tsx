@@ -12,6 +12,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { ImageCarousel } from '@/components/ui/ImageCarousel';
 import { useContent, CarouselImage } from '@/contexts/ContentContext';
+import { PortfolioManager } from '@/components/admin/portfolio/PortfolioManager';
 import { useToast } from '@/hooks/use-toast';
 
 const ContentManager = () => {
@@ -128,8 +129,8 @@ const ContentManager = () => {
         <Tabs defaultValue="hero-carousel" className="w-full">
           <TabsList className="w-full md:w-auto">
             <TabsTrigger value="hero-carousel">Hero Carousel</TabsTrigger>
-            <TabsTrigger value="testimonials">Testimonials</TabsTrigger>
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
+            <TabsTrigger value="testimonials">Testimonials</TabsTrigger>
           </TabsList>
           
           <TabsContent value="hero-carousel" className="space-y-6 mt-6">
@@ -237,8 +238,12 @@ const ContentManager = () => {
           </TabsContent>
           
           <TabsContent value="portfolio" className="pt-4">
+            <PortfolioManager />
+          </TabsContent>
+          
+          <TabsContent value="testimonials" className="pt-4">
             <div className="text-center py-12 border border-dashed rounded-lg">
-              <p className="text-muted-foreground">Portfolio management coming soon</p>
+              <p className="text-muted-foreground">Testimonials management coming soon</p>
             </div>
           </TabsContent>
         </Tabs>
