@@ -1,6 +1,5 @@
-
 import { db } from '@/config/firebase';
-import { collection, doc, getDocs, addDoc, updateDoc, deleteDoc, query, orderBy } from 'firebase/firestore';
+import { collection, doc, getDocs, addDoc, updateDoc, deleteDoc, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { useAuth } from '@/contexts/AuthContext';
 
 export interface CarouselImage {
@@ -89,4 +88,17 @@ export const deleteCarouselImage = async (id: string): Promise<void> => {
     console.error('Error deleting carousel image:', error);
     throw error;
   }
+};
+
+export const subscribeToCarouselImages = (callback: (images: CarouselImage[]) => void): (() => void) => {
+  const imagesCollection = collection(db, COLLECTION_NAME);
+  const q = query(imagesCollection, orderBy('displayOrder', 'asc'));
+  
+  return onSnapshot(q, (snapshot) => {
+    const images = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    } as CarouselImage));
+    callback(images);
+  });
 };

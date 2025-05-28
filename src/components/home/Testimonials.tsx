@@ -4,55 +4,29 @@ import { GlassMorphismCard } from "../ui/GlassMorphismCard";
 import { AnimatedButton } from "../ui/AnimatedButton";
 import { ChevronLeft, ChevronRight, Quote } from "lucide-react";
 import { Link } from "react-router-dom";
-
-interface TestimonialProps {
-  quote: string;
-  author: string;
-  role: string;
-  company: string;
-  avatar: string;
-  rating: number;
-}
-
-const testimonials: TestimonialProps[] = [
-  {
-    quote: "PermitDraft Pro transformed our complex outdoor living space design into detailed drawings that sailed through the permitting process. Their attention to detail and knowledge of US building codes is impressive.",
-    author: "Michael Thompson",
-    role: "Senior Project Manager",
-    company: "Thompson Construction",
-    avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-    rating: 5
-  },
-  {
-    quote: "Working with PermitDraft Pro has been a game-changer for our landscape design firm. Their drafting quality is exceptional, and the 48-hour turnaround time has helped us win more contracts by responding quickly to client requests.",
-    author: "Sarah Johnson",
-    role: "Owner",
-    company: "Evergreen Landscapes",
-    avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-    rating: 5
-  },
-  {
-    quote: "As a homeowner with a specific vision for my backyard renovation, I was thrilled with the detailed plans PermitDraft Pro created. They took my rough sketch and transformed it into professional drawings that my contractor could follow precisely.",
-    author: "Robert Williams",
-    role: "Homeowner",
-    company: "San Diego, CA",
-    avatar: "https://randomuser.me/api/portraits/men/65.jpg",
-    rating: 5
-  },
-  {
-    quote: "The team at PermitDraft Pro understands the complexities of US permit requirements for pool installations. Their detailed technical drawings have helped us avoid costly delays and revisions in the permitting process.",
-    author: "Jennifer Martinez",
-    role: "CEO",
-    company: "Blue Water Pools",
-    avatar: "https://randomuser.me/api/portraits/women/28.jpg",
-    rating: 4
-  }
-];
+import { getActiveTestimonials, Testimonial } from "@/services/testimonialsService";
 
 const Testimonials = () => {
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
+  const [loading, setLoading] = useState(true);
   const testimonialsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    loadTestimonials();
+  }, []);
+
+  const loadTestimonials = async () => {
+    try {
+      const activeTestimonials = await getActiveTestimonials();
+      setTestimonials(activeTestimonials);
+    } catch (error) {
+      console.error('Failed to load testimonials:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const goToPrevious = () => {
     setSlideDirection('left');
@@ -69,12 +43,32 @@ const Testimonials = () => {
   };
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      goToNext();
-    }, 8000);
+    if (testimonials.length > 0) {
+      const interval = setInterval(() => {
+        goToNext();
+      }, 8000);
 
-    return () => clearInterval(interval);
-  }, [currentIndex]);
+      return () => clearInterval(interval);
+    }
+  }, [testimonials.length, currentIndex]);
+
+  if (loading) {
+    return (
+      <section id="testimonials" className="section-padding bg-zinc-50">
+        <div className="container px-4 mx-auto">
+          <div className="flex justify-center items-center p-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (testimonials.length === 0) {
+    return null;
+  }
+
+  const currentTestimonial = testimonials[currentIndex];
 
   return (
     <section id="testimonials" className="section-padding bg-zinc-50" ref={testimonialsRef}>
@@ -102,26 +96,26 @@ const Testimonials = () => {
                 key={currentIndex}
               >
                 <blockquote className="text-lg md:text-xl italic mb-6 relative z-10">
-                  "{testimonials[currentIndex].quote}"
+                  "{currentTestimonial.content}"
                 </blockquote>
                 
                 <div className="flex items-center">
                   <img 
-                    src={testimonials[currentIndex].avatar} 
-                    alt={testimonials[currentIndex].author}
+                    src={currentTestimonial.image} 
+                    alt={currentTestimonial.name}
                     className="w-12 h-12 rounded-full object-cover border-2 border-primary/20"
                   />
                   <div className="ml-4">
-                    <div className="font-semibold">{testimonials[currentIndex].author}</div>
+                    <div className="font-semibold">{currentTestimonial.name}</div>
                     <div className="text-sm text-muted-foreground">
-                      {testimonials[currentIndex].role}, {testimonials[currentIndex].company}
+                      {currentTestimonial.role}, {currentTestimonial.company}
                     </div>
                   </div>
                   <div className="ml-auto flex">
                     {[...Array(5)].map((_, i) => (
                       <svg 
                         key={i}
-                        className={`w-5 h-5 ${i < testimonials[currentIndex].rating ? 'text-yellow-400' : 'text-gray-300'}`}
+                        className={`w-5 h-5 ${i < currentTestimonial.rating ? 'text-yellow-400' : 'text-gray-300'}`}
                         fill="currentColor"
                         viewBox="0 0 20 20"
                         xmlns="http://www.w3.org/2000/svg"

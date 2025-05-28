@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Edit, Trash2, MoveUp, MoveDown, Eye, X, ImagePlus } from 'lucide-react';
 import { usePortfolio, PortfolioItem } from '@/contexts/PortfolioContext';
 import { useToast } from '@/hooks/use-toast';
+import { addPortfolioItem, updatePortfolioItem, deletePortfolioItem } from '@/services/portfolioFirebaseService';
 
 // Available images from portfolioImages folder
 const availableImages = [
@@ -60,7 +60,7 @@ const availableImages = [
 const categories = ['Deck', 'Patio', 'Pergola', 'Outdoor Kitchen', 'Home Addition/ADU'];
 
 export const PortfolioManager: React.FC = () => {
-  const { portfolioItems, setPortfolioItems } = usePortfolio();
+  const { portfolioItems, loading } = usePortfolio();
   const [currentItem, setCurrentItem] = useState<Partial<PortfolioItem> | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -68,12 +68,15 @@ export const PortfolioManager: React.FC = () => {
   const [previewMode, setPreviewMode] = useState(false);
   const { toast } = useToast();
 
+  if (loading) {
+    return <div className="flex justify-center items-center p-8">Loading...</div>;
+  }
+
   const sortedItems = [...portfolioItems].sort((a, b) => a.order - b.order);
   const activeItems = sortedItems.filter(item => item.active);
 
   const handleAddItem = () => {
     setCurrentItem({
-      id: `portfolio-${Date.now()}`,
       title: '',
       category: 'Deck',
       description: '',
@@ -96,72 +99,89 @@ export const PortfolioManager: React.FC = () => {
     setIsDeleteDialogOpen(true);
   };
 
-  const handleDeleteItem = () => {
+  const handleDeleteItem = async () => {
     if (!currentItem) return;
-    setPortfolioItems(prev => prev.filter(item => item.id !== currentItem.id));
-    setIsDeleteDialogOpen(false);
-    toast({
-      title: "Portfolio item deleted",
-      description: "The portfolio item has been removed",
-    });
-  };
-
-  const handleSaveItem = () => {
-    if (!currentItem || !currentItem.title || !currentItem.description) return;
-
-    if (isEditing) {
-      setPortfolioItems(prev => 
-        prev.map(item => item.id === currentItem.id ? currentItem as PortfolioItem : item)
-      );
+    try {
+      await deletePortfolioItem(currentItem.id!);
+      setIsDeleteDialogOpen(false);
       toast({
-        title: "Portfolio item updated",
-        description: "Your changes have been saved",
+        title: "Portfolio item deleted",
+        description: "The portfolio item has been removed",
       });
-    } else {
-      setPortfolioItems(prev => [...prev, currentItem as PortfolioItem]);
+    } catch (error) {
       toast({
-        title: "Portfolio item added",
-        description: "New portfolio item has been added",
+        title: "Error",
+        description: "Failed to delete portfolio item",
+        variant: "destructive"
       });
     }
-    setIsDialogOpen(false);
   };
 
-  const handleMoveItem = (id: string, direction: 'up' | 'down') => {
+  const handleSaveItem = async () => {
+    if (!currentItem || !currentItem.title || !currentItem.description) return;
+
+    try {
+      if (isEditing && currentItem.id) {
+        await updatePortfolioItem(currentItem.id, currentItem);
+        toast({
+          title: "Portfolio item updated",
+          description: "Your changes have been saved",
+        });
+      } else {
+        await addPortfolioItem(currentItem as Omit<PortfolioItem, 'id'>);
+        toast({
+          title: "Portfolio item added",
+          description: "New portfolio item has been added",
+        });
+      }
+      setIsDialogOpen(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save portfolio item",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleMoveItem = async (id: string, direction: 'up' | 'down') => {
     const currentIndex = sortedItems.findIndex(item => item.id === id);
     if ((direction === 'up' && currentIndex === 0) || 
         (direction === 'down' && currentIndex === sortedItems.length - 1)) {
       return;
     }
 
-    const newItems = [...sortedItems];
     const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-    
-    [newItems[currentIndex], newItems[newIndex]] = [newItems[newIndex], newItems[currentIndex]];
-    
-    // Update order values
-    newItems.forEach((item, index) => {
-      item.order = index + 1;
-    });
-    
-    setPortfolioItems(newItems);
+    const itemToMove = sortedItems[currentIndex];
+    const itemToSwap = sortedItems[newIndex];
+
+    try {
+      await updatePortfolioItem(itemToMove.id, { order: itemToSwap.order });
+      await updatePortfolioItem(itemToSwap.id, { order: itemToMove.order });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to reorder items",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleToggleActive = (id: string) => {
-    setPortfolioItems(prev => 
-      prev.map(item => {
-        if (item.id === id) {
-          return { ...item, active: !item.active };
-        }
-        return item;
-      })
-    );
-    
+  const handleToggleActive = async (id: string) => {
     const item = portfolioItems.find(item => item.id === id);
-    if (item) {
+    if (!item) return;
+
+    try {
+      await updatePortfolioItem(id, { active: !item.active });
       toast({
         title: item.active ? "Item hidden" : "Item shown",
         description: `The portfolio item has been ${item.active ? "hidden from" : "made visible in"} the portfolio`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update item status",
+        variant: "destructive"
       });
     }
   };

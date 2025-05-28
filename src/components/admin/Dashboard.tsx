@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ServiceManager from './services/ServiceManager';
 import { CarouselManager } from './carousel/CarouselManager';
 import { LeadsManager } from './leads/LeadsManager';
+import { TestimonialsManager } from './testimonials/TestimonialsManager';
 
 export const Dashboard: React.FC = () => {
   return (
@@ -13,6 +14,7 @@ export const Dashboard: React.FC = () => {
         <TabsList>
           <TabsTrigger value="services">Services</TabsTrigger>
           <TabsTrigger value="carousel">Hero Carousel</TabsTrigger>
+          <TabsTrigger value="testimonials">Testimonials</TabsTrigger>
           <TabsTrigger value="leads">Leads</TabsTrigger>
         </TabsList>
         <TabsContent value="services">
@@ -20,6 +22,9 @@ export const Dashboard: React.FC = () => {
         </TabsContent>
         <TabsContent value="carousel">
           <CarouselManager />
+        </TabsContent>
+        <TabsContent value="testimonials">
+          <TestimonialsManager />
         </TabsContent>
         <TabsContent value="leads">
           <LeadsManager />

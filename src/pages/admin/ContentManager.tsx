@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
@@ -13,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ImageCarousel } from '@/components/ui/ImageCarousel';
 import { useContent, CarouselImage } from '@/contexts/ContentContext';
 import { PortfolioManager } from '@/components/admin/portfolio/PortfolioManager';
+import { TestimonialsManager } from '@/components/admin/testimonials/TestimonialsManager';
 import { useToast } from '@/hooks/use-toast';
 
 const ContentManager = () => {
@@ -231,20 +231,12 @@ const ContentManager = () => {
             )}
           </TabsContent>
           
-          <TabsContent value="testimonials" className="pt-4">
-            <div className="text-center py-12 border border-dashed rounded-lg">
-              <p className="text-muted-foreground">Testimonials management coming soon</p>
-            </div>
-          </TabsContent>
-          
           <TabsContent value="portfolio" className="pt-4">
             <PortfolioManager />
           </TabsContent>
           
           <TabsContent value="testimonials" className="pt-4">
-            <div className="text-center py-12 border border-dashed rounded-lg">
-              <p className="text-muted-foreground">Testimonials management coming soon</p>
-            </div>
+            <TestimonialsManager />
           </TabsContent>
         </Tabs>
       </div>

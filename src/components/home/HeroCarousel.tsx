@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { CarouselImage, getActiveCarouselImages } from '@/services/carouselService';
+import { CarouselImage, getActiveCarouselImages, subscribeToCarouselImages } from '@/services/carouselService';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -11,7 +10,14 @@ export const HeroCarousel: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadImages();
+    // Subscribe to real-time updates from Firebase
+    const unsubscribe = subscribeToCarouselImages((allImages) => {
+      const activeImages = allImages.filter(img => img.active);
+      setImages(activeImages);
+      setIsLoading(false);
+    });
+
+    return unsubscribe;
   }, []);
 
   useEffect(() => {
@@ -114,4 +120,4 @@ export const HeroCarousel: React.FC = () => {
       </div>
     </div>
   );
-}; 
+};
