@@ -1,209 +1,116 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 import { useFirebase } from '@/contexts/FirebaseContext';
-import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
+import { getUserOrders, Order } from '@/services/orderService';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Send, Paperclip, Search, MoreVertical, Phone, Video } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { 
-  LogOut,
-  LayoutDashboard,
-  FileText,
-  ShoppingCart,
-  MessageSquare,
-  Settings,
-  Menu,
-  Send,
-  Clock,
-  ChevronDown,
-  ChevronUp,
-  Paperclip,
-  Download
-} from 'lucide-react';
-import { 
-  Card, 
-  CardHeader, 
-  CardTitle, 
-  CardDescription, 
-  CardContent
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { cn } from '@/lib/utils';
-import { getUserOrders, Order } from '@/services/orderService';
 
-// Temporary message type until we implement messaging service
 interface Message {
   id: string;
-  orderId: string;
-  subject: string;
-  content: string;
-  timestamp: Date;
-  isRead: boolean;
   sender: 'client' | 'admin';
-  senderName: string;
-  senderAvatar?: string;
-  attachments?: Array<{
-    id: string;
-    name: string;
-    size: string;
-    url: string;
-  }>;
+  text: string;
+  timestamp: string;
+  attachments?: { name: string; url: string }[];
 }
 
-// Mock conversation threads
 interface Thread {
   id: string;
   orderId: string;
-  subject: string;
-  lastMessage: Date;
-  unreadCount: number;
   messages: Message[];
+  participants: {
+    client: { id: string; name: string };
+    admin: { id: string; name: string };
+  };
+  lastMessage: string;
+  lastMessageTime: string;
 }
 
+const mockThreads: Thread[] = [
+  {
+    id: 'thread-1',
+    orderId: 'order-123',
+    messages: [
+      {
+        id: 'msg-1',
+        sender: 'client',
+        text: 'Hi, I have a question about my order.',
+        timestamp: '2024-08-01T10:00:00Z',
+        attachments: [{ name: 'order_details.pdf', url: '#' }]
+      },
+      {
+        id: 'msg-2',
+        sender: 'admin',
+        text: 'Hello! How can I assist you?',
+        timestamp: '2024-08-01T10:05:00Z'
+      }
+    ],
+    participants: {
+      client: { id: 'user-1', name: 'John Doe' },
+      admin: { id: 'admin-1', name: 'Alice Smith' }
+    },
+    lastMessage: 'Hello! How can I assist you?',
+    lastMessageTime: '2024-08-01T10:05:00Z'
+  },
+  {
+    id: 'thread-2',
+    orderId: 'order-456',
+    messages: [
+      {
+        id: 'msg-3',
+        sender: 'client',
+        text: 'Can I get an update on my project?',
+        timestamp: '2024-08-05T14:30:00Z'
+      },
+      {
+        id: 'msg-4',
+        sender: 'admin',
+        text: 'Your project is currently in progress. We expect to complete it by next week.',
+        timestamp: '2024-08-05T15:00:00Z'
+      }
+    ],
+    participants: {
+      client: { id: 'user-2', name: 'Jane Smith' },
+      admin: { id: 'admin-2', name: 'Bob Johnson' }
+    },
+    lastMessage: 'Your project is currently in progress. We expect to complete it by next week.',
+    lastMessageTime: '2024-08-05T15:00:00Z'
+  }
+];
+
 const ClientMessages = () => {
-  const { currentUser, signOut } = useFirebase();
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [threads, setThreads] = useState<Thread[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [activeThread, setActiveThread] = useState<Thread | null>(null);
-  const [replyText, setReplyText] = useState('');
-  const [isSending, setIsSending] = useState(false);
+  const [newMessage, setNewMessage] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+  const { currentUser } = useFirebase();
 
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      toast({
-        title: "Logged out successfully",
-        description: "You have been successfully logged out of your account."
-      });
-      navigate('/login');
-    } catch (error) {
-      toast({
-        title: "Error signing out",
-        description: (error as Error).message,
-        variant: "destructive"
-      });
-    }
-  };
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.title = "Messages | PermitDraft Pro";
+  }, []);
 
-  // Fetch orders and messages on component mount
   useEffect(() => {
     const fetchData = async () => {
       if (!currentUser) {
-        navigate('/login');
+        setIsLoading(false);
         return;
       }
 
       try {
-        const userOrders = await getUserOrders(currentUser.uid);
+        const userOrders = await getUserOrders(currentUser.uid, currentUser.email);
         setOrders(userOrders);
-        
-        // Mock message threads based on orders
-        // In a real implementation, this would be fetched from Firestore
-        const mockThreads: Thread[] = [];
-        
-        userOrders.forEach(order => {
-          // Create a welcome thread for each order
-          const welcomeMessages: Message[] = [
-            {
-              id: `msg-${Math.random().toString(36).substring(2, 9)}`,
-              orderId: order.id,
-              subject: `Welcome to your ${order.projectType} project`,
-              content: `Hello ${currentUser.displayName},\n\nThank you for choosing PermitDraft Pro for your ${order.projectType} project. We're excited to work with you and help bring your vision to life.\n\nYour project has been assigned to our team, and we'll be in touch shortly with updates on the progress. In the meantime, if you have any questions or additional information you'd like to share about your project, please don't hesitate to reply to this message.\n\nBest regards,\nThe PermitDraft Pro Team`,
-              timestamp: new Date(order.createdAt.getTime() + 3600000), // 1 hour after order
-              isRead: true,
-              sender: 'admin',
-              senderName: 'Project Manager'
-            }
-          ];
-          
-          // If order is in progress, add some additional messages
-          if (order.status === 'in-progress') {
-            welcomeMessages.push(
-              {
-                id: `msg-${Math.random().toString(36).substring(2, 9)}`,
-                orderId: order.id,
-                subject: `Welcome to your ${order.projectType} project`,
-                content: `Thank you for the warm welcome! I'm looking forward to working with your team. I actually have a few specific requirements for this project that I'd like to discuss. Can we schedule a quick call?`,
-                timestamp: new Date(order.createdAt.getTime() + 7200000), // 2 hours after order
-                isRead: true,
-                sender: 'client',
-                senderName: currentUser.displayName || 'You'
-              },
-              {
-                id: `msg-${Math.random().toString(36).substring(2, 9)}`,
-                orderId: order.id,
-                subject: `Welcome to your ${order.projectType} project`,
-                content: `Absolutely! We'd be happy to schedule a call to discuss your specific requirements. How does tomorrow at 2:00 PM sound? If that works for you, I'll send a calendar invite with the call details.\n\nIn the meantime, if you have any documents or sketches that might help us understand your vision better, feel free to upload them here.`,
-                timestamp: new Date(order.createdAt.getTime() + 10800000), // 3 hours after order
-                isRead: false,
-                sender: 'admin',
-                senderName: 'Project Manager'
-              }
-            );
-          }
-          
-          mockThreads.push({
-            id: `thread-${Math.random().toString(36).substring(2, 9)}`,
-            orderId: order.id,
-            subject: `Welcome to your ${order.projectType} project`,
-            lastMessage: welcomeMessages[welcomeMessages.length - 1].timestamp,
-            unreadCount: welcomeMessages.filter(m => !m.isRead && m.sender === 'admin').length,
-            messages: welcomeMessages
-          });
-          
-          // For older orders, add a second thread about plans
-          if (order.status === 'in-progress' || order.status === 'completed') {
-            const planMessages: Message[] = [
-              {
-                id: `msg-${Math.random().toString(36).substring(2, 9)}`,
-                orderId: order.id,
-                subject: `Draft Plans for Review - ${order.projectType}`,
-                content: `Hello ${currentUser.displayName},\n\nI'm pleased to share the first draft of your ${order.projectType} plans for review. Please take a look at the attached documents and let me know if you have any feedback or if there are any changes you'd like to make.\n\nWe've tried to incorporate all the requirements you shared with us, but we're always open to making adjustments to ensure the final result meets your expectations.\n\nBest regards,\nDesign Team`,
-                timestamp: new Date(order.createdAt.getTime() + 172800000), // 2 days after order
-                isRead: true,
-                sender: 'admin',
-                senderName: 'Design Team',
-                attachments: [
-                  {
-                    id: `att-${Math.random().toString(36).substring(2, 9)}`,
-                    name: `${order.projectType}_Draft_Plans.pdf`,
-                    size: '2.4 MB',
-                    url: '#'
-                  }
-                ]
-              }
-            ];
-            
-            mockThreads.push({
-              id: `thread-${Math.random().toString(36).substring(2, 9)}`,
-              orderId: order.id,
-              subject: `Draft Plans for Review - ${order.projectType}`,
-              lastMessage: planMessages[planMessages.length - 1].timestamp,
-              unreadCount: planMessages.filter(m => !m.isRead && m.sender === 'admin').length,
-              messages: planMessages
-            });
-          }
-        });
-        
-        // Sort threads by lastMessage date (newest first)
-        mockThreads.sort((a, b) => b.lastMessage.getTime() - a.lastMessage.getTime());
         
         setThreads(mockThreads);
         
-        // Set active thread to the first one if available
         if (mockThreads.length > 0) {
           setActiveThread(mockThreads[0]);
         }
@@ -220,403 +127,176 @@ const ClientMessages = () => {
     };
 
     fetchData();
-  }, [currentUser, navigate, toast]);
+  }, [currentUser, toast]);
 
-  const navigation = [
-    { name: 'Overview', icon: LayoutDashboard, path: '/client/dashboard' },
-    { name: 'Orders', icon: ShoppingCart, path: '/client/orders' },
-    { name: 'Documents', icon: FileText, path: '/client/documents' },
-    { name: 'Messages', icon: MessageSquare, path: '/client/messages' },
-    { name: 'Settings', icon: Settings, path: '/client/settings' },
-  ];
+  const filteredThreads = searchTerm
+    ? threads.filter(thread =>
+        thread.participants.client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        thread.messages.some(msg => msg.text.toLowerCase().includes(searchTerm.toLowerCase()))
+      )
+    : threads;
 
-  const handleThreadSelect = (thread: Thread) => {
-    // Mark all messages as read in this thread
-    const updatedThreads = threads.map(t => {
-      if (t.id === thread.id) {
-        return {
-          ...t,
-          unreadCount: 0,
-          messages: t.messages.map(m => ({
-            ...m,
-            isRead: true
-          }))
-        };
-      }
-      return t;
-    });
-    
-    setThreads(updatedThreads);
-    setActiveThread(thread);
-  };
+  const sendMessage = () => {
+    if (!activeThread) return;
 
-  const handleSendReply = () => {
-    if (!activeThread || !replyText.trim()) return;
-    
-    setIsSending(true);
-    
-    // Simulate sending message
-    setTimeout(() => {
-      const newMessage: Message = {
-        id: `msg-${Math.random().toString(36).substring(2, 9)}`,
-        orderId: activeThread.orderId,
-        subject: activeThread.subject,
-        content: replyText,
-        timestamp: new Date(),
-        isRead: true,
-        sender: 'client',
-        senderName: currentUser?.displayName || 'You'
-      };
-      
-      // Update threads with new message
-      const updatedThreads = threads.map(thread => {
-        if (thread.id === activeThread.id) {
-          return {
-            ...thread,
-            lastMessage: newMessage.timestamp,
-            messages: [...thread.messages, newMessage]
-          };
-        }
-        return thread;
-      });
-      
-      // Sort threads by lastMessage date (newest first)
-      updatedThreads.sort((a, b) => b.lastMessage.getTime() - a.lastMessage.getTime());
-      
-      setThreads(updatedThreads);
-      
-      // Update active thread
-      const updatedActiveThread = updatedThreads.find(t => t.id === activeThread.id);
-      if (updatedActiveThread) {
-        setActiveThread(updatedActiveThread);
-      }
-      
-      setReplyText('');
-      setIsSending(false);
-      
-      toast({
-        title: "Message Sent",
-        description: "Your reply has been sent successfully."
-      });
-    }, 1000);
-  };
+    const newMsg: Message = {
+      id: `msg-${Date.now()}`,
+      sender: 'client',
+      text: newMessage,
+      timestamp: new Date().toISOString(),
+    };
 
-  const formatDate = (date: Date) => {
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 0) {
-      // Today - show time
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    } else if (diffDays === 1) {
-      // Yesterday
-      return 'Yesterday';
-    } else if (diffDays < 7) {
-      // Within a week - show day name
-      return date.toLocaleDateString([], { weekday: 'long' });
-    } else {
-      // Older - show date
-      return date.toLocaleDateString();
-    }
-  };
+    const updatedThread: Thread = {
+      ...activeThread,
+      messages: [...activeThread.messages, newMsg],
+      lastMessage: newMessage,
+      lastMessageTime: new Date().toISOString(),
+    };
 
-  const getTotalUnreadCount = () => {
-    return threads.reduce((count, thread) => count + thread.unreadCount, 0);
-  };
-
-  const getOrderById = (orderId: string) => {
-    return orders.find(order => order.id === orderId);
+    setThreads(threads.map(t => t.id === activeThread.id ? updatedThread : t));
+    setActiveThread(updatedThread);
+    setNewMessage('');
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Navbar />
       <main className="pt-28 lg:pt-32 pb-24">
         <div className="container px-4 mx-auto">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row">
-              {/* Sidebar (Desktop) */}
-              <aside className="hidden md:flex flex-col w-64 shrink-0 mr-8">
-                <div className="bg-white rounded-lg shadow-sm p-4 sticky top-24">
-                  <div className="mb-6">
-                    <div className="flex items-center space-x-3 mb-3">
-                      <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-lg font-semibold">
-                        {currentUser?.displayName?.charAt(0) || 'U'}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Sidebar */}
+            <div className="lg:col-span-1">
+              <Card className="h-full">
+                <CardHeader>
+                  <CardTitle>Messages</CardTitle>
+                  <CardDescription>Communicate with our team</CardDescription>
+                </CardHeader>
+                <CardContent className="p-4">
+                  <div className="relative mb-4">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="text"
+                      placeholder="Search messages..."
+                      className="w-full pl-10 pr-4 py-2 border border-input rounded-md focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+                  {isLoading ? (
+                    <div className="text-center py-4">Loading messages...</div>
+                  ) : (
+                    <div className="space-y-2">
+                      {filteredThreads.map(thread => (
+                        <Button
+                          key={thread.id}
+                          variant="ghost"
+                          className={`w-full justify-start rounded-md ${activeThread?.id === thread.id ? 'bg-accent text-accent-foreground' : ''}`}
+                          onClick={() => setActiveThread(thread)}
+                        >
+                          <div className="flex items-center justify-between w-full">
+                            <div>
+                              <p className="font-medium">{thread.participants.client.name}</p>
+                              <p className="text-sm text-muted-foreground truncate">{thread.lastMessage}</p>
+                            </div>
+                            <span className="text-xs text-muted-foreground">{thread.lastMessageTime.substring(11, 16)}</span>
+                          </div>
+                        </Button>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Main Content */}
+            <div className="lg:col-span-3">
+              {activeThread ? (
+                <Card className="h-full flex flex-col">
+                  <CardHeader className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="mr-3">
+                        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="rounded-full bg-muted w-8 h-8">
+                          <path d="M16 6C12.6863 6 10 9.68629 10 13C10 16.3137 12.6863 19 16 19C19.3137 19 22 16.3137 22 13C22 9.68629 19.3137 6 16 6ZM6 25C6 21.6863 8.68629 19 12 19H20C23.3137 19 26 21.6863 26 25V27H6V25Z" fill="currentColor" />
+                        </svg>
                       </div>
                       <div>
-                        <p className="font-medium">{currentUser?.displayName}</p>
-                        <p className="text-sm text-muted-foreground">{currentUser?.email}</p>
+                        <CardTitle>{activeThread.participants.client.name}</CardTitle>
+                        <CardDescription>Order: {activeThread.orderId}</CardDescription>
                       </div>
                     </div>
-                    <Button onClick={handleSignOut} variant="outline" size="sm" className="w-full">
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Sign Out
-                    </Button>
-                  </div>
-                  
-                  <nav className="space-y-1">
-                    {navigation.map((item) => (
-                      <Button
-                        key={item.name}
-                        variant={item.name === 'Messages' ? 'default' : 'ghost'}
-                        className="w-full justify-start"
-                        onClick={() => navigate(item.path)}
-                      >
-                        <item.icon className="h-5 w-5 mr-3" />
-                        {item.name}
-                        {item.name === 'Messages' && getTotalUnreadCount() > 0 && (
-                          <Badge variant="secondary" className="ml-auto">
-                            {getTotalUnreadCount()}
-                          </Badge>
-                        )}
+                    <div className="space-x-2">
+                      <Button variant="ghost" size="icon">
+                        <Phone className="h-4 w-4" />
                       </Button>
-                    ))}
-                  </nav>
-                </div>
-              </aside>
-
-              {/* Sidebar (Mobile) */}
-              <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="outline" size="icon" className="md:hidden mb-4">
-                    <Menu className="h-5 w-5" />
-                    <span className="sr-only">Toggle menu</span>
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left">
-                  <div className="mb-6 mt-6">
-                    <div className="flex items-center space-x-3 mb-3">
-                      <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-lg font-semibold">
-                        {currentUser?.displayName?.charAt(0) || 'U'}
-                      </div>
-                      <div>
-                        <p className="font-medium">{currentUser?.displayName}</p>
-                        <p className="text-sm text-muted-foreground">{currentUser?.email}</p>
-                      </div>
-                    </div>
-                    <Button onClick={handleSignOut} variant="outline" size="sm" className="w-full">
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Sign Out
-                    </Button>
-                  </div>
-                  
-                  <nav className="space-y-1">
-                    {navigation.map((item) => (
-                      <Button
-                        key={item.name}
-                        variant={item.name === 'Messages' ? 'default' : 'ghost'}
-                        className="w-full justify-start"
-                        onClick={() => {
-                          navigate(item.path);
-                          setIsMobileMenuOpen(false);
-                        }}
-                      >
-                        <item.icon className="h-5 w-5 mr-3" />
-                        {item.name}
-                        {item.name === 'Messages' && getTotalUnreadCount() > 0 && (
-                          <Badge variant="secondary" className="ml-auto">
-                            {getTotalUnreadCount()}
-                          </Badge>
-                        )}
+                      <Button variant="ghost" size="icon">
+                        <Video className="h-4 w-4" />
                       </Button>
-                    ))}
-                  </nav>
-                </SheetContent>
-              </Sheet>
-
-              {/* Main Content */}
-              <div className="flex-1">
-                <div className="bg-white rounded-lg shadow-sm mb-6">
-                  <div className="p-6">
-                    <h1 className="text-2xl font-bold">My Messages</h1>
-                    <p className="text-muted-foreground">Communicate with our team</p>
-                  </div>
-                </div>
-
-                {isLoading ? (
-                  <div className="text-center py-8">
-                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-t-primary border-r-transparent border-b-primary border-l-transparent"></div>
-                    <p className="mt-2 text-muted-foreground">Loading your messages...</p>
-                  </div>
-                ) : threads.length === 0 ? (
-                  <Card>
-                    <CardContent className="text-center py-8">
-                      <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                      <h3 className="text-lg font-medium mb-2">No Messages Found</h3>
-                      <p className="text-muted-foreground mb-4">You don't have any messages yet.</p>
-                      <Button onClick={() => navigate('/order')}>Start a New Project</Button>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Thread List */}
-                    <div className="md:col-span-1">
-                      <Card className="h-full">
-                        <CardContent className="p-0">
-                          <div className="overflow-y-auto max-h-[600px]">
-                            {threads.map(thread => {
-                              const order = getOrderById(thread.orderId);
-                              const lastMessage = thread.messages[thread.messages.length - 1];
-                              
-                              return (
-                                <div 
-                                  key={thread.id}
-                                  className={cn(
-                                    "p-4 border-b cursor-pointer hover:bg-gray-50 transition-colors",
-                                    activeThread?.id === thread.id && "bg-gray-50"
-                                  )}
-                                  onClick={() => handleThreadSelect(thread)}
-                                >
-                                  <div className="flex justify-between items-start mb-1">
-                                    <h3 className={cn(
-                                      "font-medium line-clamp-1",
-                                      thread.unreadCount > 0 && "font-bold"
-                                    )}>
-                                      {thread.subject}
-                                    </h3>
-                                    <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
-                                      {formatDate(thread.lastMessage)}
-                                    </span>
-                                  </div>
-                                  <p className="text-sm text-muted-foreground line-clamp-1 mb-1">
-                                    {order?.projectType}: {lastMessage.sender === 'client' ? 'You' : lastMessage.senderName}: {lastMessage.content.substring(0, 50)}...
-                                  </p>
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-xs text-muted-foreground">
-                                      {thread.messages.length} {thread.messages.length === 1 ? 'message' : 'messages'}
-                                    </span>
-                                    {thread.unreadCount > 0 && (
-                                      <Badge variant="default" className="text-xs">
-                                        {thread.unreadCount} new
-                                      </Badge>
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </CardContent>
-                      </Card>
+                      <Button variant="ghost" size="icon">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
                     </div>
-                    
-                    {/* Message Content */}
-                    <div className="md:col-span-2">
-                      {activeThread ? (
-                        <Card className="h-full flex flex-col">
-                          <CardHeader className="bg-gray-50 border-b">
-                            <CardTitle>{activeThread.subject}</CardTitle>
-                            <CardDescription>
-                              {getOrderById(activeThread.orderId)?.projectType || 'Project'} - 
-                              {activeThread.messages.length} {activeThread.messages.length === 1 ? 'message' : 'messages'}
-                            </CardDescription>
-                          </CardHeader>
-                          <CardContent className="flex-1 p-0">
-                            <div className="overflow-y-auto max-h-[400px] p-6 space-y-6">
-                              {activeThread.messages.map(message => (
-                                <div 
-                                  key={message.id}
-                                  className={cn(
-                                    "flex gap-4",
-                                    message.sender === 'client' && "flex-row-reverse"
-                                  )}
-                                >
-                                  <Avatar className="h-10 w-10 shrink-0">
-                                    <AvatarFallback className={message.sender === 'client' ? "bg-primary" : "bg-gray-500"}>
-                                      {message.senderName.charAt(0)}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <div className={cn(
-                                    "bg-gray-100 rounded-lg p-4 max-w-[80%]",
-                                    message.sender === 'client' && "bg-primary/10"
-                                  )}>
-                                    <div className="flex justify-between items-center mb-2">
-                                      <span className="font-medium">{message.senderName}</span>
-                                      <span className="text-xs text-muted-foreground">
-                                        {message.timestamp.toLocaleString()}
-                                      </span>
-                                    </div>
-                                    <div className="text-sm whitespace-pre-line">
-                                      {message.content}
-                                    </div>
-                                    
-                                    {message.attachments && message.attachments.length > 0 && (
-                                      <div className="mt-3 pt-3 border-t">
-                                        <p className="text-xs text-muted-foreground mb-2">Attachments</p>
-                                        <div className="space-y-2">
-                                          {message.attachments.map(attachment => (
-                                            <div 
-                                              key={attachment.id}
-                                              className="flex items-center p-2 bg-white rounded border"
-                                            >
-                                              <FileText className="h-4 w-4 mr-2 text-blue-500" />
-                                              <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-medium truncate">{attachment.name}</p>
-                                                <p className="text-xs text-muted-foreground">{attachment.size}</p>
-                                              </div>
-                                              <Button 
-                                                variant="ghost" 
-                                                size="icon"
-                                                className="h-8 w-8 ml-2"
-                                                onClick={() => window.open(attachment.url, '_blank')}
-                                              >
-                                                <Download className="h-4 w-4" />
-                                              </Button>
-                                            </div>
-                                          ))}
-                                        </div>
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </CardContent>
-                          
-                          <div className="p-4 border-t mt-auto">
-                            <Textarea
-                              placeholder="Type your reply..."
-                              className="mb-3 min-h-[100px]"
-                              value={replyText}
-                              onChange={(e) => setReplyText(e.target.value)}
-                            />
-                            <div className="flex justify-between items-center">
-                              <Button variant="outline" size="sm" disabled>
-                                <Paperclip className="h-4 w-4 mr-2" />
-                                Attach Files
-                              </Button>
-                              <Button 
-                                disabled={!replyText.trim() || isSending}
-                                onClick={handleSendReply}
-                              >
-                                {isSending ? (
-                                  <>
-                                    <Clock className="h-4 w-4 mr-2 animate-spin" />
-                                    Sending...
-                                  </>
-                                ) : (
-                                  <>
-                                    <Send className="h-4 w-4 mr-2" />
-                                    Send Reply
-                                  </>
-                                )}
-                              </Button>
-                            </div>
+                  </CardHeader>
+                  <CardContent className="flex-1 overflow-y-auto p-4">
+                    <div className="space-y-4">
+                      {activeThread.messages.map(msg => (
+                        <div
+                          key={msg.id}
+                          className={`flex flex-col ${msg.sender === 'client' ? 'items-end' : 'items-start'}`}
+                        >
+                          <div
+                            className={`rounded-lg p-3 max-w-[80%] ${msg.sender === 'client' ? 'bg-teal-500 text-white' : 'bg-muted'}`}
+                          >
+                            <p>{msg.text}</p>
+                            {msg.attachments && msg.attachments.length > 0 && (
+                              <div className="mt-2 space-y-1">
+                                {msg.attachments.map(attachment => (
+                                  <a
+                                    key={attachment.name}
+                                    href={attachment.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-sm text-blue-300 hover:underline"
+                                  >
+                                    <Paperclip className="inline-block h-3 w-3 mr-1" />
+                                    {attachment.name}
+                                  </a>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                        </Card>
-                      ) : (
-                        <Card>
-                          <CardContent className="text-center py-8">
-                            <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                            <h3 className="text-lg font-medium mb-2">Select a Conversation</h3>
-                            <p className="text-muted-foreground mb-4">Choose a conversation from the list to view messages</p>
-                          </CardContent>
-                        </Card>
-                      )}
+                          <span className="text-xs text-muted-foreground mt-1">
+                            {msg.timestamp.substring(11, 16)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                  <div className="p-4 border-t">
+                    <div className="flex items-center">
+                      <Textarea
+                        placeholder="Type your message here..."
+                        className="flex-1 mr-2 resize-none border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                      />
+                      <Button onClick={sendMessage}>
+                        Send
+                        <Send className="ml-2 h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
-                )}
-              </div>
+                </Card>
+              ) : (
+                <Card className="h-full">
+                  <CardContent className="text-center">
+                    {isLoading ? (
+                      <div>Loading messages...</div>
+                    ) : (
+                      <div>Select a message to view</div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </div>
         </div>

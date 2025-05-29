@@ -1,8 +1,10 @@
+
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { useFirebase } from '@/contexts/FirebaseContext';
 import { calculatePrice, createOrder, AdditionalService } from '@/services/orderService';
+import { DocumentUpload } from '@/components/order/DocumentUpload';
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Button } from '@/components/ui/button';
@@ -38,6 +40,7 @@ interface FormData {
   phone: string;
   additionalDetails: string;
   additionalServices: AdditionalService;
+  files: File[];
 }
 
 const Order = () => {
@@ -52,7 +55,8 @@ const Order = () => {
       sitePlan: false,
       materialList: false,
       render3D: false
-    }
+    },
+    files: []
   });
   
   const [currentPrice, setCurrentPrice] = useState<number>(0);
@@ -103,6 +107,10 @@ const Order = () => {
         [service]: !prev.additionalServices[service]
       }
     }));
+  };
+
+  const handleFilesChange = (files: File[]) => {
+    setFormData(prev => ({ ...prev, files }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -206,7 +214,7 @@ const Order = () => {
               <div className="md:col-span-2">
                 <form 
                   onSubmit={handleSubmit} 
-                  className="bg-white rounded-lg shadow-md p-6 md:p-8"
+                  className="bg-white rounded-lg shadow-md p-6 md:p-8 space-y-6"
                 >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="md:col-span-2">
@@ -335,6 +343,13 @@ const Order = () => {
                         </div>
                       </div>
                     </div>
+
+                    <div className="md:col-span-2">
+                      <DocumentUpload 
+                        files={formData.files} 
+                        onFilesChange={handleFilesChange} 
+                      />
+                    </div>
                   </div>
                 </form>
               </div>
@@ -380,6 +395,15 @@ const Order = () => {
                         )}
                       </div>
 
+                      {formData.files.length > 0 && (
+                        <div>
+                          <h3 className="font-medium">Documents</h3>
+                          <div className="mt-2 text-sm text-muted-foreground">
+                            {formData.files.length} file{formData.files.length !== 1 ? 's' : ''} attached
+                          </div>
+                        </div>
+                      )}
+
                       <div className="pt-4 border-t">
                         <div className="flex justify-between font-semibold">
                           <span>Total</span>
@@ -419,4 +443,4 @@ const Order = () => {
   );
 };
 
-export default Order; 
+export default Order;

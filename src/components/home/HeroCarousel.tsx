@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { CarouselImage, getActiveCarouselImages, subscribeToCarouselImages } from '@/services/carouselService';
+import { CarouselImage, subscribeToCarouselImages } from '@/services/carouselService';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -29,18 +30,6 @@ export const HeroCarousel: React.FC = () => {
       return () => clearInterval(timer);
     }
   }, [images.length]);
-
-  const loadImages = async () => {
-    try {
-      // Only fetch active images
-      const fetchedImages = await getActiveCarouselImages();
-      setImages(fetchedImages);
-    } catch (error) {
-      console.error('Failed to load carousel images:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const goToPrevious = () => {
     setCurrentIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);

@@ -1,4 +1,3 @@
-
 import { db, storage } from '@/config/firebase';
 import { collection, doc, getDocs, addDoc, updateDoc, getDoc, query, where, orderBy, limit as firestoreLimit } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -189,22 +188,42 @@ export const convertLeadToOrder = async (leadId: string): Promise<string | null>
     
     const leadData = leadSnapshot.data() as Lead;
     
-    // Create a new order based on the lead
+    // Create a new order based on the lead with ALL lead information
     const orderData = {
-      clientName: leadData.name,
-      clientEmail: leadData.email,
-      clientPhone: leadData.phone,
+      userId: leadData.userId || '',
+      name: leadData.name,
+      email: leadData.email,
+      phone: leadData.phone || '',
       projectType: leadData.projectType,
-      squareFootage: leadData.squareFootage,
-      status: 'pending',
-      createdFrom: 'lead',
-      leadId: leadId,
-      userId: leadData.userId || null,
+      squareFootage: parseInt(leadData.squareFootage || '0'),
+      additionalServices: {
+        sitePlan: false,
+        materialList: false,
+        render3D: false
+      },
+      additionalDetails: leadData.additionalDetails || '',
+      totalPrice: 0, // Will be calculated based on project type and square footage
+      status: 'pending' as const,
+      paymentStatus: 'pending' as const,
       createdAt: new Date(),
       updatedAt: new Date(),
+      // Preserve lead-specific data
+      leadId: leadId,
+      createdFrom: 'lead',
       notes: leadData.notes || [],
       attachments: leadData.attachments || []
     };
+    
+    // Calculate price based on square footage (same logic as orderService)
+    const sqft = parseInt(leadData.squareFootage || '0');
+    let basePrice = 0;
+    if (sqft <= 200) basePrice = 150;
+    else if (sqft <= 400) basePrice = 200;
+    else if (sqft <= 600) basePrice = 300;
+    else if (sqft <= 1000) basePrice = 500;
+    else basePrice = 750;
+    
+    orderData.totalPrice = basePrice;
     
     // Add the order to Firestore
     const orderRef = await addDoc(collection(db, 'orders'), orderData);

@@ -51,15 +51,16 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
       <div className="container px-4 mx-auto">
         <nav className="flex flex-col space-y-1">
           {navLinks.map((link) => (
-            <NavLink
-              key={link.title}
-              link={link}
-              activeDropdown={activeDropdown}
-              setActiveDropdown={setActiveDropdown}
-              closeDropdown={closeDropdown}
-              mobile={true}
-              onMenuItemClick={toggleMenu}
-            />
+            <div key={link.title} className="text-center">
+              <NavLink
+                link={link}
+                activeDropdown={activeDropdown}
+                setActiveDropdown={setActiveDropdown}
+                closeDropdown={closeDropdown}
+                mobile={true}
+                onMenuItemClick={toggleMenu}
+              />
+            </div>
           ))}
         </nav>
 
