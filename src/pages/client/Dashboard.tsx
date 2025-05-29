@@ -49,6 +49,7 @@ const ClientDashboard = () => {
         const userOrders = await getUserOrders(currentUser.uid);
         setOrders(userOrders);
       } catch (error) {
+        console.log('Error fetching orders:', error);
         toast({
           title: "Error fetching orders",
           description: "Could not load your orders. Please try again.",
@@ -421,4 +422,3 @@ const ClientDashboard = () => {
 };
 
 export default ClientDashboard;
-

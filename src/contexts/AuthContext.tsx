@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useFirebase } from './FirebaseContext';
 import { User } from 'firebase/auth';
@@ -72,7 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Post-login logic:
       // The currentUser in AuthContext should update automatically because useFirebase().currentUser will update.
       // setIsAdmin will be re-evaluated by the useEffect watching currentUser.
-      console.log("User logged in with Google:", userCredential.user);
+      console.log("User logged in with Google:", userCredential);
     } catch (error) {
       // Handle errors, maybe show a toast to the user
       console.error("AuthContext: Google login failed", error);
@@ -84,7 +85,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const userCredential = await signInWithApple();
       // Post-login logic similar to loginWithGoogle
-      console.log("User logged in with Apple:", userCredential.user);
+      console.log("User logged in with Apple:", userCredential);
     } catch (error) {
       console.error("AuthContext: Apple login failed", error);
       throw error;

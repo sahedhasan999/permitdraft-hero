@@ -144,6 +144,7 @@ const ClientDocuments = () => {
         
         setDocuments(mockDocuments);
       } catch (error) {
+        console.log('Error fetching data:', error);
         toast({
           title: "Error fetching data",
           description: "Could not load your documents. Please try again.",
@@ -375,4 +376,4 @@ const ClientDocuments = () => {
   );
 };
 
-export default ClientDocuments; 
+export default ClientDocuments;

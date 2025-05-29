@@ -208,6 +208,7 @@ const ClientMessages = () => {
           setActiveThread(mockThreads[0]);
         }
       } catch (error) {
+        console.log('Error fetching data:', error);
         toast({
           title: "Error fetching data",
           description: "Could not load your messages. Please try again.",
@@ -625,4 +626,4 @@ const ClientMessages = () => {
   );
 };
 
-export default ClientMessages; 
+export default ClientMessages;
