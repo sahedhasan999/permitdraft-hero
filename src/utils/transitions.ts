@@ -32,26 +32,27 @@ export const getTransitionProps = (
   switch (direction) {
     case 'up':
       initial = { opacity: 0, y: distance };
-      animate = { ...animate, y: 0 };
+      animate = { opacity: 1, y: 0 };
       break;
     case 'down':
       initial = { opacity: 0, y: -distance };
-      animate = { ...animate, y: 0 };
+      animate = { opacity: 1, y: 0 };
       break;
     case 'left':
       initial = { opacity: 0, x: distance };
-      animate = { ...animate, x: 0 };
+      animate = { opacity: 1, x: 0 };
       break;
     case 'right':
       initial = { opacity: 0, x: -distance };
-      animate = { ...animate, x: 0 };
+      animate = { opacity: 1, x: 0 };
       break;
     case 'fade':
       initial = { opacity: 0 };
+      animate = { opacity: 1 };
       break;
     default:
       initial = { opacity: 0, y: distance };
-      animate = { ...animate, y: 0 };
+      animate = { opacity: 1, y: 0 };
   }
 
   return {
