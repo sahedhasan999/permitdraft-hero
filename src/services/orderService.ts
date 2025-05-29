@@ -1,5 +1,5 @@
 import { db } from '@/config/firebase';
-import { collection, doc, getDocs, addDoc, updateDoc, deleteDoc, query, where, orderBy, limit, Timestamp, getDoc } from 'firebase/firestore';
+import { collection, doc, getDocs, addDoc, updateDoc, deleteDoc, query, where, orderBy, limit, Timestamp, getDoc, DocumentSnapshot } from 'firebase/firestore'; // Added DocumentSnapshot
 
 export interface AdditionalService {
   sitePlan: boolean;
@@ -24,6 +24,33 @@ export interface Order {
 }
 
 const COLLECTION_NAME = 'orders';
+
+// Helper function to map Firestore document to Order object
+const mapDocToOrder = (docSnap: DocumentSnapshot): Order => {
+  const data = docSnap.data(); 
+  if (!data) {
+    // This case should ideally not happen if the document exists
+    // Handle it by throwing an error or returning a default/empty Order object
+    // For now, let's throw an error, or you can adjust as per your error handling strategy
+    throw new Error(`No data found for document ID: ${docSnap.id}`);
+  }
+  return {
+    id: docSnap.id,
+    userId: data.userId || '',
+    name: data.name || '',
+    email: data.email || '',
+    phone: data.phone || '',
+    projectType: data.projectType || '',
+    squareFootage: data.squareFootage || 0,
+    additionalServices: data.additionalServices || { sitePlan: false, materialList: false, render3D: false },
+    totalPrice: data.totalPrice || 0,
+    status: (data.status as Order['status']) || 'pending',
+    paymentStatus: (data.paymentStatus as Order['paymentStatus']) || 'pending',
+    // Ensure createdAt and updatedAt are converted from Firestore Timestamp to Date
+    createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : (data.createdAt ? new Date(data.createdAt) : new Date()),
+    updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : (data.updatedAt ? new Date(data.updatedAt) : new Date())
+  };
+};
 
 export const calculatePrice = (squareFootage: number, additionalServices: AdditionalService): number => {
   let basePrice = 0;
@@ -88,60 +115,34 @@ export const getOrders = async (): Promise<Order[]> => {
     const ordersCollection = collection(db, COLLECTION_NAME);
     const q = query(ordersCollection, orderBy('createdAt', 'desc'));
     const snapshot = await getDocs(q);
-    
-    return snapshot.docs.map(doc => {
-      const data = doc.data();
-      
-      return {
-        id: doc.id,
-        userId: data.userId || '',
-        name: data.name || '',
-        email: data.email || '',
-        phone: data.phone || '',
-        projectType: data.projectType || '',
-        squareFootage: data.squareFootage || 0,
-        additionalServices: data.additionalServices || { sitePlan: false, materialList: false, render3D: false },
-        totalPrice: data.totalPrice || 0,
-        status: (data.status as Order['status']) || 'pending',
-        paymentStatus: (data.paymentStatus as Order['paymentStatus']) || 'pending',
-        createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date(data.createdAt),
-        updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : new Date(data.updatedAt)
-      };
-    });
+    return snapshot.docs.map(mapDocToOrder);
   } catch (error) {
     console.error('Error fetching orders:', error);
     throw error;
   }
 };
 
-export const getUserOrders = async (userId: string): Promise<Order[]> => {
+export const getUserOrders = async (userId: string, userEmail: string | null): Promise<Order[]> => {
   try {
     const ordersCollection = collection(db, COLLECTION_NAME);
-    const q = query(ordersCollection, where('userId', '==', userId), orderBy('createdAt', 'desc'));
-    const snapshot = await getDocs(q);
     
-    return snapshot.docs.map(doc => {
-      const data = doc.data();
-      
-      return {
-        id: doc.id,
-        userId: data.userId || '',
-        name: data.name || '',
-        email: data.email || '',
-        phone: data.phone || '',
-        projectType: data.projectType || '',
-        squareFootage: data.squareFootage || 0,
-        additionalServices: data.additionalServices || { sitePlan: false, materialList: false, render3D: false },
-        totalPrice: data.totalPrice || 0,
-        status: (data.status as Order['status']) || 'pending',
-        paymentStatus: (data.paymentStatus as Order['paymentStatus']) || 'pending',
-        createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date(data.createdAt),
-        updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : new Date(data.updatedAt)
-      };
-    });
+    // 1. Primary Query by userId
+    const q1 = query(ordersCollection, where('userId', '==', userId), orderBy('createdAt', 'desc'));
+    const snapshot1 = await getDocs(q1);
+    let orders = snapshot1.docs.map(mapDocToOrder);
+
+    // 2. Secondary Query by email, if no orders by userId and email is provided
+    if (orders.length === 0 && userEmail && userEmail.trim() !== '') {
+      console.log(`No orders found for userId ${userId}. Querying by email ${userEmail}...`);
+      const q2 = query(ordersCollection, where('email', '==', userEmail), orderBy('createdAt', 'desc'));
+      const snapshot2 = await getDocs(q2);
+      orders = snapshot2.docs.map(mapDocToOrder);
+    }
+    
+    return orders;
   } catch (error) {
     console.error('Error fetching user orders:', error);
-    throw error;
+    throw error; // Re-throw the error to be handled by the caller
   }
 };
 
@@ -153,24 +154,7 @@ export const getOrderById = async (orderId: string): Promise<Order | null> => {
     if (!snapshot.exists()) {
       return null;
     }
-    
-    const data = snapshot.data();
-    
-    return {
-      id: snapshot.id,
-      userId: data.userId || '',
-      name: data.name || '',
-      email: data.email || '',
-      phone: data.phone || '',
-      projectType: data.projectType || '',
-      squareFootage: data.squareFootage || 0,
-      additionalServices: data.additionalServices || { sitePlan: false, materialList: false, render3D: false },
-      totalPrice: data.totalPrice || 0,
-      status: (data.status as Order['status']) || 'pending',
-      paymentStatus: (data.paymentStatus as Order['paymentStatus']) || 'pending',
-      createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date(data.createdAt),
-      updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : new Date(data.updatedAt)
-    };
+    return mapDocToOrder(snapshot);
   } catch (error) {
     console.error('Error fetching order by ID:', error);
     throw error;
@@ -208,26 +192,7 @@ export const getRecentOrders = async (count: number = 5): Promise<Order[]> => {
     const ordersCollection = collection(db, COLLECTION_NAME);
     const q = query(ordersCollection, orderBy('createdAt', 'desc'), limit(count));
     const snapshot = await getDocs(q);
-    
-    return snapshot.docs.map(doc => {
-      const data = doc.data();
-      
-      return {
-        id: doc.id,
-        userId: data.userId || '',
-        name: data.name || '',
-        email: data.email || '',
-        phone: data.phone || '',
-        projectType: data.projectType || '',
-        squareFootage: data.squareFootage || 0,
-        additionalServices: data.additionalServices || { sitePlan: false, materialList: false, render3D: false },
-        totalPrice: data.totalPrice || 0,
-        status: (data.status as Order['status']) || 'pending',
-        paymentStatus: (data.paymentStatus as Order['paymentStatus']) || 'pending',
-        createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date(data.createdAt),
-        updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : new Date(data.updatedAt)
-      };
-    });
+    return snapshot.docs.map(mapDocToOrder);
   } catch (error) {
     console.error('Error fetching recent orders:', error);
     throw error;
