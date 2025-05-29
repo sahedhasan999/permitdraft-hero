@@ -1,8 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { Search, Filter, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
+import { Search, Filter, ChevronDown, ChevronUp, Loader2, Download, FileText, Image, FileIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getOrders, updateOrderStatus, Order } from '@/services/orderService';
+
+const getFileIconComponent = (fileName: string) => {
+  const extension = fileName.split('.').pop()?.toLowerCase();
+  switch (extension) {
+    case 'pdf':
+      return <FileText className="h-4 w-4 mr-2 text-red-500" />;
+    case 'jpg':
+    case 'jpeg':
+    case 'png':
+    case 'gif':
+      return <Image className="h-4 w-4 mr-2 text-blue-500" />;
+    default:
+      return <FileIcon className="h-4 w-4 mr-2 text-gray-500" />;
+  }
+};
 
 const Orders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -307,7 +322,7 @@ const Orders = () => {
       {/* Order Detail Modal */}
       {isDetailOpen && selectedOrder && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-card rounded-lg shadow-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+          <div className="bg-card rounded-lg shadow-lg max-w-4xl w-full max-h-[80vh] overflow-y-auto">
             <div className="px-6 py-4 border-b border-border flex justify-between items-center">
               <h2 className="text-xl font-semibold">Order Details: {selectedOrder.id.substring(0, 8).toUpperCase()}</h2>
               <button
@@ -354,6 +369,43 @@ const Orders = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Additional Details Section */}
+              {selectedOrder.additionalDetails && (
+                <div className="border-t border-border pt-4">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-2">Additional Details</h3>
+                  <div className="bg-muted/50 p-4 rounded-md whitespace-pre-wrap text-sm">
+                    {selectedOrder.additionalDetails}
+                  </div>
+                </div>
+              )}
+
+              {/* Attachments Section */}
+              {selectedOrder.attachments && selectedOrder.attachments.length > 0 && (
+                <div className="border-t border-border pt-4">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-2">Project Documents</h3>
+                  <div className="space-y-2">
+                    {selectedOrder.attachments.map((attachment, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 border border-border rounded-md bg-muted/30">
+                        <div className="flex items-center">
+                          {getFileIconComponent(attachment.name)}
+                          <div className="ml-2">
+                            <p className="text-sm font-medium">{attachment.name}</p>
+                            <p className="text-xs text-muted-foreground">{attachment.size}</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => window.open(attachment.url, '_blank')}
+                          className="flex items-center px-3 py-1 bg-primary text-primary-foreground rounded text-xs hover:bg-primary/90"
+                        >
+                          <Download className="h-3 w-3 mr-1" />
+                          Download
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               
               <div className="border-t border-border pt-4">
                 <h3 className="text-sm font-medium text-muted-foreground mb-1">Additional Services</h3>

@@ -7,6 +7,12 @@ export interface AdditionalService {
   render3D: boolean;
 }
 
+export interface Attachment {
+  name: string;
+  url: string;
+  size: string;
+}
+
 export interface Order {
   id: string;
   userId: string;
@@ -21,6 +27,8 @@ export interface Order {
   paymentStatus: 'pending' | 'paid' | 'failed';
   createdAt: Date;
   updatedAt: Date;
+  additionalDetails?: string;
+  attachments?: Attachment[];
 }
 
 const COLLECTION_NAME = 'orders';
@@ -48,7 +56,9 @@ const mapDocToOrder = (docSnap: DocumentSnapshot): Order => {
     paymentStatus: (data.paymentStatus as Order['paymentStatus']) || 'pending',
     // Ensure createdAt and updatedAt are converted from Firestore Timestamp to Date
     createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : (data.createdAt ? new Date(data.createdAt) : new Date()),
-    updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : (data.updatedAt ? new Date(data.updatedAt) : new Date())
+    updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : (data.updatedAt ? new Date(data.updatedAt) : new Date()),
+    additionalDetails: data.additionalDetails || undefined,
+    attachments: data.attachments || undefined
   };
 };
 
@@ -86,6 +96,8 @@ export const createOrder = async (
     projectType: string;
     squareFootage: number;
     additionalServices: AdditionalService;
+    additionalDetails?: string;
+    attachments?: Attachment[];
   }
 ): Promise<string> => {
   try {
@@ -216,4 +228,4 @@ export const validateOrderData = (data: Partial<Order>): { isValid: boolean; err
     isValid: errors.length === 0,
     errors
   };
-}; 
+};
