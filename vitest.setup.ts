@@ -1,6 +1,12 @@
-// import { expect } from 'vitest'; // Not strictly necessary to import expect here
-import '@testing-library/jest-dom'; // This line should be enough to extend expect
 
-// If the above doesn't work, or for more specific control, you might do:
-// import * as matchers from '@testing-library/jest-dom/matchers';
-// expect.extend(matchers);
+import { expect, afterEach } from 'vitest';
+import { cleanup } from '@testing-library/react';
+import * as matchers from '@testing-library/jest-dom/matchers';
+
+// extends Vitest's expect method with methods from react-testing-library
+expect.extend(matchers);
+
+// runs a cleanup after each test case (e.g. clearing jsdom)
+afterEach(() => {
+  cleanup();
+});

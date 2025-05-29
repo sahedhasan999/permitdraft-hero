@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import SignUpDialog from './SignUpDialog'; // Adjust path as necessary
+import SignUpDialog from './SignUpDialog';
 import { useFirebase } from '@/contexts/FirebaseContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -11,11 +12,11 @@ const mockNavigate = vi.fn();
 vi.mock('@/contexts/FirebaseContext');
 vi.mock('@/contexts/AuthContext');
 vi.mock('@/hooks/use-toast');
-vi.mock('react-router-dom', async (importOriginal) => {
-  const actual = await importOriginal();
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
   return {
-    ...actual, // Import and retain default behavior
-    useNavigate: () => mockNavigate, // Ensure useNavigate always returns our mock
+    ...actual,
+    useNavigate: () => mockNavigate,
   };
 });
 
@@ -24,7 +25,6 @@ const mockSignInWithApple = vi.fn();
 const mockSignUp = vi.fn();
 const mockLogin = vi.fn();
 const mockToast = vi.fn();
-// mockNavigate is defined above the mocks
 
 const mockOnOpenChange = vi.fn();
 
@@ -32,29 +32,27 @@ describe('SignUpDialog', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    (useFirebase as vi.Mock).mockReturnValue({
+    (useFirebase as any).mockReturnValue({
       signUp: mockSignUp,
       signInWithGoogle: mockSignInWithGoogle,
       signInWithApple: mockSignInWithApple,
     });
 
-    (useAuth as vi.Mock).mockReturnValue({
+    (useAuth as any).mockReturnValue({
       login: mockLogin,
-      currentUser: null, // Or a mock user if needed for other tests
+      currentUser: null,
     });
 
-    (useToast as vi.Mock).mockReturnValue({
+    (useToast as any).mockReturnValue({
       toast: mockToast,
     });
-    // No longer need to re-assign useNavigate here
   });
 
   const renderComponent = (props = {}) => {
     const defaultProps = {
       open: true,
       onOpenChange: mockOnOpenChange,
-      onSuccess: vi.fn(), // Mock onSuccess if its behavior needs to be tested
-      // prefillData can be added if needed for specific tests
+      onSuccess: vi.fn(),
     };
     return render(
       <SignUpDialog {...defaultProps} {...props} />
