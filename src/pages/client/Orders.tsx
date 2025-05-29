@@ -66,7 +66,9 @@ const ClientOrders = () => {
       }
 
       try {
-        const userOrders = await getUserOrders(currentUser.uid);
+        // Pass both UID and email to getUserOrders.
+        // The email can be null if not available, getUserOrders is designed to handle this.
+        const userOrders = await getUserOrders(currentUser.uid, currentUser.email || null);
         setOrders(userOrders);
       } catch (error) {
         toast({
