@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useFirebase } from '@/contexts/FirebaseContext';
@@ -5,7 +6,7 @@ import { getUserOrders, Order } from '@/services/orderService';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Download, FileText, Image, FileIcon, Eye, Upload, Trash2 } from 'lucide-react';
+import { Download, FileText, Image, FileIcon, Eye, Upload, Trash2, Loader2, X } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 
