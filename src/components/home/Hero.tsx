@@ -20,13 +20,16 @@ const Hero = () => {
 
   useEffect(() => {
     const unsubscribe = subscribeToCarouselImages((allImages) => {
+      console.log('[Hero.tsx] All images from Firebase:', allImages); // Added log
       const activeImgs = allImages.filter(img => img.active);
+      console.log('[Hero.tsx] Active images after filtering:', activeImgs); // Added log
       setActiveFirebaseImages(activeImgs);
     });
     return () => unsubscribe(); // Cleanup subscription
   }, []);
 
   // Filter out inactive images and extract just the image URLs
+  console.log('[Hero.tsx] activeFirebaseImages state before mapping to URLs:', activeFirebaseImages); // Added log
   const heroImageUrls = activeFirebaseImages.map(img => img.src);
 
   useEffect(() => {
