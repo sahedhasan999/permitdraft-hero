@@ -1,13 +1,13 @@
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { ArrowRight, Heart, Clock, ArrowUpRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AnimatedButton } from "../ui/AnimatedButton";
 import { GlassMorphismCard } from "../ui/GlassMorphismCard";
 import { ImageCarousel } from "../ui/ImageCarousel";
 import { scrollParallax } from "@/utils/transitions";
+import { useContent } from "@/contexts/ContentContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { CarouselImage, subscribeToCarouselImages } from '@/services/carouselService';
 
 const Hero = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -16,21 +16,14 @@ const Hero = () => {
   const decorativeElement3 = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [activeFirebaseImages, setActiveFirebaseImages] = useState<CarouselImage[]>([]);
-
-  useEffect(() => {
-    const unsubscribe = subscribeToCarouselImages((allImages) => {
-      console.log('[Hero.tsx] All images from Firebase:', allImages); // Added log
-      const activeImgs = allImages.filter(img => img.active);
-      console.log('[Hero.tsx] Active images after filtering:', activeImgs); // Added log
-      setActiveFirebaseImages(activeImgs);
-    });
-    return () => unsubscribe(); // Cleanup subscription
-  }, []);
-
+  
+  // Get carousel images from content context
+  const { carouselImages } = useContent();
+  
   // Filter out inactive images and extract just the image URLs
-  console.log('[Hero.tsx] activeFirebaseImages state before mapping to URLs:', activeFirebaseImages); // Added log
-  const heroImageUrls = activeFirebaseImages.map(img => img.src);
+  const heroImages = carouselImages
+    .filter(img => img.active)
+    .map(img => img.src);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -151,9 +144,9 @@ const Hero = () => {
                 variant="interactive"
               >
                 <div className="relative aspect-[4/3] w-full">
-                  {heroImageUrls.length > 0 ? (
+                  {heroImages.length > 0 ? (
                     <ImageCarousel 
-                      images={heroImageUrls}
+                      images={heroImages} 
                       interval={6000}
                       className="aspect-[4/3] w-full" 
                     />

@@ -35,7 +35,6 @@ export const CarouselManager: React.FC = () => {
   };
 
   const handleAddImage = async () => {
-    console.log('[CarouselManager] handleAddImage called. newImage data:', newImage); // Added log
     if (!newImage.src || !newImage.alt || !newImage.caption) {
       toast.error('Please fill in all required fields');
       return;
@@ -59,8 +58,7 @@ export const CarouselManager: React.FC = () => {
       });
       loadImages();
     } catch (error) {
-      console.error('[CarouselManager] Error in handleAddImage:', error); // Log the full error
-      toast.error('Failed to add image. Check console for details.'); // Modified toast
+      toast.error('Failed to add image');
     }
   };
 

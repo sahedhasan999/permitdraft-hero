@@ -51,18 +51,12 @@ export const getActiveCarouselImages = async (): Promise<CarouselImage[]> => {
 };
 
 export const addCarouselImage = async (image: Omit<CarouselImage, 'id'>): Promise<string> => {
-  console.log('[carouselService] Attempting to add image:', image); // Log input
   try {
     const docRef = await addDoc(collection(db, COLLECTION_NAME), image);
-    console.log('[carouselService] Image added successfully with ID:', docRef.id);
     return docRef.id;
   } catch (error) {
-    console.error('[carouselService] Error adding carousel image to Firestore:', error); // Log the full error
-    // Check for specific error types if possible, e.g., permission denied
-    if (error.code === 'permission-denied') {
-      console.error('[carouselService] Firestore permission denied. Check security rules.');
-    }
-    throw error; // Re-throw the error so the caller can handle it
+    console.error('Error adding carousel image:', error);
+    throw error;
   }
 };
 
