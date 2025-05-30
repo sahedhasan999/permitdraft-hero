@@ -3,7 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { useFirebase } from '@/contexts/FirebaseContext';
-import { calculatePrice, createOrder, AdditionalService } from '@/services/orderService';
+import { calculatePrice, createOrder, AdditionalService, Attachment } from '@/services/orderService';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { DocumentUpload } from '@/components/order/DocumentUpload';
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -42,6 +43,32 @@ interface FormData {
   additionalServices: AdditionalService;
   files: File[];
 }
+
+// Helper to format file size
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+const uploadFileAndGetAttachment = async (file: File, userId: string): Promise<Attachment> => {
+  if (!userId) throw new Error("User ID is required for uploading files.");
+  const storage = getStorage();
+  // Create a unique path, e.g., orders/{userId}/{timestamp}_{originalFilename}
+  const filePath = `orders/${userId}/${Date.now()}_${file.name}`;
+  const storageRef = ref(storage, filePath);
+
+  await uploadBytes(storageRef, file);
+  const downloadURL = await getDownloadURL(storageRef);
+
+  return {
+    name: file.name,
+    url: downloadURL,
+    size: formatFileSize(file.size),
+  };
+};
 
 const Order = () => {
   const [formData, setFormData] = useState<FormData>({
@@ -145,15 +172,33 @@ const Order = () => {
     setIsSubmitting(true);
     try {
       if (!currentUser) {
-        // Redirect to login or registration first
-        // Store form data in session for later retrieval
         sessionStorage.setItem('pendingOrder', JSON.stringify(formData));
         toast({
           title: "Login Required",
           description: "Please log in or create an account to proceed with your order."
         });
         navigate('/login', { state: { redirectAfterLogin: '/order' } });
+        setIsSubmitting(false); // Ensure this is set if returning early
         return;
+      }
+
+      let uploadedAttachments: Attachment[] = [];
+      if (formData.files.length > 0) {
+        try {
+          // Use Promise.all to upload all files concurrently
+          uploadedAttachments = await Promise.all(
+            formData.files.map(file => uploadFileAndGetAttachment(file, currentUser.uid))
+          );
+        } catch (uploadError) {
+          console.error("Error uploading files:", uploadError);
+          toast({
+            title: "File Upload Error",
+            description: "There was an error uploading one or more files. Please try again.",
+            variant: "destructive",
+          });
+          setIsSubmitting(false);
+          return; // Stop order creation if file upload fails
+        }
       }
 
       // Create order in Firestore
@@ -163,7 +208,9 @@ const Order = () => {
         phone: formData.phone,
         projectType: formData.projectType,
         squareFootage: sqft,
-        additionalServices: formData.additionalServices
+        additionalServices: formData.additionalServices,
+        additionalDetails: formData.additionalDetails,
+        attachments: uploadedAttachments // Pass the array of uploaded file details
       });
       
       toast({
