@@ -1,0 +1,29 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Carousel Images: Public read, Authenticated write
+    match /carousel_images/{imageId} {
+      allow read: if true;
+      allow write: if request.auth != null; // Assumes admins are authenticated
+    }
+
+    // Orders: User can manage their own, Admins can manage all (example)
+    // This is a placeholder, actual Order rules might be different or more granular
+    match /orders/{orderId} {
+      allow read, write: if request.auth != null && (request.auth.uid == resource.data.userId || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true);
+      // Example admin check: assumes an 'isAdmin' field on a user document.
+      // More robust admin checks might use custom claims.
+    }
+
+    // Users collection (example, adjust as needed)
+    match /users/{userId} {
+       allow read, write: if request.auth != null && request.auth.uid == userId;
+       // Admins might have broader access, e.g. allow read: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    // Default deny for any other paths not explicitly matched
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,29 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // General public read access for all files by default
+    // This is often desired for web-accessible assets.
+    // Restrict further if specific paths need to be private.
+    match /{allPaths=**} {
+      allow read;
+    }
+
+    // Allow authenticated users to write to their own order attachments
+    // Path: orders/{userId}/{timestamp}_{originalFilename} (from Order.tsx upload logic)
+    match /orders/{userId}/{fileName} {
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Allow authenticated users to write lead attachments
+    // Path: Clients_Attachement/{leadId}/{timestamp}-{originalFilename} (from leadsService.ts)
+    // Assuming leadId is not directly the userId, this rule is a bit more open if any auth user can create a lead.
+    // If leads are user-specific, one might add: && request.auth.uid == resource.data.userId (if lead metadata is in storage custom metadata)
+    // Or rely on Firestore rules to control who can create leads with which IDs.
+    // For simplicity now, allow any authenticated user to write here, as lead creation is often open.
+    match /Clients_Attachement/{leadId}/{fileName} {
+      allow write: if request.auth != null;
+    }
+
+    // Add other specific paths and their rules as needed above this line.
+  }
+}
