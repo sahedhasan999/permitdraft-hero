@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { MessageSquare } from 'lucide-react';
-import { ConversationType } from '@/types/communications';
+import { ConversationType, FileAttachment } from '@/types/communications';
 import MessageItem from './MessageItem';
 import SuggestedReplyEditor from './SuggestedReplyEditor';
 
@@ -15,7 +15,7 @@ interface ConversationDetailProps {
   setSuggestedReply: (reply: string) => void;
   replyText: string;
   setReplyText: (text: string) => void;
-  handleSendReply: () => void;
+  handleSendReply: (attachments?: FileAttachment[]) => void;
 }
 
 const ConversationDetail: React.FC<ConversationDetailProps> = ({
@@ -54,7 +54,6 @@ const ConversationDetail: React.FC<ConversationDetailProps> = ({
     });
     
     setConversations(updatedConversations);
-    // Find the updated conversation and pass it to setSelectedConversation
     const updatedConversation = updatedConversations.find(c => c.id === selectedConversation.id);
     if (updatedConversation) {
       setSelectedConversation(updatedConversation);

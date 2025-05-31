@@ -1,15 +1,17 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, Edit, Check, X } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
+import { Send, Lightbulb } from 'lucide-react';
+import { FileAttachment } from '@/types/communications';
+import FileAttachmentComponent from './FileAttachment';
 
 interface SuggestedReplyEditorProps {
   suggestedReply: string;
   setSuggestedReply: (reply: string) => void;
   replyText: string;
   setReplyText: (text: string) => void;
-  handleSendReply: () => void;
+  handleSendReply: (attachments?: FileAttachment[]) => void;
 }
 
 const SuggestedReplyEditor: React.FC<SuggestedReplyEditorProps> = ({
@@ -19,88 +21,58 @@ const SuggestedReplyEditor: React.FC<SuggestedReplyEditorProps> = ({
   setReplyText,
   handleSendReply,
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
+  const [attachments, setAttachments] = React.useState<FileAttachment[]>([]);
 
-  const handleResetReply = () => {
-    setReplyText('');
-    setSuggestedReply("I'd be happy to provide more information about our services. Could you please provide some specific details about your project requirements?");
+  const handleSend = () => {
+    handleSendReply(attachments);
+    setAttachments([]);
   };
 
-  const handleUseReply = () => {
+  const useSuggestedReply = () => {
     setReplyText(suggestedReply);
-    setSuggestedReply('');
   };
 
   return (
-    <>
-      <div className="mb-4">
-        <div className="flex items-center justify-between mb-2">
-          <h4 className="text-sm font-medium text-muted-foreground">AI Suggested Reply</h4>
-          <div className="flex gap-2">
-            {isEditing ? (
-              <>
-                <Button size="sm" variant="ghost" onClick={() => setIsEditing(false)}>
-                  <X className="h-4 w-4" />
-                </Button>
-                <Button size="sm" variant="ghost" onClick={() => setIsEditing(false)}>
-                  <Check className="h-4 w-4" />
-                </Button>
-              </>
-            ) : (
-              <Button size="sm" variant="ghost" onClick={() => setIsEditing(true)}>
-                <Edit className="h-4 w-4" />
-              </Button>
-            )}
+    <div className="space-y-3">
+      <div className="bg-blue-50 p-3 rounded-lg border">
+        <div className="flex items-start space-x-2 mb-2">
+          <Lightbulb className="h-4 w-4 text-blue-600 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-blue-900">AI Suggested Reply</p>
+            <p className="text-sm text-blue-700 mt-1">{suggestedReply}</p>
           </div>
         </div>
-        
-        {isEditing ? (
-          <Textarea
-            className="text-sm"
-            rows={3}
-            value={suggestedReply}
-            onChange={(e) => setSuggestedReply(e.target.value)}
-          />
-        ) : (
-          <div 
-            className="p-3 bg-primary/5 rounded-md text-sm"
-            onClick={() => setIsEditing(true)}
-          >
-            {suggestedReply}
-          </div>
-        )}
-        
-        <div className="mt-2 flex justify-end space-x-2">
-          <Button 
-            size="sm" 
-            variant="outline"
-            onClick={handleResetReply}
-          >
-            Reset
-          </Button>
-          <Button 
-            size="sm"
-            onClick={handleUseReply}
-          >
-            Use This Reply
-          </Button>
-        </div>
-      </div>
-      
-      <div className="flex items-start space-x-2">
-        <Textarea
-          className="flex-grow text-sm"
-          rows={3}
-          placeholder="Type your custom reply here..."
-          value={replyText}
-          onChange={(e) => setReplyText(e.target.value)}
-        />
-        <Button className="flex-shrink-0" onClick={handleSendReply}>
-          <MessageSquare className="h-4 w-4 mr-2" />
-          Send
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={useSuggestedReply}
+          className="w-full"
+        >
+          Use This Reply
         </Button>
       </div>
-    </>
+
+      <div className="space-y-2">
+        <Textarea
+          placeholder="Type your message here..."
+          value={replyText}
+          onChange={(e) => setReplyText(e.target.value)}
+          className="min-h-[100px]"
+        />
+        
+        <FileAttachmentComponent
+          attachments={attachments}
+          onAttachmentsChange={setAttachments}
+        />
+        
+        <div className="flex justify-end">
+          <Button onClick={handleSend} disabled={!replyText.trim() && attachments.length === 0}>
+            <Send className="h-4 w-4 mr-1" />
+            Send Reply
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 };
 

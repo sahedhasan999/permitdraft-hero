@@ -1,46 +1,105 @@
 
 import { ConversationType } from '@/types/communications';
 
-// Mock data for AI communications
 export const mockCommunications: ConversationType[] = [
   {
-    id: 'comm-001',
-    customer: 'John Doe',
+    id: 'conv-1',
+    customer: 'John Smith',
     email: 'john@example.com',
-    subject: 'Deck Design Questions',
+    subject: 'Project Timeline Question',
     messages: [
-      { id: 'm1', sender: 'customer', content: 'I have some questions about your deck design services.', timestamp: '2023-09-10T10:30:00Z' },
-      { id: 'm2', sender: 'ai', content: 'Thank you for your interest! I\'d be happy to help with any questions about our deck design services. What would you like to know?', timestamp: '2023-09-10T10:32:00Z' },
-      { id: 'm3', sender: 'customer', content: 'What materials do you typically use for decks?', timestamp: '2023-09-10T10:35:00Z' },
-      { id: 'm4', sender: 'ai', content: 'We offer a variety of materials including pressure-treated lumber, cedar, composite, and PVC. Each has its own benefits in terms of cost, maintenance, and appearance. Would you like more details on any specific material?', timestamp: '2023-09-10T10:37:00Z' },
+      {
+        id: 'msg-1',
+        sender: 'customer',
+        content: 'Hi, I wanted to check on the timeline for my deck project. Can you provide an update?',
+        timestamp: '2024-01-15T10:30:00Z',
+        attachments: [
+          {
+            name: 'deck_reference.jpg',
+            url: '#',
+            size: '2.3 MB',
+            type: 'image/jpeg'
+          }
+        ]
+      },
+      {
+        id: 'msg-2',
+        sender: 'ai',
+        content: 'Thank you for reaching out! Your deck project is currently in the design phase. We expect to have the initial plans ready by next Friday.',
+        timestamp: '2024-01-15T11:00:00Z',
+        attachments: []
+      },
+      {
+        id: 'msg-3',
+        sender: 'customer',
+        content: 'That sounds great! I have some additional requirements I\'d like to discuss.',
+        timestamp: '2024-01-15T11:15:00Z',
+        attachments: [
+          {
+            name: 'additional_requirements.pdf',
+            url: '#',
+            size: '1.1 MB',
+            type: 'application/pdf'
+          }
+        ]
+      }
     ],
     status: 'active',
-    lastUpdated: '2023-09-10T10:37:00Z'
+    lastUpdated: '2024-01-15T11:15:00Z'
   },
   {
-    id: 'comm-002',
-    customer: 'Jane Smith',
-    email: 'jane@example.com',
-    subject: 'Pricing for Patio Installation',
+    id: 'conv-2',
+    customer: 'Sarah Johnson',
+    email: 'sarah@example.com',
+    subject: 'Permit Status Inquiry',
     messages: [
-      { id: 'm1', sender: 'customer', content: 'Can you provide pricing for a 12x15 patio installation?', timestamp: '2023-09-09T14:20:00Z' },
-      { id: 'm2', sender: 'ai', content: 'Thanks for your inquiry about a 12x15 patio installation. The cost typically ranges from $3,600 to $7,200 depending on the materials and complexity. Would you like a more detailed quote based on specific materials?', timestamp: '2023-09-09T14:25:00Z' },
+      {
+        id: 'msg-4',
+        sender: 'customer',
+        content: 'Hello, I was wondering about the status of my building permit application.',
+        timestamp: '2024-01-14T14:20:00Z',
+        attachments: []
+      },
+      {
+        id: 'msg-5',
+        sender: 'ai',
+        content: 'Hi Sarah! Your permit application was submitted last week and is currently under review by the city planning department. The typical review time is 2-3 weeks.',
+        timestamp: '2024-01-14T14:45:00Z',
+        attachments: [
+          {
+            name: 'permit_application_status.pdf',
+            url: '#',
+            size: '156 KB',
+            type: 'application/pdf'
+          }
+        ]
+      }
     ],
     status: 'active',
-    lastUpdated: '2023-09-09T14:25:00Z'
+    lastUpdated: '2024-01-14T14:45:00Z'
   },
   {
-    id: 'comm-003',
-    customer: 'Robert Johnson',
-    email: 'robert@example.com',
-    subject: 'Home Addition Timeline',
+    id: 'conv-3',
+    customer: 'Mike Davis',
+    email: 'mike@example.com',
+    subject: 'Design Revision Request',
     messages: [
-      { id: 'm1', sender: 'customer', content: 'What\'s the typical timeline for a small home addition?', timestamp: '2023-09-08T09:15:00Z' },
-      { id: 'm2', sender: 'ai', content: 'For a small home addition, the timeline typically ranges from 6-12 weeks from design approval to completion. This includes permitting (2-3 weeks), construction (3-8 weeks), and finishing work (1-2 weeks). Would you like more details about a specific type of addition?', timestamp: '2023-09-08T09:20:00Z' },
-      { id: 'm3', sender: 'customer', content: 'Yes, I\'m interested in adding a bedroom and bathroom.', timestamp: '2023-09-08T09:25:00Z' },
-      { id: 'm4', sender: 'ai', content: 'A bedroom and bathroom addition typically falls on the longer end of the timeline, around 8-12 weeks due to the plumbing work involved. The permitting process might also take a bit longer. Would you like to schedule a consultation to discuss your specific requirements?', timestamp: '2023-09-08T09:30:00Z' },
+      {
+        id: 'msg-6',
+        sender: 'customer',
+        content: 'I reviewed the plans and would like to make some changes to the kitchen layout.',
+        timestamp: '2024-01-13T09:00:00Z',
+        attachments: []
+      },
+      {
+        id: 'msg-7',
+        sender: 'ai',
+        content: 'Of course! Design revisions are part of our service. Could you please specify what changes you\'d like to make?',
+        timestamp: '2024-01-13T09:30:00Z',
+        attachments: []
+      }
     ],
     status: 'closed',
-    lastUpdated: '2023-09-08T09:30:00Z'
-  },
+    lastUpdated: '2024-01-13T09:30:00Z'
+  }
 ];

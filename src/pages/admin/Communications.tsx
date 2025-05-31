@@ -4,7 +4,7 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import ConversationList from '@/components/admin/communications/ConversationList';
 import ConversationDetail from '@/components/admin/communications/ConversationDetail';
 import { mockCommunications } from '@/data/mockCommunications';
-import { ConversationType } from '@/types/communications';
+import { ConversationType, FileAttachment } from '@/types/communications';
 
 const Communications = () => {
   const [conversations, setConversations] = useState<ConversationType[]>(mockCommunications);
@@ -13,9 +13,9 @@ const Communications = () => {
   const [replyText, setReplyText] = useState('');
   const [suggestedReply, setSuggestedReply] = useState("I'd be happy to provide more information about our services. Could you please provide some specific details about your project requirements?");
 
-  const handleSendReply = () => {
+  const handleSendReply = (attachments?: FileAttachment[]) => {
     const textToSend = replyText || suggestedReply;
-    if (!textToSend.trim()) return;
+    if (!textToSend.trim() && (!attachments || attachments.length === 0)) return;
 
     const updatedConversations = conversations.map(conv => {
       if (conv.id === selectedConversation.id) {
@@ -23,7 +23,8 @@ const Communications = () => {
           id: `m${conv.messages.length + 1}`,
           sender: 'ai' as const,
           content: textToSend,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          attachments: attachments || []
         };
         return {
           ...conv,
