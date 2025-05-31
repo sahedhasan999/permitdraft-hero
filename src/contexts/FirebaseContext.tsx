@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { 
   User, 
@@ -10,8 +11,8 @@ import {
   setPersistence,
   signInWithPopup
 } from 'firebase/auth';
-import { auth, googleProvider, appleProvider, db } from '@/config/firebase'; // Added db
-import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore'; // Added Firestore functions
+import { auth, googleProvider, appleProvider, db } from '@/config/firebase';
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 
 interface FirebaseContextType {
   currentUser: User | null;
@@ -33,7 +34,11 @@ export const useFirebase = () => {
   return context;
 };
 
-export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+interface FirebaseProviderProps {
+  children: React.ReactNode;
+}
+
+export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -50,28 +55,25 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const userData = {
           uid: user.uid,
           email: user.email,
-          displayName: user.displayName || '', // Ensure displayName is not null
-          photoURL: user.photoURL || '',     // Ensure photoURL is not null
+          displayName: user.displayName || '',
+          photoURL: user.photoURL || '',
           createdAt: serverTimestamp(),
           lastLoginAt: serverTimestamp(),
-          // You can add any other app-specific default fields here
-          // e.g., roles: ['user'], preferences: {}, etc.
         };
         await setDoc(userRef, userData);
         console.log("Created user profile in Firestore for:", user.uid);
       } else {
         // Existing user, update last login and potentially other details
         await setDoc(userRef, {
-          displayName: user.displayName || docSnap.data()?.displayName || '', // Keep existing if new is null
-          photoURL: user.photoURL || docSnap.data()?.photoURL || '',         // Keep existing if new is null
-          email: user.email, // Email can also be updated if changed in provider
+          displayName: user.displayName || docSnap.data()?.displayName || '',
+          photoURL: user.photoURL || docSnap.data()?.photoURL || '',
+          email: user.email,
           lastLoginAt: serverTimestamp()
         }, { merge: true });
         console.log("Updated user profile in Firestore for:", user.uid);
       }
     } catch (error) {
       console.error("Error managing user profile in Firestore:", error);
-      // Potentially re-throw or handle as needed for the app's error strategy
     }
   };
 
@@ -112,7 +114,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     try {
       const userCredential = await signInWithPopup(auth, googleProvider);
       if (userCredential.user) {
-        await manageUserProfile(userCredential.user); // Manage profile in Firestore
+        await manageUserProfile(userCredential.user);
         console.log("Google sign-in successful, user profile managed:", userCredential.user);
       }
       return userCredential.user;
@@ -126,7 +128,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     try {
       const userCredential = await signInWithPopup(auth, appleProvider);
       if (userCredential.user) {
-        await manageUserProfile(userCredential.user); // Manage profile in Firestore
+        await manageUserProfile(userCredential.user);
         console.log("Apple sign-in successful, user profile managed:", userCredential.user);
       }
       return userCredential.user;
