@@ -5,15 +5,18 @@ import { MessageSquare } from 'lucide-react';
 import { ConversationType, MessageType } from '@/types/communications';
 import MessageItem from '@/components/admin/communications/MessageItem';
 import MessageComposer from './MessageComposer';
+import NewConversationDialog from './NewConversationDialog';
 
 interface ActiveConversationViewProps {
   activeConversation: ConversationType | null;
   activeMessages: MessageType[];
+  hasConversations: boolean;
 }
 
 const ActiveConversationView: React.FC<ActiveConversationViewProps> = ({
   activeConversation,
-  activeMessages
+  activeMessages,
+  hasConversations
 }) => {
   if (!activeConversation) {
     return (
@@ -22,7 +25,10 @@ const ActiveConversationView: React.FC<ActiveConversationViewProps> = ({
           <div className="text-center">
             <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">No Conversation Selected</h3>
-            <p className="text-muted-foreground">Select a conversation or start a new one</p>
+            <p className="text-muted-foreground mb-4">
+              {hasConversations ? 'Select a conversation or start a new one' : 'Start your first conversation with our support team'}
+            </p>
+            <NewConversationDialog />
           </div>
         </CardContent>
       </Card>

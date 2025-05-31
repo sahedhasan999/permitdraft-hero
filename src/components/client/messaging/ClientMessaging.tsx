@@ -69,6 +69,7 @@ const ClientMessaging: React.FC = () => {
         <ActiveConversationView
           activeConversation={activeConversation}
           activeMessages={activeMessages}
+          hasConversations={conversations.length > 0}
         />
       </div>
     </div>

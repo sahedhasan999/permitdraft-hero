@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { Search, Filter, ChevronDown, ChevronUp, Loader2, Download, FileText, Image, FileIcon } from 'lucide-react';
+import { Search, Filter, ChevronDown, ChevronUp, Loader2, Download, FileText, Image, FileIcon, MessageSquare } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getOrders, updateOrderStatus, Order } from '@/services/orderService';
+import { useNavigate } from 'react-router-dom';
 
 const getFileIconComponent = (fileName: string) => {
   const extension = fileName.split('.').pop()?.toLowerCase();
@@ -29,6 +30,7 @@ const Orders = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchOrders();
@@ -148,6 +150,18 @@ const Orders = () => {
 
   const closeOrderDetail = () => {
     setIsDetailOpen(false);
+  };
+
+  const handleMessageCustomer = () => {
+    if (selectedOrder) {
+      // Store order info in sessionStorage for the communications page
+      sessionStorage.setItem('customerToMessage', JSON.stringify({
+        email: selectedOrder.email,
+        name: selectedOrder.name,
+        orderId: selectedOrder.id
+      }));
+      navigate('/admin/communications');
+    }
   };
 
   // Format date for display
@@ -477,7 +491,14 @@ const Orders = () => {
               </div>
             </div>
             
-            <div className="px-6 py-4 border-t border-border flex justify-end">
+            <div className="px-6 py-4 border-t border-border flex justify-between">
+              <button
+                onClick={handleMessageCustomer}
+                className="flex items-center px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 text-sm font-medium"
+              >
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Message Customer
+              </button>
               <button
                 onClick={closeOrderDetail}
                 className="text-sm font-medium text-muted-foreground hover:text-foreground px-4 py-2"
