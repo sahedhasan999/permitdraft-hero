@@ -1,44 +1,42 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import ConversationList from '@/components/admin/communications/ConversationList';
 import ConversationDetail from '@/components/admin/communications/ConversationDetail';
-import { mockCommunications } from '@/data/mockCommunications';
 import { ConversationType, FileAttachment } from '@/types/communications';
+import { subscribeToAllConversations, sendMessage } from '@/services/firebaseMessagingService';
 
 const Communications = () => {
-  const [conversations, setConversations] = useState<ConversationType[]>(mockCommunications);
+  const [conversations, setConversations] = useState<ConversationType[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedConversation, setSelectedConversation] = useState<ConversationType>(conversations[0]);
+  const [selectedConversation, setSelectedConversation] = useState<ConversationType | null>(null);
   const [replyText, setReplyText] = useState('');
   const [suggestedReply, setSuggestedReply] = useState("I'd be happy to provide more information about our services. Could you please provide some specific details about your project requirements?");
 
-  const handleSendReply = (attachments?: FileAttachment[]) => {
+  useEffect(() => {
+    const unsubscribe = subscribeToAllConversations((allConversations) => {
+      setConversations(allConversations);
+      if (allConversations.length > 0 && !selectedConversation) {
+        setSelectedConversation(allConversations[0]);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleSendReply = async (attachments?: FileAttachment[]) => {
+    if (!selectedConversation) return;
+    
     const textToSend = replyText || suggestedReply;
     if (!textToSend.trim() && (!attachments || attachments.length === 0)) return;
 
-    const updatedConversations = conversations.map(conv => {
-      if (conv.id === selectedConversation.id) {
-        const newMessage = {
-          id: `m${conv.messages.length + 1}`,
-          sender: 'ai' as const,
-          content: textToSend,
-          timestamp: new Date().toISOString(),
-          attachments: attachments || []
-        };
-        return {
-          ...conv,
-          messages: [...conv.messages, newMessage],
-          lastUpdated: new Date().toISOString()
-        };
-      }
-      return conv;
-    });
-
-    setConversations(updatedConversations);
-    setSelectedConversation(updatedConversations.find(c => c.id === selectedConversation.id)!);
-    setReplyText('');
-    setSuggestedReply("Is there anything else I can help you with regarding your project?");
+    try {
+      await sendMessage(selectedConversation.id, 'admin', textToSend, attachments || []);
+      setReplyText('');
+      setSuggestedReply("Is there anything else I can help you with regarding your project?");
+    } catch (error) {
+      console.error('Error sending reply:', error);
+    }
   };
 
   return (

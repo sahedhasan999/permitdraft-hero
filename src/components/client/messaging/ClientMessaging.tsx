@@ -5,17 +5,23 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { MessageSquare, Plus, Send } from 'lucide-react';
+import { MessageSquare, Plus, Send, Upload, X, Paperclip } from 'lucide-react';
 import { ConversationType, MessageType, FileAttachment } from '@/types/communications';
-import { getClientConversations, sendClientMessage, createClientConversation } from '@/services/clientMessagingService';
+import { 
+  subscribeToUserConversations, 
+  sendMessage, 
+  createConversation,
+  uploadFile,
+  subscribeToConversationMessages 
+} from '@/services/firebaseMessagingService';
 import { useFirebase } from '@/contexts/FirebaseContext';
 import { useToast } from '@/hooks/use-toast';
 import MessageItem from '@/components/admin/communications/MessageItem';
-import FileAttachmentComponent from '@/components/admin/communications/FileAttachment';
 
 const ClientMessaging: React.FC = () => {
   const [conversations, setConversations] = useState<ConversationType[]>([]);
   const [activeConversation, setActiveConversation] = useState<ConversationType | null>(null);
+  const [activeMessages, setActiveMessages] = useState<MessageType[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [attachments, setAttachments] = useState<FileAttachment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -24,54 +30,81 @@ const ClientMessaging: React.FC = () => {
   const [newConversationSubject, setNewConversationSubject] = useState('');
   const [newConversationMessage, setNewConversationMessage] = useState('');
   const [newConversationAttachments, setNewConversationAttachments] = useState<FileAttachment[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
   const { currentUser } = useFirebase();
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchConversations = async () => {
-      if (!currentUser) return;
-      
-      try {
-        const userConversations = await getClientConversations(currentUser.uid);
-        setConversations(userConversations);
-        if (userConversations.length > 0) {
-          setActiveConversation(userConversations[0]);
-        }
-      } catch (error) {
-        console.error('Error fetching conversations:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load conversations.",
-          variant: "destructive"
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    if (!currentUser) return;
 
-    fetchConversations();
-  }, [currentUser, toast]);
+    const unsubscribe = subscribeToUserConversations(currentUser.uid, (userConversations) => {
+      setConversations(userConversations);
+      if (userConversations.length > 0 && !activeConversation) {
+        setActiveConversation(userConversations[0]);
+      }
+      setIsLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (!activeConversation) return;
+
+    const unsubscribe = subscribeToConversationMessages(activeConversation.id, (messages) => {
+      setActiveMessages(messages);
+    });
+
+    return () => unsubscribe();
+  }, [activeConversation]);
+
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>, isNewConversation = false) => {
+    const files = event.target.files;
+    if (!files || !activeConversation) return;
+
+    setIsUploading(true);
+    
+    try {
+      const newAttachments: FileAttachment[] = [];
+      
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const attachment = await uploadFile(file, activeConversation.id);
+        newAttachments.push(attachment);
+      }
+      
+      if (isNewConversation) {
+        setNewConversationAttachments([...newConversationAttachments, ...newAttachments]);
+      } else {
+        setAttachments([...attachments, ...newAttachments]);
+      }
+    } catch (error) {
+      console.error('Error uploading files:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload files.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploading(false);
+      event.target.value = '';
+    }
+  };
+
+  const removeAttachment = (index: number, isNewConversation = false) => {
+    if (isNewConversation) {
+      setNewConversationAttachments(newConversationAttachments.filter((_, i) => i !== index));
+    } else {
+      setAttachments(attachments.filter((_, i) => i !== index));
+    }
+  };
 
   const handleSendMessage = async () => {
-    if (!activeConversation || (!newMessage.trim() && attachments.length === 0)) return;
+    if (!activeConversation || !currentUser || (!newMessage.trim() && attachments.length === 0)) return;
 
     setIsSending(true);
     try {
-      const message = await sendClientMessage(activeConversation.id, newMessage, attachments);
-      
-      const updatedConversations = conversations.map(conv => {
-        if (conv.id === activeConversation.id) {
-          return {
-            ...conv,
-            messages: [...conv.messages, message],
-            lastUpdated: new Date().toISOString()
-          };
-        }
-        return conv;
-      });
-
-      setConversations(updatedConversations);
-      setActiveConversation(updatedConversations.find(c => c.id === activeConversation.id)!);
+      await sendMessage(activeConversation.id, 'customer', newMessage, attachments);
       setNewMessage('');
       setAttachments([]);
 
@@ -96,16 +129,15 @@ const ClientMessaging: React.FC = () => {
 
     setIsCreatingConversation(true);
     try {
-      const conversation = await createClientConversation(
-        newConversationSubject,
-        newConversationMessage,
+      await createConversation(
+        currentUser.uid,
         currentUser.email || '',
         currentUser.displayName || 'Anonymous',
+        newConversationSubject,
+        newConversationMessage,
         newConversationAttachments
       );
 
-      setConversations([conversation, ...conversations]);
-      setActiveConversation(conversation);
       setNewConversationSubject('');
       setNewConversationMessage('');
       setNewConversationAttachments([]);
@@ -175,10 +207,52 @@ const ClientMessaging: React.FC = () => {
                       className="min-h-[100px]"
                     />
                   </div>
-                  <FileAttachmentComponent
-                    attachments={newConversationAttachments}
-                    onAttachmentsChange={setNewConversationAttachments}
-                  />
+                  
+                  {/* File attachments for new conversation */}
+                  <div className="space-y-2">
+                    {newConversationAttachments.length > 0 && (
+                      <div className="space-y-1">
+                        {newConversationAttachments.map((attachment, index) => (
+                          <div key={index} className="flex items-center justify-between bg-muted p-2 rounded text-sm">
+                            <div className="flex items-center space-x-2">
+                              <Paperclip className="h-3 w-3" />
+                              <span className="truncate">{attachment.name}</span>
+                              <span className="text-muted-foreground">({attachment.size})</span>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeAttachment(index, true)}
+                              className="h-6 w-6 p-0"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        type="file"
+                        multiple
+                        onChange={(e) => handleFileSelect(e, true)}
+                        className="hidden"
+                        id="new-file-upload"
+                        accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => document.getElementById('new-file-upload')?.click()}
+                        disabled={isUploading}
+                      >
+                        <Upload className="h-4 w-4 mr-1" />
+                        {isUploading ? 'Uploading...' : 'Attach Files'}
+                      </Button>
+                    </div>
+                  </div>
+                  
                   <Button 
                     onClick={handleCreateConversation}
                     disabled={isCreatingConversation || !newConversationSubject.trim() || !newConversationMessage.trim()}
@@ -230,7 +304,7 @@ const ClientMessaging: React.FC = () => {
             </CardHeader>
             <CardContent className="flex-1 flex flex-col p-4">
               <div className="flex-1 overflow-y-auto space-y-4 mb-4">
-                {activeConversation.messages.map((message) => (
+                {activeMessages.map((message) => (
                   <MessageItem key={message.id} message={message} />
                 ))}
               </div>
@@ -243,10 +317,50 @@ const ClientMessaging: React.FC = () => {
                   className="min-h-[80px]"
                 />
                 
-                <FileAttachmentComponent
-                  attachments={attachments}
-                  onAttachmentsChange={setAttachments}
-                />
+                {/* File attachments */}
+                <div className="space-y-2">
+                  {attachments.length > 0 && (
+                    <div className="space-y-1">
+                      {attachments.map((attachment, index) => (
+                        <div key={index} className="flex items-center justify-between bg-muted p-2 rounded text-sm">
+                          <div className="flex items-center space-x-2">
+                            <Paperclip className="h-3 w-3" />
+                            <span className="truncate">{attachment.name}</span>
+                            <span className="text-muted-foreground">({attachment.size})</span>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeAttachment(index)}
+                            className="h-6 w-6 p-0"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center space-x-2">
+                    <Input
+                      type="file"
+                      multiple
+                      onChange={handleFileSelect}
+                      className="hidden"
+                      id="file-upload"
+                      accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => document.getElementById('file-upload')?.click()}
+                      disabled={isUploading}
+                    >
+                      <Upload className="h-4 w-4 mr-1" />
+                      {isUploading ? 'Uploading...' : 'Attach Files'}
+                    </Button>
+                  </div>
+                </div>
                 
                 <div className="flex justify-end">
                   <Button 
