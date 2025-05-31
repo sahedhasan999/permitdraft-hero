@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CarouselImage, getCarouselImages, addCarouselImage, updateCarouselImage, deleteCarouselImage, updateCarouselImageOrder } from '@/services/carouselService';
+import { CarouselImage, getCarouselImages, addCarouselImage, updateCarouselImage, deleteCarouselImage, updateCarouselImageOrder, subscribeToCarouselImages } from '@/services/carouselService';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,7 +20,13 @@ export const CarouselManager: React.FC = () => {
   });
 
   useEffect(() => {
-    loadImages();
+    // Subscribe to real-time updates from Firebase
+    const unsubscribe = subscribeToCarouselImages((fetchedImages) => {
+      setImages(fetchedImages);
+      setIsLoading(false);
+    });
+
+    return unsubscribe;
   }, []);
 
   const loadImages = async () => {
@@ -202,4 +208,4 @@ export const CarouselManager: React.FC = () => {
       </DragDropContext>
     </div>
   );
-}; 
+};

@@ -1,13 +1,12 @@
-
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ArrowRight, Heart, Clock, ArrowUpRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AnimatedButton } from "../ui/AnimatedButton";
 import { GlassMorphismCard } from "../ui/GlassMorphismCard";
 import { ImageCarousel } from "../ui/ImageCarousel";
 import { scrollParallax } from "@/utils/transitions";
-import { useContent } from "@/contexts/ContentContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { subscribeToCarouselImages, CarouselImage } from "@/services/carouselService";
 
 const Hero = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -17,8 +16,17 @@ const Hero = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   
-  // Get carousel images from content context
-  const { carouselImages } = useContent();
+  // Get carousel images from Firebase instead of context
+  const [carouselImages, setCarouselImages] = useState<CarouselImage[]>([]);
+  
+  useEffect(() => {
+    // Subscribe to real-time updates from Firebase
+    const unsubscribe = subscribeToCarouselImages((images) => {
+      setCarouselImages(images);
+    });
+
+    return unsubscribe;
+  }, []);
   
   // Filter out inactive images and extract just the image URLs
   const heroImages = carouselImages

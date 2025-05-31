@@ -1,5 +1,6 @@
+
 import { db } from '@/config/firebase';
-import { collection, doc, getDocs, addDoc, updateDoc, deleteDoc, query, where, orderBy, limit, Timestamp, getDoc, DocumentSnapshot } from 'firebase/firestore'; // Added DocumentSnapshot
+import { collection, doc, getDocs, addDoc, updateDoc, deleteDoc, query, where, orderBy, limit, Timestamp, getDoc, DocumentSnapshot } from 'firebase/firestore';
 
 export interface AdditionalService {
   sitePlan: boolean;
@@ -106,12 +107,19 @@ export const createOrder = async (
     
     const orderToAdd = {
       userId,
-      ...orderData,
+      name: orderData.name,
+      email: orderData.email,
+      phone: orderData.phone,
+      projectType: orderData.projectType,
+      squareFootage: orderData.squareFootage,
+      additionalServices: orderData.additionalServices,
       totalPrice,
       status: 'pending' as const,
       paymentStatus: 'pending' as const,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
+      additionalDetails: orderData.additionalDetails || '',
+      attachments: orderData.attachments || []
     };
 
     const docRef = await addDoc(collection(db, COLLECTION_NAME), orderToAdd);

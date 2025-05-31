@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { useFirebase } from '@/contexts/FirebaseContext';
-import { calculatePrice, createOrder, AdditionalService } from '@/services/orderService';
+import { calculatePrice, createOrder, AdditionalService, Attachment } from '@/services/orderService';
 import { DocumentUpload } from '@/components/order/DocumentUpload';
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -156,14 +156,23 @@ const Order = () => {
         return;
       }
 
-      // Create order in Firestore
+      // Convert files to attachments format
+      const attachments: Attachment[] = formData.files.map(file => ({
+        name: file.name,
+        url: URL.createObjectURL(file), // In real app, you'd upload to storage first
+        size: `${(file.size / 1024 / 1024).toFixed(2)} MB`
+      }));
+
+      // Create order in Firestore with all data
       await createOrder(currentUser.uid, {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
         projectType: formData.projectType,
         squareFootage: sqft,
-        additionalServices: formData.additionalServices
+        additionalServices: formData.additionalServices,
+        additionalDetails: formData.additionalDetails,
+        attachments: attachments
       });
       
       toast({
