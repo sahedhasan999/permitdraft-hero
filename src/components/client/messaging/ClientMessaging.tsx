@@ -18,31 +18,61 @@ const ClientMessaging: React.FC = () => {
   const { currentUser } = useFirebase();
 
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      console.log('No current user, skipping conversations subscription');
+      setIsLoading(false);
+      return;
+    }
 
+    console.log('Setting up conversations subscription for user:', currentUser.uid);
+    
     const unsubscribe = subscribeToUserConversations(currentUser.uid, (userConversations) => {
+      console.log('Received conversations update:', userConversations);
       setConversations(userConversations);
+      
+      // Auto-select first conversation if none selected and conversations exist
       if (userConversations.length > 0 && !activeConversation) {
+        console.log('Auto-selecting first conversation:', userConversations[0].id);
         setActiveConversation(userConversations[0]);
       }
+      
       setIsLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      console.log('Cleaning up conversations subscription');
+      unsubscribe();
+    };
   }, [currentUser]);
 
   useEffect(() => {
-    if (!activeConversation) return;
+    if (!activeConversation) {
+      console.log('No active conversation, clearing messages');
+      setActiveMessages([]);
+      return;
+    }
 
+    console.log('Setting up messages subscription for conversation:', activeConversation.id);
+    
     const unsubscribe = subscribeToConversationMessages(activeConversation.id, (messages) => {
+      console.log('Received messages update for conversation', activeConversation.id, ':', messages);
       setActiveMessages(messages);
     });
 
-    return () => unsubscribe();
+    return () => {
+      console.log('Cleaning up messages subscription for conversation:', activeConversation.id);
+      unsubscribe();
+    };
   }, [activeConversation]);
 
   const handleConversationSelect = (conversation: ConversationType) => {
+    console.log('Selecting conversation:', conversation.id);
     setActiveConversation(conversation);
+  };
+
+  const handleNewConversationCreated = () => {
+    console.log('New conversation created, refreshing list');
+    // The subscription will automatically update the conversations list
   };
 
   if (isLoading) {
@@ -50,6 +80,16 @@ const ClientMessaging: React.FC = () => {
       <Card>
         <CardContent className="p-6">
           <div className="text-center">Loading messages...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!currentUser) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center">Please log in to access messages.</div>
         </CardContent>
       </Card>
     );

@@ -19,24 +19,26 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
     document.body.removeChild(link);
   };
 
+  const isFromCustomer = message.sender === 'customer';
+
   return (
     <div 
       className={`mb-4 max-w-3xl ${
-        message.sender === 'customer' ? 'ml-0 mr-auto' : 'ml-auto mr-0'
+        isFromCustomer ? 'ml-0 mr-auto' : 'ml-auto mr-0'
       }`}
     >
-      <div className={`p-3 rounded-lg ${
-        message.sender === 'customer' 
-          ? 'bg-muted text-foreground' 
-          : 'bg-primary/10 text-foreground'
+      <div className={`p-4 rounded-lg ${
+        isFromCustomer 
+          ? 'bg-blue-50 border border-blue-200 text-blue-900' 
+          : 'bg-green-50 border border-green-200 text-green-900'
       }`}>
-        <p>{message.content}</p>
+        <p className="text-sm">{message.content}</p>
         
         {message.attachments && message.attachments.length > 0 && (
           <div className="mt-3 space-y-2">
             <p className="text-xs font-medium text-muted-foreground">Attachments:</p>
             {message.attachments.map((attachment, index) => (
-              <div key={index} className="flex items-center justify-between bg-background/50 p-2 rounded text-sm">
+              <div key={index} className="flex items-center justify-between bg-white/70 p-2 rounded text-sm">
                 <div className="flex items-center space-x-2">
                   <Paperclip className="h-3 w-3" />
                   <span className="truncate">{attachment.name}</span>
@@ -56,10 +58,12 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
         )}
       </div>
       <div className={`text-xs text-muted-foreground mt-1 ${
-        message.sender === 'customer' ? 'text-left' : 'text-right'
+        isFromCustomer ? 'text-left' : 'text-right'
       }`}>
-        {message.sender === 'customer' ? 'Customer' : 'AI'} • {
-          new Date(message.timestamp).toLocaleTimeString([], {
+        {isFromCustomer ? 'Customer' : 'Support Team'} • {
+          new Date(message.timestamp).toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
             hour: '2-digit',
             minute: '2-digit'
           })

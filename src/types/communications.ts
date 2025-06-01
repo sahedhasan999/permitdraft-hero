@@ -8,7 +8,7 @@ export type FileAttachment = {
 
 export type MessageType = {
   id: string;
-  sender: 'customer' | 'ai';
+  sender: 'customer' | 'admin';
   content: string;
   timestamp: string;
   attachments?: FileAttachment[];
