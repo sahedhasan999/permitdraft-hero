@@ -38,7 +38,7 @@ const ConversationsList: React.FC<ConversationsListProps> = ({
             {conversations.map(conversation => {
               const lastMessage = conversation.messages && conversation.messages.length > 0 
                 ? conversation.messages[conversation.messages.length - 1]?.content || 'No messages yet'
-                : 'Loading messages...';
+                : 'Start a conversation...';
               
               return (
                 <Button
@@ -51,6 +51,9 @@ const ConversationsList: React.FC<ConversationsListProps> = ({
                     <div className="font-medium truncate">{conversation.subject}</div>
                     <div className="text-sm text-muted-foreground truncate">
                       {lastMessage}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {new Date(conversation.lastUpdated).toLocaleDateString()}
                     </div>
                   </div>
                 </Button>

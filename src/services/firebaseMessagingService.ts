@@ -9,8 +9,9 @@ import {
   updateDoc,
   serverTimestamp,
   where,
-  getDocs,
-  writeBatch
+  writeBatch,
+  getDoc,
+  getDocs
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '@/config/firebase';
@@ -28,40 +29,43 @@ export const createConversation = async (
   initialMessage: string,
   attachments: FileAttachment[] = []
 ): Promise<string> => {
-  const batch = writeBatch(db);
-  
-  // Create conversation document
-  const conversationDocRef = doc(conversationsRef);
-  const conversationData = {
-    userId,
-    userEmail,
-    userName,
-    subject,
-    status: 'active',
-    createdAt: serverTimestamp(),
-    lastUpdated: serverTimestamp(),
-    messageCount: 1
-  };
+  try {
+    const batch = writeBatch(db);
+    
+    // Create conversation document
+    const conversationDocRef = doc(conversationsRef);
+    const conversationData = {
+      userId: userId === 'admin-created' ? `admin-${Date.now()}` : userId,
+      userEmail,
+      userName,
+      subject,
+      status: 'active',
+      createdAt: serverTimestamp(),
+      lastUpdated: serverTimestamp(),
+      lastMessage: initialMessage,
+      messageCount: 1
+    };
 
-  // If userId is 'admin-created', this is an admin starting a conversation
-  if (userId === 'admin-created') {
-    conversationData.userId = `admin-${Date.now()}`; // Generate a unique ID for admin-created conversations
+    batch.set(conversationDocRef, conversationData);
+
+    // Create initial message document
+    const messageDocRef = doc(messagesRef);
+    batch.set(messageDocRef, {
+      conversationId: conversationDocRef.id,
+      sender: userId === 'admin-created' ? 'admin' : 'customer',
+      content: initialMessage,
+      attachments,
+      timestamp: serverTimestamp(),
+      read: false
+    });
+
+    await batch.commit();
+    console.log('Conversation created successfully:', conversationDocRef.id);
+    return conversationDocRef.id;
+  } catch (error) {
+    console.error('Error creating conversation:', error);
+    throw error;
   }
-
-  batch.set(conversationDocRef, conversationData);
-
-  // Create initial message document
-  const messageDocRef = doc(messagesRef);
-  batch.set(messageDocRef, {
-    conversationId: conversationDocRef.id,
-    sender: userId === 'admin-created' ? 'admin' : 'customer',
-    content: initialMessage,
-    attachments,
-    timestamp: serverTimestamp()
-  });
-
-  await batch.commit();
-  return conversationDocRef.id;
 };
 
 export const sendMessage = async (
@@ -70,45 +74,56 @@ export const sendMessage = async (
   content: string,
   attachments: FileAttachment[] = []
 ): Promise<void> => {
-  const batch = writeBatch(db);
-  
-  // Add message
-  const messageDocRef = doc(messagesRef);
-  batch.set(messageDocRef, {
-    conversationId,
-    sender,
-    content,
-    attachments,
-    timestamp: serverTimestamp()
-  });
+  try {
+    const batch = writeBatch(db);
+    
+    // Add message
+    const messageDocRef = doc(messagesRef);
+    batch.set(messageDocRef, {
+      conversationId,
+      sender,
+      content,
+      attachments,
+      timestamp: serverTimestamp(),
+      read: false
+    });
 
-  // Update conversation last updated and increment message count
-  const conversationDocRef = doc(db, 'conversations', conversationId);
-  batch.update(conversationDocRef, {
-    lastUpdated: serverTimestamp()
-  });
+    // Update conversation last updated and last message
+    const conversationDocRef = doc(db, 'conversations', conversationId);
+    batch.update(conversationDocRef, {
+      lastUpdated: serverTimestamp(),
+      lastMessage: content
+    });
 
-  await batch.commit();
+    await batch.commit();
+    console.log('Message sent successfully');
+  } catch (error) {
+    console.error('Error sending message:', error);
+    throw error;
+  }
 };
 
 export const uploadFile = async (file: File, conversationId: string): Promise<FileAttachment> => {
-  const timestamp = Date.now();
-  const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-  const fileRef = ref(storage, `chat-attachments/${conversationId}/${timestamp}-${sanitizedFileName}`);
-  
-  console.log('Uploading file:', file.name, 'to path:', fileRef.fullPath);
-  
-  const snapshot = await uploadBytes(fileRef, file);
-  const downloadURL = await getDownloadURL(snapshot.ref);
+  try {
+    const timestamp = Date.now();
+    const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+    const fileRef = ref(storage, `chat-attachments/${conversationId}/${timestamp}-${sanitizedFileName}`);
+    
+    console.log('Uploading file:', file.name);
+    
+    const snapshot = await uploadBytes(fileRef, file);
+    const downloadURL = await getDownloadURL(snapshot.ref);
 
-  console.log('File uploaded successfully, URL:', downloadURL);
-
-  return {
-    name: file.name,
-    url: downloadURL,
-    size: formatFileSize(file.size),
-    type: file.type
-  };
+    return {
+      name: file.name,
+      url: downloadURL,
+      size: formatFileSize(file.size),
+      type: file.type
+    };
+  } catch (error) {
+    console.error('Error uploading file:', error);
+    throw error;
+  }
 };
 
 const formatFileSize = (bytes: number): string => {
@@ -131,27 +146,49 @@ export const subscribeToUserConversations = (
     orderBy('lastUpdated', 'desc')
   );
 
-  return onSnapshot(q, (snapshot) => {
-    console.log('Conversations snapshot received, count:', snapshot.docs.length);
-    const conversations: ConversationType[] = snapshot.docs.map(doc => {
-      const data = doc.data();
-      console.log('Processing conversation:', doc.id, data);
+  return onSnapshot(q, async (snapshot) => {
+    console.log('User conversations snapshot received, count:', snapshot.docs.length);
+    
+    const conversations: ConversationType[] = [];
+    
+    for (const docSnapshot of snapshot.docs) {
+      const data = docSnapshot.data();
+      console.log('Processing user conversation:', docSnapshot.id, data);
       
-      return {
-        id: doc.id,
+      // Get the latest messages for this conversation
+      const messagesQuery = query(
+        messagesRef,
+        where('conversationId', '==', docSnapshot.id),
+        orderBy('timestamp', 'desc')
+      );
+      
+      const messagesSnapshot = await getDocs(messagesQuery);
+      const messages: MessageType[] = messagesSnapshot.docs.map(msgDoc => {
+        const msgData = msgDoc.data();
+        return {
+          id: msgDoc.id,
+          sender: msgData.sender,
+          content: msgData.content,
+          timestamp: msgData.timestamp?.toDate?.()?.toISOString() || new Date().toISOString(),
+          attachments: msgData.attachments || []
+        };
+      }).reverse(); // Reverse to get chronological order
+      
+      conversations.push({
+        id: docSnapshot.id,
         customer: data.userName,
         email: data.userEmail,
         subject: data.subject,
-        messages: [], // Messages will be loaded separately
+        messages,
         status: data.status,
         lastUpdated: data.lastUpdated?.toDate?.()?.toISOString() || new Date().toISOString()
-      };
-    });
+      });
+    }
     
-    console.log('Final conversations array:', conversations);
+    console.log('Final user conversations array:', conversations);
     callback(conversations);
   }, (error) => {
-    console.error('Error in conversations subscription:', error);
+    console.error('Error in user conversations subscription:', error);
   });
 };
 
@@ -195,22 +232,44 @@ export const subscribeToAllConversations = (
   
   const q = query(conversationsRef, orderBy('lastUpdated', 'desc'));
 
-  return onSnapshot(q, (snapshot) => {
+  return onSnapshot(q, async (snapshot) => {
     console.log('All conversations snapshot received, count:', snapshot.docs.length);
-    const conversations: ConversationType[] = snapshot.docs.map(doc => {
-      const data = doc.data();
-      console.log('Processing admin conversation:', doc.id, data);
+    
+    const conversations: ConversationType[] = [];
+    
+    for (const docSnapshot of snapshot.docs) {
+      const data = docSnapshot.data();
+      console.log('Processing admin conversation:', docSnapshot.id, data);
       
-      return {
-        id: doc.id,
+      // Get the latest messages for this conversation
+      const messagesQuery = query(
+        messagesRef,
+        where('conversationId', '==', docSnapshot.id),
+        orderBy('timestamp', 'desc')
+      );
+      
+      const messagesSnapshot = await getDocs(messagesQuery);
+      const messages: MessageType[] = messagesSnapshot.docs.map(msgDoc => {
+        const msgData = msgDoc.data();
+        return {
+          id: msgDoc.id,
+          sender: msgData.sender,
+          content: msgData.content,
+          timestamp: msgData.timestamp?.toDate?.()?.toISOString() || new Date().toISOString(),
+          attachments: msgData.attachments || []
+        };
+      }).reverse(); // Reverse to get chronological order
+      
+      conversations.push({
+        id: docSnapshot.id,
         customer: data.userName,
         email: data.userEmail,
         subject: data.subject,
-        messages: [], // Messages will be loaded separately
+        messages,
         status: data.status,
         lastUpdated: data.lastUpdated?.toDate?.()?.toISOString() || new Date().toISOString()
-      };
-    });
+      });
+    }
     
     console.log('Final admin conversations array:', conversations);
     callback(conversations);

@@ -2,10 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ConversationType, MessageType } from '@/types/communications';
-import { 
-  subscribeToUserConversations, 
-  subscribeToConversationMessages 
-} from '@/services/firebaseMessagingService';
+import { subscribeToUserConversations } from '@/services/firebaseMessagingService';
 import { useFirebase } from '@/contexts/FirebaseContext';
 import ConversationsList from './ConversationsList';
 import ActiveConversationView from './ActiveConversationView';
@@ -13,7 +10,6 @@ import ActiveConversationView from './ActiveConversationView';
 const ClientMessaging: React.FC = () => {
   const [conversations, setConversations] = useState<ConversationType[]>([]);
   const [activeConversation, setActiveConversation] = useState<ConversationType | null>(null);
-  const [activeMessages, setActiveMessages] = useState<MessageType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { currentUser } = useFirebase();
 
@@ -27,19 +23,15 @@ const ClientMessaging: React.FC = () => {
     console.log('Setting up conversations subscription for user:', currentUser.uid);
     
     const unsubscribe = subscribeToUserConversations(currentUser.uid, (userConversations) => {
-      console.log('Received conversations update:', userConversations);
+      console.log('Client received conversations update:', userConversations);
       setConversations(userConversations);
       
-      // If we have an active conversation, update it with the latest data
+      // Update active conversation if it exists in the new data
       if (activeConversation) {
         const updatedActiveConversation = userConversations.find(conv => conv.id === activeConversation.id);
         if (updatedActiveConversation) {
           setActiveConversation(updatedActiveConversation);
         }
-      } else if (userConversations.length > 0) {
-        // Auto-select first conversation if none selected and conversations exist
-        console.log('Auto-selecting first conversation:', userConversations[0].id);
-        setActiveConversation(userConversations[0]);
       }
       
       setIsLoading(false);
@@ -50,26 +42,6 @@ const ClientMessaging: React.FC = () => {
       unsubscribe();
     };
   }, [currentUser]);
-
-  useEffect(() => {
-    if (!activeConversation) {
-      console.log('No active conversation, clearing messages');
-      setActiveMessages([]);
-      return;
-    }
-
-    console.log('Setting up messages subscription for conversation:', activeConversation.id);
-    
-    const unsubscribe = subscribeToConversationMessages(activeConversation.id, (messages) => {
-      console.log('Received messages update for conversation', activeConversation.id, ':', messages);
-      setActiveMessages(messages);
-    });
-
-    return () => {
-      console.log('Cleaning up messages subscription for conversation:', activeConversation.id);
-      unsubscribe();
-    };
-  }, [activeConversation]);
 
   const handleConversationSelect = (conversation: ConversationType) => {
     console.log('Selecting conversation:', conversation.id);
@@ -116,7 +88,7 @@ const ClientMessaging: React.FC = () => {
       <div className="lg:col-span-3">
         <ActiveConversationView
           activeConversation={activeConversation}
-          activeMessages={activeMessages}
+          activeMessages={activeConversation?.messages || []}
           hasConversations={conversations.length > 0}
           onNewConversationCreated={handleNewConversationCreated}
         />

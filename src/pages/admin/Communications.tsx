@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import ConversationList from '@/components/admin/communications/ConversationList';
 import ConversationDetail from '@/components/admin/communications/ConversationDetail';
-import { ConversationType, FileAttachment, MessageType } from '@/types/communications';
-import { subscribeToAllConversations, subscribeToConversationMessages, sendMessage, createConversation } from '@/services/firebaseMessagingService';
+import { ConversationType, FileAttachment } from '@/types/communications';
+import { subscribeToAllConversations, sendMessage, createConversation } from '@/services/firebaseMessagingService';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,7 +15,6 @@ const Communications = () => {
   const [conversations, setConversations] = useState<ConversationType[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedConversation, setSelectedConversation] = useState<ConversationType | null>(null);
-  const [selectedMessages, setSelectedMessages] = useState<MessageType[]>([]);
   const [replyText, setReplyText] = useState('');
   const [suggestedReply, setSuggestedReply] = useState("I'd be happy to provide more information about our services. Could you please provide some specific details about your project requirements?");
   const [showNewConversationDialog, setShowNewConversationDialog] = useState(false);
@@ -26,39 +25,25 @@ const Communications = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    console.log('Setting up admin conversations subscription');
     const unsubscribe = subscribeToAllConversations((allConversations) => {
       console.log('Admin received conversations:', allConversations);
       setConversations(allConversations);
-      if (allConversations.length > 0 && !selectedConversation) {
+      
+      // Update selected conversation if it exists in the new data
+      if (selectedConversation) {
+        const updatedSelectedConversation = allConversations.find(conv => conv.id === selectedConversation.id);
+        if (updatedSelectedConversation) {
+          setSelectedConversation(updatedSelectedConversation);
+        }
+      } else if (allConversations.length > 0) {
+        // Auto-select first conversation if none selected
         setSelectedConversation(allConversations[0]);
       }
     });
 
     return () => unsubscribe();
   }, []);
-
-  useEffect(() => {
-    if (!selectedConversation) {
-      setSelectedMessages([]);
-      return;
-    }
-
-    console.log('Setting up messages subscription for admin conversation:', selectedConversation.id);
-    
-    const unsubscribe = subscribeToConversationMessages(selectedConversation.id, (messages) => {
-      console.log('Admin received messages for conversation', selectedConversation.id, ':', messages);
-      setSelectedMessages(messages);
-      
-      // Update the conversation in the list with the latest messages
-      setConversations(prev => prev.map(conv => 
-        conv.id === selectedConversation.id 
-          ? { ...conv, messages }
-          : conv
-      ));
-    });
-
-    return () => unsubscribe();
-  }, [selectedConversation]);
 
   useEffect(() => {
     // Check if we need to start a conversation with a specific customer
@@ -84,8 +69,18 @@ const Communications = () => {
       await sendMessage(selectedConversation.id, 'admin', textToSend, attachments || []);
       setReplyText('');
       setSuggestedReply("Is there anything else I can help you with regarding your project?");
+      
+      toast({
+        title: "Message sent",
+        description: "Your reply has been sent successfully."
+      });
     } catch (error) {
       console.error('Error sending reply:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send reply.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -101,7 +96,7 @@ const Communications = () => {
 
     try {
       const conversationId = await createConversation(
-        'admin-created', // temporary userId for admin-created conversations
+        'admin-created',
         newConversationEmail,
         newConversationName,
         newConversationSubject,
@@ -129,12 +124,6 @@ const Communications = () => {
     }
   };
 
-  // Create a conversation object with messages for the ConversationDetail component
-  const selectedConversationWithMessages = selectedConversation ? {
-    ...selectedConversation,
-    messages: selectedMessages
-  } : null;
-
   return (
     <AdminLayout>
       <div className="h-full flex flex-col">
@@ -160,7 +149,7 @@ const Communications = () => {
           />
           
           <ConversationDetail
-            selectedConversation={selectedConversationWithMessages}
+            selectedConversation={selectedConversation}
             conversations={conversations}
             setConversations={setConversations}
             setSelectedConversation={setSelectedConversation}
