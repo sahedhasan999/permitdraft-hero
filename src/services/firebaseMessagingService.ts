@@ -1,3 +1,4 @@
+
 import { 
   collection, 
   addDoc, 
@@ -130,42 +131,22 @@ export const subscribeToUserConversations = (
     orderBy('lastUpdated', 'desc')
   );
 
-  return onSnapshot(q, async (snapshot) => {
+  return onSnapshot(q, (snapshot) => {
     console.log('Conversations snapshot received, count:', snapshot.docs.length);
-    const conversations: ConversationType[] = [];
-    
-    for (const doc of snapshot.docs) {
+    const conversations: ConversationType[] = snapshot.docs.map(doc => {
       const data = doc.data();
       console.log('Processing conversation:', doc.id, data);
       
-      // Get messages for this conversation in real-time
-      const messagesQuery = query(
-        messagesRef,
-        where('conversationId', '==', doc.id),
-        orderBy('timestamp', 'asc')
-      );
-      
-      const messagesSnapshot = await getDocs(messagesQuery);
-      const messages: MessageType[] = messagesSnapshot.docs.map(msgDoc => ({
-        id: msgDoc.id,
-        sender: msgDoc.data().sender,
-        content: msgDoc.data().content,
-        timestamp: msgDoc.data().timestamp?.toDate?.()?.toISOString() || new Date().toISOString(),
-        attachments: msgDoc.data().attachments || []
-      }));
-
-      console.log('Messages for conversation', doc.id, ':', messages.length);
-
-      conversations.push({
+      return {
         id: doc.id,
         customer: data.userName,
         email: data.userEmail,
         subject: data.subject,
-        messages,
+        messages: [], // Messages will be loaded separately
         status: data.status,
         lastUpdated: data.lastUpdated?.toDate?.()?.toISOString() || new Date().toISOString()
-      });
-    }
+      };
+    });
     
     console.log('Final conversations array:', conversations);
     callback(conversations);
@@ -214,40 +195,22 @@ export const subscribeToAllConversations = (
   
   const q = query(conversationsRef, orderBy('lastUpdated', 'desc'));
 
-  return onSnapshot(q, async (snapshot) => {
+  return onSnapshot(q, (snapshot) => {
     console.log('All conversations snapshot received, count:', snapshot.docs.length);
-    const conversations: ConversationType[] = [];
-    
-    for (const doc of snapshot.docs) {
+    const conversations: ConversationType[] = snapshot.docs.map(doc => {
       const data = doc.data();
       console.log('Processing admin conversation:', doc.id, data);
       
-      // Get messages for this conversation
-      const messagesQuery = query(
-        messagesRef,
-        where('conversationId', '==', doc.id),
-        orderBy('timestamp', 'asc')
-      );
-      
-      const messagesSnapshot = await getDocs(messagesQuery);
-      const messages: MessageType[] = messagesSnapshot.docs.map(msgDoc => ({
-        id: msgDoc.id,
-        sender: msgDoc.data().sender,
-        content: msgDoc.data().content,
-        timestamp: msgDoc.data().timestamp?.toDate?.()?.toISOString() || new Date().toISOString(),
-        attachments: msgDoc.data().attachments || []
-      }));
-
-      conversations.push({
+      return {
         id: doc.id,
         customer: data.userName,
         email: data.userEmail,
         subject: data.subject,
-        messages,
+        messages: [], // Messages will be loaded separately
         status: data.status,
         lastUpdated: data.lastUpdated?.toDate?.()?.toISOString() || new Date().toISOString()
-      });
-    }
+      };
+    });
     
     console.log('Final admin conversations array:', conversations);
     callback(conversations);

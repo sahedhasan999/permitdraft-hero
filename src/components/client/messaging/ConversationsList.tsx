@@ -35,21 +35,27 @@ const ConversationsList: React.FC<ConversationsListProps> = ({
           </div>
         ) : (
           <div className="space-y-2">
-            {conversations.map(conversation => (
-              <Button
-                key={conversation.id}
-                variant={activeConversation?.id === conversation.id ? "secondary" : "ghost"}
-                className="w-full justify-start text-left h-auto p-3"
-                onClick={() => onConversationSelect(conversation)}
-              >
-                <div className="w-full">
-                  <div className="font-medium truncate">{conversation.subject}</div>
-                  <div className="text-sm text-muted-foreground truncate">
-                    {conversation.messages[conversation.messages.length - 1]?.content}
+            {conversations.map(conversation => {
+              const lastMessage = conversation.messages && conversation.messages.length > 0 
+                ? conversation.messages[conversation.messages.length - 1]?.content || 'No messages yet'
+                : 'Loading messages...';
+              
+              return (
+                <Button
+                  key={conversation.id}
+                  variant={activeConversation?.id === conversation.id ? "secondary" : "ghost"}
+                  className="w-full justify-start text-left h-auto p-3"
+                  onClick={() => onConversationSelect(conversation)}
+                >
+                  <div className="w-full">
+                    <div className="font-medium truncate">{conversation.subject}</div>
+                    <div className="text-sm text-muted-foreground truncate">
+                      {lastMessage}
+                    </div>
                   </div>
-                </div>
-              </Button>
-            ))}
+                </Button>
+              );
+            })}
           </div>
         )}
       </CardContent>
