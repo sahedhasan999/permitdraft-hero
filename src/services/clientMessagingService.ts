@@ -20,7 +20,7 @@ const mockClientConversations: ConversationType[] = [
       },
       {
         id: 'msg-2',
-        sender: 'ai',
+        sender: 'admin',
         content: 'Hello! Your project is currently in the design phase. We expect to complete it by next week.',
         timestamp: '2024-01-01T10:30:00Z',
         attachments: []

@@ -24,7 +24,7 @@ export const mockCommunications: ConversationType[] = [
       },
       {
         id: 'msg-2',
-        sender: 'ai',
+        sender: 'admin',
         content: 'Thank you for reaching out! Your deck project is currently in the design phase. We expect to have the initial plans ready by next Friday.',
         timestamp: '2024-01-15T11:00:00Z',
         attachments: []
@@ -62,7 +62,7 @@ export const mockCommunications: ConversationType[] = [
       },
       {
         id: 'msg-5',
-        sender: 'ai',
+        sender: 'admin',
         content: 'Hi Sarah! Your permit application was submitted last week and is currently under review by the city planning department. The typical review time is 2-3 weeks.',
         timestamp: '2024-01-14T14:45:00Z',
         attachments: [
@@ -93,7 +93,7 @@ export const mockCommunications: ConversationType[] = [
       },
       {
         id: 'msg-7',
-        sender: 'ai',
+        sender: 'admin',
         content: 'Of course! Design revisions are part of our service. Could you please specify what changes you\'d like to make?',
         timestamp: '2024-01-13T09:30:00Z',
         attachments: []
