@@ -11,7 +11,8 @@ import {
   where,
   writeBatch,
   getDoc,
-  getDocs
+  getDocs,
+  increment
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '@/config/firebase';
@@ -27,7 +28,7 @@ export const createConversation = async (
   userName: string,
   subject: string,
   initialMessage: string,
-  attachments: FileAttachment[] = []
+  pendingFiles: File[] = [] // Changed from attachments: FileAttachment[]
 ): Promise<string> => {
   try {
     const batch = writeBatch(db);
@@ -54,13 +55,35 @@ export const createConversation = async (
       conversationId: conversationDocRef.id,
       sender: userId === 'admin-created' ? 'admin' : 'customer',
       content: initialMessage,
-      attachments,
+      attachments: [], // Initially empty, will be updated later
       timestamp: serverTimestamp(),
       read: false
     });
 
     await batch.commit();
-    console.log('Conversation created successfully:', conversationDocRef.id);
+    console.log('Conversation and initial message (without attachments) created successfully:', conversationDocRef.id);
+
+    // Upload files and update message with attachments
+    if (pendingFiles.length > 0) {
+      const uploadedAttachments: FileAttachment[] = [];
+      for (const file of pendingFiles) {
+        try {
+          const attachment = await uploadFile(file, conversationDocRef.id);
+          uploadedAttachments.push(attachment);
+        } catch (uploadError) {
+          console.error('Error uploading an attachment during conversation creation:', uploadError);
+          // Decide if you want to throw, or continue creating conversation without this attachment
+        }
+      }
+
+      if (uploadedAttachments.length > 0) {
+        await updateDoc(messageDocRef, {
+          attachments: uploadedAttachments
+        });
+        console.log('Initial message updated with attachments:', uploadedAttachments);
+      }
+    }
+
     return conversationDocRef.id;
   } catch (error) {
     console.error('Error creating conversation:', error);
@@ -92,7 +115,8 @@ export const sendMessage = async (
     const conversationDocRef = doc(db, 'conversations', conversationId);
     batch.update(conversationDocRef, {
       lastUpdated: serverTimestamp(),
-      lastMessage: content
+      lastMessage: content,
+      messageCount: increment(1)
     });
 
     await batch.commit();
