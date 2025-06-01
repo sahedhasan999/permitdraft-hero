@@ -5,17 +5,22 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus } from 'lucide-react';
-import { FileAttachment } from '@/types/communications';
+import { FileAttachment, ConversationType } from '@/types/communications';
 import { createConversation } from '@/services/firebaseMessagingService';
 import { useFirebase } from '@/contexts/FirebaseContext';
 import { useToast } from '@/hooks/use-toast';
 import FileUploadManager from './FileUploadManager';
 
-const NewConversationDialog: React.FC = () => {
+interface NewConversationDialogProps {
+  onConversationCreated?: (conversation: ConversationType) => void;
+}
+
+const NewConversationDialog: React.FC<NewConversationDialogProps> = ({ onConversationCreated }) => {
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const [newConversationSubject, setNewConversationSubject] = useState('');
   const [newConversationMessage, setNewConversationMessage] = useState('');
   const [newConversationAttachments, setNewConversationAttachments] = useState<FileAttachment[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
   const { currentUser } = useFirebase();
   const { toast } = useToast();
 
@@ -24,7 +29,7 @@ const NewConversationDialog: React.FC = () => {
 
     setIsCreatingConversation(true);
     try {
-      await createConversation(
+      const conversationId = await createConversation(
         currentUser.uid,
         currentUser.email || '',
         currentUser.displayName || 'Anonymous',
@@ -33,9 +38,31 @@ const NewConversationDialog: React.FC = () => {
         newConversationAttachments
       );
 
+      // Create a mock conversation object to pass to the callback
+      const newConversation: ConversationType = {
+        id: conversationId,
+        customer: currentUser.displayName || 'Anonymous',
+        email: currentUser.email || '',
+        subject: newConversationSubject,
+        messages: [{
+          id: `msg-${Date.now()}`,
+          sender: 'customer',
+          content: newConversationMessage,
+          timestamp: new Date().toISOString(),
+          attachments: newConversationAttachments
+        }],
+        status: 'active',
+        lastUpdated: new Date().toISOString()
+      };
+
+      if (onConversationCreated) {
+        onConversationCreated(newConversation);
+      }
+
       setNewConversationSubject('');
       setNewConversationMessage('');
       setNewConversationAttachments([]);
+      setIsOpen(false);
 
       toast({
         title: "Conversation created",
@@ -54,7 +81,7 @@ const NewConversationDialog: React.FC = () => {
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button size="sm">
           <Plus className="h-4 w-4 mr-1" />

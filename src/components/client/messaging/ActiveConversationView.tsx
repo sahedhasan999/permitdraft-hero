@@ -11,12 +11,14 @@ interface ActiveConversationViewProps {
   activeConversation: ConversationType | null;
   activeMessages: MessageType[];
   hasConversations: boolean;
+  onNewConversationCreated?: (conversation: ConversationType) => void;
 }
 
 const ActiveConversationView: React.FC<ActiveConversationViewProps> = ({
   activeConversation,
   activeMessages,
-  hasConversations
+  hasConversations,
+  onNewConversationCreated
 }) => {
   if (!activeConversation) {
     return (
@@ -28,7 +30,7 @@ const ActiveConversationView: React.FC<ActiveConversationViewProps> = ({
             <p className="text-muted-foreground mb-4">
               {hasConversations ? 'Select a conversation or start a new one' : 'Start your first conversation with our support team'}
             </p>
-            <NewConversationDialog />
+            <NewConversationDialog onConversationCreated={onNewConversationCreated} />
           </div>
         </CardContent>
       </Card>

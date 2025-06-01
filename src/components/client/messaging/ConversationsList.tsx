@@ -9,12 +9,14 @@ interface ConversationsListProps {
   conversations: ConversationType[];
   activeConversation: ConversationType | null;
   onConversationSelect: (conversation: ConversationType) => void;
+  onNewConversationCreated?: (conversation: ConversationType) => void;
 }
 
 const ConversationsList: React.FC<ConversationsListProps> = ({
   conversations,
   activeConversation,
-  onConversationSelect
+  onConversationSelect,
+  onNewConversationCreated
 }) => {
   return (
     <Card>
@@ -23,12 +25,13 @@ const ConversationsList: React.FC<ConversationsListProps> = ({
           <CardTitle className="text-lg">Messages</CardTitle>
           <CardDescription>Your conversations</CardDescription>
         </div>
-        <NewConversationDialog />
+        <NewConversationDialog onConversationCreated={onNewConversationCreated} />
       </CardHeader>
       <CardContent className="p-4">
         {conversations.length === 0 ? (
           <div className="text-center text-muted-foreground py-4">
-            No conversations yet
+            <p className="mb-4">No conversations yet</p>
+            <NewConversationDialog onConversationCreated={onNewConversationCreated} />
           </div>
         ) : (
           <div className="space-y-2">

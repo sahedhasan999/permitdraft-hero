@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, LogOut } from "lucide-react";
 import NavLink, { NavLinkItem } from "./NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -18,7 +18,7 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
   setActiveDropdown,
   closeDropdown
 }) => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleStartProject = () => {
@@ -38,6 +38,15 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
 
   const handleLogin = () => {
     navigate('/login');
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Failed to log out', error);
+    }
   };
 
   return (
@@ -62,12 +71,23 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
           Start Your Project
           <ArrowRight size={16} className="ml-2" />
         </button>
-        <button 
-          onClick={handleLogin} 
-          className="text-sm font-medium hover:text-teal-600 transition-colors"
-        >
-          Login
-        </button>
+        
+        {user ? (
+          <button 
+            onClick={handleLogout} 
+            className="text-sm font-medium hover:text-teal-600 transition-colors flex items-center"
+          >
+            <LogOut size={16} className="mr-2" />
+            Logout
+          </button>
+        ) : (
+          <button 
+            onClick={handleLogin} 
+            className="text-sm font-medium hover:text-teal-600 transition-colors"
+          >
+            Login
+          </button>
+        )}
       </div>
     </>
   );

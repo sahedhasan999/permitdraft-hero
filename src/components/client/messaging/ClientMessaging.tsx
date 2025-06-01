@@ -70,9 +70,10 @@ const ClientMessaging: React.FC = () => {
     setActiveConversation(conversation);
   };
 
-  const handleNewConversationCreated = () => {
-    console.log('New conversation created, refreshing list');
-    // The subscription will automatically update the conversations list
+  const handleNewConversationCreated = (newConversation: ConversationType) => {
+    console.log('New conversation created:', newConversation);
+    setConversations(prev => [newConversation, ...prev]);
+    setActiveConversation(newConversation);
   };
 
   if (isLoading) {
@@ -102,6 +103,7 @@ const ClientMessaging: React.FC = () => {
           conversations={conversations}
           activeConversation={activeConversation}
           onConversationSelect={handleConversationSelect}
+          onNewConversationCreated={handleNewConversationCreated}
         />
       </div>
 
@@ -110,6 +112,7 @@ const ClientMessaging: React.FC = () => {
           activeConversation={activeConversation}
           activeMessages={activeMessages}
           hasConversations={conversations.length > 0}
+          onNewConversationCreated={handleNewConversationCreated}
         />
       </div>
     </div>

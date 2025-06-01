@@ -1,4 +1,3 @@
-
 import { 
   collection, 
   addDoc, 
@@ -32,7 +31,7 @@ export const createConversation = async (
   
   // Create conversation document
   const conversationDocRef = doc(conversationsRef);
-  batch.set(conversationDocRef, {
+  const conversationData = {
     userId,
     userEmail,
     userName,
@@ -41,13 +40,20 @@ export const createConversation = async (
     createdAt: serverTimestamp(),
     lastUpdated: serverTimestamp(),
     messageCount: 1
-  });
+  };
+
+  // If userId is 'admin-created', this is an admin starting a conversation
+  if (userId === 'admin-created') {
+    conversationData.userId = `admin-${Date.now()}`; // Generate a unique ID for admin-created conversations
+  }
+
+  batch.set(conversationDocRef, conversationData);
 
   // Create initial message document
   const messageDocRef = doc(messagesRef);
   batch.set(messageDocRef, {
     conversationId: conversationDocRef.id,
-    sender: 'customer',
+    sender: userId === 'admin-created' ? 'admin' : 'customer',
     content: initialMessage,
     attachments,
     timestamp: serverTimestamp()

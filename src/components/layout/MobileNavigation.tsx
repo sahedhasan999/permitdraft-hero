@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, LogOut } from "lucide-react";
 import NavLink, { NavLinkItem } from "./NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -22,7 +22,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
   closeDropdown,
   toggleMenu
 }) => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleStartProject = () => {
@@ -42,6 +42,15 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
 
   const handleLogin = () => {
     navigate('/login');
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Failed to log out', error);
+    }
   };
 
   if (!isMenuOpen) return null;
@@ -75,15 +84,29 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
             Start Your Project
             <ArrowRight size={16} className="ml-2" />
           </button>
-          <button 
-            onClick={() => {
-              toggleMenu();
-              handleLogin();
-            }}
-            className="block w-full text-center text-sm font-medium hover:text-teal-600 transition-colors"
-          >
-            Login
-          </button>
+          
+          {user ? (
+            <button 
+              onClick={() => {
+                toggleMenu();
+                handleLogout();
+              }}
+              className="block w-full text-center text-sm font-medium hover:text-teal-600 transition-colors flex items-center justify-center"
+            >
+              <LogOut size={16} className="mr-2" />
+              Logout
+            </button>
+          ) : (
+            <button 
+              onClick={() => {
+                toggleMenu();
+                handleLogin();
+              }}
+              className="block w-full text-center text-sm font-medium hover:text-teal-600 transition-colors"
+            >
+              Login
+            </button>
+          )}
         </div>
       </div>
     </div>
