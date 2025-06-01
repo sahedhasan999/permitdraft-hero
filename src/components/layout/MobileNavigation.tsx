@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, LogOut } from "lucide-react";
+import { LogOut, User } from "lucide-react";
 import NavLink, { NavLinkItem } from "./NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -53,6 +53,10 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
     }
   };
 
+  const handleDashboard = () => {
+    navigate('/client/dashboard');
+  };
+
   if (!isMenuOpen) return null;
 
   return (
@@ -75,27 +79,38 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
 
         <div className="mt-6 space-y-4 px-4">
           <button
-            className="w-full bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center transition-colors"
+            className="w-full bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
             onClick={() => {
               toggleMenu();
               handleStartProject();
             }}
           >
-            Start Your Project
-            <ArrowRight size={16} className="ml-2" />
+            {user ? 'Start a Project' : 'Start Your Project'}
           </button>
           
           {user ? (
-            <button 
-              onClick={() => {
-                toggleMenu();
-                handleLogout();
-              }}
-              className="block w-full text-center text-sm font-medium hover:text-teal-600 transition-colors flex items-center justify-center"
-            >
-              <LogOut size={16} className="mr-2" />
-              Logout
-            </button>
+            <>
+              <button 
+                onClick={() => {
+                  toggleMenu();
+                  handleDashboard();
+                }}
+                className="block w-full text-center text-sm font-medium hover:text-teal-600 transition-colors flex items-center justify-center"
+              >
+                <User size={16} className="mr-2" />
+                My Dashboard
+              </button>
+              <button 
+                onClick={() => {
+                  toggleMenu();
+                  handleLogout();
+                }}
+                className="block w-full text-center text-sm font-medium hover:text-teal-600 transition-colors flex items-center justify-center"
+              >
+                <LogOut size={16} className="mr-2" />
+                Logout
+              </button>
+            </>
           ) : (
             <button 
               onClick={() => {

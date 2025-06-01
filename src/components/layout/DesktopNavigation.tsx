@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, LogOut } from "lucide-react";
+import { LogOut, User } from "lucide-react";
 import NavLink, { NavLinkItem } from "./NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -49,6 +49,10 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
     }
   };
 
+  const handleDashboard = () => {
+    navigate('/client/dashboard');
+  };
+
   return (
     <>
       <nav className="hidden md:flex items-center space-x-6">
@@ -65,21 +69,29 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
 
       <div className="hidden md:flex items-center space-x-4">
         <button 
-          className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center transition-colors"
+          className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
           onClick={handleStartProject}
         >
-          Start Your Project
-          <ArrowRight size={16} className="ml-2" />
+          {user ? 'Start a Project' : 'Start Your Project'}
         </button>
         
         {user ? (
-          <button 
-            onClick={handleLogout} 
-            className="text-sm font-medium hover:text-teal-600 transition-colors flex items-center"
-          >
-            <LogOut size={16} className="mr-2" />
-            Logout
-          </button>
+          <>
+            <button 
+              onClick={handleDashboard} 
+              className="text-sm font-medium hover:text-teal-600 transition-colors flex items-center"
+            >
+              <User size={16} className="mr-2" />
+              My Dashboard
+            </button>
+            <button 
+              onClick={handleLogout} 
+              className="text-sm font-medium hover:text-teal-600 transition-colors flex items-center"
+            >
+              <LogOut size={16} className="mr-2" />
+              Logout
+            </button>
+          </>
         ) : (
           <button 
             onClick={handleLogin} 

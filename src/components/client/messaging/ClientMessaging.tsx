@@ -30,8 +30,14 @@ const ClientMessaging: React.FC = () => {
       console.log('Received conversations update:', userConversations);
       setConversations(userConversations);
       
-      // Auto-select first conversation if none selected and conversations exist
-      if (userConversations.length > 0 && !activeConversation) {
+      // If we have an active conversation, update it with the latest data
+      if (activeConversation) {
+        const updatedActiveConversation = userConversations.find(conv => conv.id === activeConversation.id);
+        if (updatedActiveConversation) {
+          setActiveConversation(updatedActiveConversation);
+        }
+      } else if (userConversations.length > 0) {
+        // Auto-select first conversation if none selected and conversations exist
         console.log('Auto-selecting first conversation:', userConversations[0].id);
         setActiveConversation(userConversations[0]);
       }
