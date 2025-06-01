@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,16 +10,30 @@ import { createConversation } from '@/services/firebaseMessagingService';
 import { useFirebase } from '@/contexts/FirebaseContext';
 import { useToast } from '@/hooks/use-toast';
 import FileUploadManager from './FileUploadManager';
+import { VariantProps } from 'class-variance-authority';
+
+// Get Button variants type
+type ButtonVariant = VariantProps<typeof Button>['variant'];
 
 interface NewConversationDialogProps {
   onConversationCreated?: (conversation: ConversationType) => void;
+  triggerButtonText?: string;
+  triggerButtonIcon?: React.ReactNode;
+  triggerButtonVariant?: ButtonVariant;
+  triggerButtonClassName?: string;
 }
 
-const NewConversationDialog: React.FC<NewConversationDialogProps> = ({ onConversationCreated }) => {
+const NewConversationDialog: React.FC<NewConversationDialogProps> = ({
+  onConversationCreated,
+  triggerButtonText = "New", // Default text
+  triggerButtonIcon,
+  triggerButtonVariant = "default", // Default variant
+  triggerButtonClassName
+}) => {
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const [newConversationSubject, setNewConversationSubject] = useState('');
   const [newConversationMessage, setNewConversationMessage] = useState('');
-  const [newConversationAttachments, setNewConversationAttachments] = useState<FileAttachment[]>([]);
+  const [newConversationFiles, setNewConversationFiles] = useState<File[]>([]); // Changed state name and type
   const [isOpen, setIsOpen] = useState(false);
   const { currentUser } = useFirebase();
   const { toast } = useToast();
@@ -35,10 +49,13 @@ const NewConversationDialog: React.FC<NewConversationDialogProps> = ({ onConvers
         currentUser.displayName || 'Anonymous',
         newConversationSubject,
         newConversationMessage,
-        newConversationAttachments
+        newConversationFiles // Pass File[] here
       );
 
       // Create a mock conversation object to pass to the callback
+      // Note: The actual attachments will be uploaded by createConversation.
+      // This mock might not be perfectly accurate for attachments immediately,
+      // but the real-time subscription should update it.
       const newConversation: ConversationType = {
         id: conversationId,
         customer: currentUser.displayName || 'Anonymous',
@@ -49,7 +66,9 @@ const NewConversationDialog: React.FC<NewConversationDialogProps> = ({ onConvers
           sender: 'customer',
           content: newConversationMessage,
           timestamp: new Date().toISOString(),
-          attachments: newConversationAttachments
+          // attachments: newConversationAttachments // This is tricky, as they are Files not FileAttachments yet.
+          // For simplicity, we'll leave it empty in the mock. The subscription will provide the real data.
+          attachments: []
         }],
         status: 'active',
         lastUpdated: new Date().toISOString()
@@ -61,7 +80,7 @@ const NewConversationDialog: React.FC<NewConversationDialogProps> = ({ onConvers
 
       setNewConversationSubject('');
       setNewConversationMessage('');
-      setNewConversationAttachments([]);
+      setNewConversationFiles([]); // Reset files state
       setIsOpen(false);
 
       toast({
@@ -83,9 +102,13 @@ const NewConversationDialog: React.FC<NewConversationDialogProps> = ({ onConvers
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button size="sm">
-          <Plus className="h-4 w-4 mr-1" />
-          New
+        <Button
+          variant={triggerButtonVariant}
+          size="sm"
+          className={triggerButtonClassName}
+        >
+          {triggerButtonIcon ? triggerButtonIcon : (triggerButtonText === "New" && <Plus className="h-4 w-4 mr-1" />)}
+          {triggerButtonText}
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -112,10 +135,14 @@ const NewConversationDialog: React.FC<NewConversationDialogProps> = ({ onConvers
           </div>
           
           <FileUploadManager
-            attachments={newConversationAttachments}
-            onAttachmentsChange={setNewConversationAttachments}
+            // attachments prop is not used by FileUploadManager when conversationId="new" for selection
+            // but we pass newConversationFiles to make it clear what it's managing internally if needed
+            attachments={[]} // Pass empty array as FileAttachment[] is expected by prop type
+            onFilesChange={setNewConversationFiles} // Changed prop name
             conversationId="new"
             inputId="new-file-upload"
+            // We need to ensure FileUploadManager calls onFilesChange with File[]
+            // and not onAttachmentsChange with FileAttachment[] when conversationId is "new"
           />
           
           <Button 

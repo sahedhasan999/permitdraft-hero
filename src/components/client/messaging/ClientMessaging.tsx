@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ConversationType, MessageType } from '@/types/communications';
-import { subscribeToUserConversations } from '@/services/firebaseMessagingService';
+import { subscribeToUserConversations, subscribeToConversationMessages } from '@/services/firebaseMessagingService';
 import { useFirebase } from '@/contexts/FirebaseContext';
 import ConversationsList from './ConversationsList';
 import ActiveConversationView from './ActiveConversationView';
@@ -10,6 +10,7 @@ import ActiveConversationView from './ActiveConversationView';
 const ClientMessaging: React.FC = () => {
   const [conversations, setConversations] = useState<ConversationType[]>([]);
   const [activeConversation, setActiveConversation] = useState<ConversationType | null>(null);
+  const [currentMessages, setCurrentMessages] = useState<MessageType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { currentUser } = useFirebase();
 
@@ -43,9 +44,33 @@ const ClientMessaging: React.FC = () => {
     };
   }, [currentUser]);
 
+  useEffect(() => {
+    let messageSubscriptionUnsubscribe: (() => void) | undefined;
+
+    if (activeConversation) {
+      console.log('Setting up message subscription for conversation:', activeConversation.id);
+      messageSubscriptionUnsubscribe = subscribeToConversationMessages(
+        activeConversation.id,
+        (receivedMessages) => {
+          console.log('Received messages update:', receivedMessages);
+          setCurrentMessages(receivedMessages);
+        }
+      );
+    }
+
+    return () => {
+      if (messageSubscriptionUnsubscribe) {
+        console.log('Cleaning up message subscription for conversation:', activeConversation?.id);
+        messageSubscriptionUnsubscribe();
+      }
+    };
+  }, [activeConversation]);
+
   const handleConversationSelect = (conversation: ConversationType) => {
     console.log('Selecting conversation:', conversation.id);
     setActiveConversation(conversation);
+    // Reset messages when conversation changes, will be populated by the effect
+    setCurrentMessages([]);
   };
 
   const handleNewConversationCreated = (newConversation: ConversationType) => {
@@ -88,7 +113,7 @@ const ClientMessaging: React.FC = () => {
       <div className="lg:col-span-3">
         <ActiveConversationView
           activeConversation={activeConversation}
-          activeMessages={activeConversation?.messages || []}
+          currentMessages={currentMessages}
           hasConversations={conversations.length > 0}
           onNewConversationCreated={handleNewConversationCreated}
         />
