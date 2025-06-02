@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,8 +24,6 @@ const FileUploadManager: React.FC<FileUploadManagerProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   // Store selected files locally if it's a new conversation
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const { toast } = useToast();
-
   const { toast } = useToast();
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
