@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 
 interface FileUploadManagerProps {
   attachments: FileAttachment[]; // Used for displaying existing attachments or newly uploaded ones for existing conversations
-  onAttachmentsChange: (attachments: FileAttachment[]) => void; // For existing conversations
+  onAttachmentsChange?: (attachments: FileAttachment[]) => void; // For existing conversations - now optional
   onFilesChange?: (files: File[]) => void; // For new conversations, passes raw File objects
   conversationId: string; // Can be "new"
   inputId: string;
@@ -50,7 +51,9 @@ const FileUploadManager: React.FC<FileUploadManagerProps> = ({
         const attachment = await uploadFile(file, conversationId);
         newUploadedAttachments.push(attachment);
       }
-      onAttachmentsChange([...attachments, ...newUploadedAttachments]);
+      if (onAttachmentsChange) {
+        onAttachmentsChange([...attachments, ...newUploadedAttachments]);
+      }
     } catch (error) {
       console.error('Error uploading files:', error);
       toast({
@@ -72,7 +75,9 @@ const FileUploadManager: React.FC<FileUploadManagerProps> = ({
         onFilesChange(newSelectedFiles);
       }
     } else {
-      onAttachmentsChange(attachments.filter((_, i) => i !== index));
+      if (onAttachmentsChange) {
+        onAttachmentsChange(attachments.filter((_, i) => i !== index));
+      }
     }
   };
 
