@@ -22,7 +22,7 @@ const TestimonialCard: React.FC<{ testimonial: Testimonial; index: number }> = (
             ))}
           </div>
           <blockquote className="text-muted-foreground mb-4 flex-grow italic">
-            "{testimonial.review}"
+            "{testimonial.content}"
           </blockquote>
           <div className="flex items-center">
             <div className="bg-teal-100 rounded-full w-10 h-10 flex items-center justify-center mr-3">
