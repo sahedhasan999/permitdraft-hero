@@ -52,7 +52,7 @@ const NavLink: React.FC<NavLinkProps> = ({
         <button
           className={cn(
             mobile 
-              ? "w-full px-4 py-2 text-left flex justify-between items-center hover:bg-secondary rounded-md transition-colors" 
+              ? "w-full px-4 py-2 text-center flex justify-center items-center hover:bg-secondary rounded-md transition-colors relative" 
               : "px-0 py-2 text-sm font-medium flex items-center transition-colors hover:text-teal-600 group",
           )}
           onClick={toggleDropdown}
@@ -62,7 +62,7 @@ const NavLink: React.FC<NavLinkProps> = ({
           <ChevronDown 
             size={mobile ? 16 : 14} 
             className={cn(
-              mobile ? "transition-transform duration-200" : "ml-1 transition-transform duration-200 group-hover:rotate-180",
+              mobile ? "absolute right-4 transition-transform duration-200" : "ml-1 transition-transform duration-200 group-hover:rotate-180",
               activeDropdown === link.title ? "rotate-180" : ""
             )} 
           />
