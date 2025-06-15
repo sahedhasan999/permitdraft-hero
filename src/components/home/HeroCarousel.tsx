@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, memo, useCallback } from 'react';
 import { CarouselImage, subscribeToCarouselImages } from '@/services/carouselService';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -43,72 +42,29 @@ const fallbackImages: CarouselImage[] = [
 ];
 
 export const HeroCarousel: React.FC = memo(() => {
-  const [images, setImages] = useState<CarouselImage[]>([]);
+  const [images, setImages] = useState<CarouselImage[]>(fallbackImages);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
-  const [firebaseError, setFirebaseError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    let unsubscribe: (() => void) | null = null;
-    
     try {
       // Try to subscribe to Firebase data
-      unsubscribe = subscribeToCarouselImages((allImages) => {
+      const unsubscribe = subscribeToCarouselImages((allImages) => {
         const activeImages = allImages.filter(img => img.active);
         if (activeImages.length > 0) {
           setImages(activeImages);
-          setFirebaseError(false);
-        } else {
-          // If no active images, use fallback
-          setImages(fallbackImages);
         }
+        // If no active images from Firebase, keep using fallback images
         setIsLoading(false);
       });
+
+      return unsubscribe;
     } catch (error) {
       console.log('Firebase not available for carousel, using fallback images');
-      setFirebaseError(true);
-      setImages(fallbackImages);
+      // Keep fallback images that were set in initial state
       setIsLoading(false);
     }
-
-    // Fallback timeout - if Firebase doesn't respond in 2 seconds, use fallback
-    const fallbackTimeout = setTimeout(() => {
-      if (isLoading) {
-        console.log('Firebase timeout, using fallback images');
-        setImages(fallbackImages);
-        setIsLoading(false);
-        setFirebaseError(true);
-      }
-    }, 2000);
-
-    return () => {
-      if (unsubscribe) unsubscribe();
-      clearTimeout(fallbackTimeout);
-    };
-  }, [isLoading]);
-
-  // Preload images for smoother transitions
-  useEffect(() => {
-    if (images.length > 0) {
-      const preloadImages = () => {
-        images.forEach((image, index) => {
-          if (!loadedImages.has(index)) {
-            const img = new Image();
-            img.onload = () => {
-              setLoadedImages(prev => new Set([...prev, index]));
-            };
-            img.onerror = () => {
-              console.log(`Failed to load image: ${image.src}`);
-            };
-            img.src = image.src;
-          }
-        });
-      };
-
-      preloadImages();
-    }
-  }, [images, loadedImages]);
+  }, []);
 
   useEffect(() => {
     if (images.length > 0) {
