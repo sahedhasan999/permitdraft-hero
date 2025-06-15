@@ -1,12 +1,27 @@
 
-import React from "react";
+```javascript
+import React, { useEffect } from "react";
 import ServiceLayout from "@/components/services/ServiceLayout";
 
 const PatioService = () => {
+  const description = "Expert drafting for patio permit drawings and hardscapes. Our detailed plans help you visualize your project and secure permits with confidence.";
+
+  useEffect(() => {
+    const metaDescriptionTag = document.querySelector('meta[name="description"]');
+    if (metaDescriptionTag) {
+      metaDescriptionTag.setAttribute("content", description);
+    } else {
+      const newMetaTag = document.createElement('meta');
+      newMetaTag.name = "description";
+      newMetaTag.content = description;
+      document.head.appendChild(newMetaTag);
+    }
+  }, []);
+
   return (
     <ServiceLayout
-      title="Patio Drafting Services"
-      description="Expert drafting services for patios and hardscapes. Our detailed drawings help you visualize your project and secure permits with confidence."
+      title="Patio Permit Drawings & Hardscape Designs"
+      description={description}
       image="https://images.unsplash.com/photo-1588880331179-bc9b93a8cb5e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
       features={[
         "Complete construction drawings for permit applications",
@@ -82,3 +97,4 @@ const PatioService = () => {
 };
 
 export default PatioService;
+```

@@ -1,4 +1,5 @@
 
+```javascript
 import React, { useState, useEffect, useMemo, memo } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
@@ -13,6 +14,7 @@ const staticNavLinks: NavLinkItem[] = [
   { title: "Portfolio", href: "/portfolio" },
   { title: "Testimonials", href: "/testimonials" },
   { title: "About Us", href: "/about" },
+  { title: "Blog", href: "/blog" },
   { title: "Contact", href: "/contact" },
 ];
 
@@ -123,3 +125,4 @@ const Navbar = memo(() => {
 Navbar.displayName = "Navbar";
 
 export default Navbar;
+```

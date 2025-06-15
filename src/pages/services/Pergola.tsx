@@ -1,16 +1,29 @@
-
-import React from "react";
+import React, { useEffect } from "react";
 import ServiceLayout from "@/components/services/ServiceLayout";
 
 const PergolaService = () => {
+  const description = "Expert drafting services for pergola permit drawings and outdoor structures. Our detailed plans help you create the perfect outdoor living space while ensuring your structure meets all local building codes for a pergola permit.";
+  
+  useEffect(() => {
+    const metaDescriptionTag = document.querySelector('meta[name="description"]');
+    if (metaDescriptionTag) {
+      metaDescriptionTag.setAttribute("content", description);
+    } else {
+      const newMetaTag = document.createElement('meta');
+      newMetaTag.name = "description";
+      newMetaTag.content = description;
+      document.head.appendChild(newMetaTag);
+    }
+  }, []);
+
   return (
     <ServiceLayout
-      title="Pergola Drafting Services"
-      description="Expert drafting services for pergolas and outdoor structures. Our detailed plans will help you create the perfect outdoor living space while ensuring your structure meets all local building codes."
+      title="Pergola Permit Drawings & Design Services"
+      description={description}
       image="https://images.unsplash.com/photo-1573742889082-5b8469aea25c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
       features={[
         "Custom pergola designs tailored to your space",
-        "Structural calculations to ensure stability and safety",
+        "Structural calculations to ensure stability and safety for your pergola permit",
         "Detailed construction drawings for permit applications",
         "Material specifications and quantity lists",
         "Connection details for proper installation",

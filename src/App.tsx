@@ -1,4 +1,3 @@
-
 import './App.css';
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
@@ -20,6 +19,7 @@ const Testimonials = lazy(() => import('./pages/Testimonials'));
 const Portfolio = lazy(() => import('./pages/Portfolio'));
 const Quote = lazy(() => import('./pages/Quote'));
 const Order = lazy(() => import('./pages/Order'));
+const Blog = lazy(() => import('./pages/Blog'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const AdminLogin = lazy(() => import('./pages/admin/Login'));
 
@@ -76,6 +76,7 @@ function App() {
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/testimonials" element={<Testimonials />} />
                   <Route path="/portfolio" element={<Portfolio />} />
+                  <Route path="/blog" element={<Blog />} />
                   <Route path="/quote" element={<Quote />} />
                   <Route path="/order" element={<Order />} />
                   <Route path="/login" element={<Login />} />

@@ -1,15 +1,30 @@
 
-import React from "react";
+```javascript
+import React, { useEffect } from "react";
 import ServiceLayout from "@/components/services/ServiceLayout";
 
 const DeckService = () => {
+  const description = "Professional architectural drafting services for decks of all sizes. Our detailed deck permit drawings will help you secure permits quickly and build with confidence.";
+
+  useEffect(() => {
+    const metaDescriptionTag = document.querySelector('meta[name="description"]');
+    if (metaDescriptionTag) {
+      metaDescriptionTag.setAttribute("content", description);
+    } else {
+      const newMetaTag = document.createElement('meta');
+      newMetaTag.name = "description";
+      newMetaTag.content = description;
+      document.head.appendChild(newMetaTag);
+    }
+  }, []);
+
   return (
     <ServiceLayout
-      title="Deck Drafting Services"
-      description="Professional architectural drafting services for decks of all sizes. Our detailed drawings will help you secure permits quickly and build with confidence."
+      title="Deck Permit Drawings & Drafting Services"
+      description={description}
       image="https://images.unsplash.com/photo-1591825729269-caeb344f6df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
       features={[
-        "Detailed construction drawings for permit applications",
+        "Detailed construction drawings for deck permit applications",
         "Plans include elevations, sections, and connection details",
         "3D visualizations to help you see the final result",
         "Material specifications and structural calculations",
@@ -19,7 +34,7 @@ const DeckService = () => {
     >
       <div className="space-y-12">
         <section>
-          <h2 className="text-3xl font-bold mb-6">What's Included in Our Deck Plans</h2>
+          <h2 className="text-3xl font-bold mb-6">What's Included in Our Deck Permit Plans</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
               <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center mb-4">
@@ -83,3 +98,4 @@ const DeckService = () => {
 };
 
 export default DeckService;
+```

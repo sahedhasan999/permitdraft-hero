@@ -1,4 +1,5 @@
 
+```javascript
 import React, { useEffect } from "react";
 import Hero from '@/components/home/Hero';
 import Services from '@/components/home/Services';
@@ -10,7 +11,7 @@ import Navbar from "../components/layout/Navbar";
 const Index = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "PermitDraft Pro | Outdoor Designs, Approved Results";
+    document.title = "Deck & Patio Permit Drawings | Outdoor Space Design | PermitDraft Pro";
   }, []);
 
   return (
@@ -32,3 +33,4 @@ const Index = () => {
 };
 
 export default Index;
+```
