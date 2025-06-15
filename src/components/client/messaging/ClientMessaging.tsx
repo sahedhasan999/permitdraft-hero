@@ -1,13 +1,14 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ConversationType, MessageType } from '@/types/communications';
 import { subscribeToUserConversations, subscribeToConversationMessages } from '@/services/firebaseMessagingService';
 import { useFirebase } from '@/contexts/FirebaseContext';
 import ConversationsList from './ConversationsList';
 import ActiveConversationView from './ActiveConversationView';
 
-const ClientMessaging: React.FC = () => {
+const ClientMessaging: React.FC = memo(() => {
   const [conversations, setConversations] = useState<ConversationType[]>([]);
   const [activeConversation, setActiveConversation] = useState<ConversationType | null>(null);
   const [currentMessages, setCurrentMessages] = useState<MessageType[]>([]);
@@ -42,7 +43,7 @@ const ClientMessaging: React.FC = () => {
       console.log('Cleaning up conversations subscription');
       unsubscribe();
     };
-  }, [currentUser]);
+  }, [currentUser, activeConversation?.id]);
 
   useEffect(() => {
     let messageSubscriptionUnsubscribe: (() => void) | undefined;
@@ -64,7 +65,7 @@ const ClientMessaging: React.FC = () => {
         messageSubscriptionUnsubscribe();
       }
     };
-  }, [activeConversation]);
+  }, [activeConversation?.id]);
 
   const handleConversationSelect = (conversation: ConversationType) => {
     console.log('Selecting conversation:', conversation.id);
@@ -83,7 +84,19 @@ const ClientMessaging: React.FC = () => {
     return (
       <Card>
         <CardContent className="p-6">
-          <div className="text-center">Loading messages...</div>
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="lg:col-span-1 space-y-4">
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
+            </div>
+            <div className="lg:col-span-3 space-y-4">
+              <Skeleton className="h-8 w-64" />
+              <Skeleton className="h-64 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          </div>
         </CardContent>
       </Card>
     );
@@ -120,6 +133,8 @@ const ClientMessaging: React.FC = () => {
       </div>
     </div>
   );
-};
+});
+
+ClientMessaging.displayName = "ClientMessaging";
 
 export default ClientMessaging;

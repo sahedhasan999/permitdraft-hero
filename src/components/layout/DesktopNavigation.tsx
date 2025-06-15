@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogOut, User } from "lucide-react";
 import NavLink, { NavLinkItem } from "./NavLink";
@@ -12,7 +12,7 @@ interface DesktopNavigationProps {
   closeDropdown: () => void;
 }
 
-const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
+const DesktopNavigation: React.FC<DesktopNavigationProps> = memo(({
   navLinks,
   activeDropdown,
   setActiveDropdown,
@@ -103,6 +103,8 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
       </div>
     </>
   );
-};
+});
+
+DesktopNavigation.displayName = "DesktopNavigation";
 
 export default DesktopNavigation;

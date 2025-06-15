@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogOut, User } from "lucide-react";
 import NavLink, { NavLinkItem } from "./NavLink";
@@ -14,7 +14,7 @@ interface MobileNavigationProps {
   toggleMenu: () => void;
 }
 
-const MobileNavigation: React.FC<MobileNavigationProps> = ({
+const MobileNavigation: React.FC<MobileNavigationProps> = memo(({
   isMenuOpen,
   navLinks,
   activeDropdown,
@@ -126,6 +126,8 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
       </div>
     </div>
   );
-};
+});
+
+MobileNavigation.displayName = "MobileNavigation";
 
 export default MobileNavigation;
