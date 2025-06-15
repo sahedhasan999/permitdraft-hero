@@ -1,3 +1,4 @@
+
 import React, { useRef } from "react";
 import { GlassMorphismCard } from "../ui/GlassMorphismCard";
 
@@ -110,7 +111,7 @@ const Benefits = () => {
   ];
 
   return (
-    <section id="benefits" className="py-24 bg-background" ref={benefitsRef}>
+    <section id="benefits" className="py-12 bg-background" ref={benefitsRef}>
       <div className="container px-4 mx-auto">
         <div className="max-w-2xl mx-auto text-center mb-16 animate-fade-up">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">

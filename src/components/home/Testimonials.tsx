@@ -83,7 +83,7 @@ const Testimonials = () => {
 
   if (isLoading) {
     return (
-      <section className="py-24 bg-zinc-50">
+      <section className="py-12 bg-zinc-50">
         <div className="container px-4 mx-auto">
           <div className="flex justify-center">
             <div className="h-8 w-8 border-4 border-teal-600 border-t-transparent rounded-full animate-spin"></div>
@@ -98,7 +98,7 @@ const Testimonials = () => {
   }
 
   return (
-    <section id="testimonials" className="py-24 bg-zinc-50" ref={testimonialsRef}>
+    <section id="testimonials" className="py-12 bg-zinc-50" ref={testimonialsRef}>
       <div className="container px-4 mx-auto">
         <div className="max-w-2xl mx-auto text-center mb-16 animate-fade-up">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
