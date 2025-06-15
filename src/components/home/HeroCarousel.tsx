@@ -1,14 +1,16 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo, useCallback } from 'react';
 import { CarouselImage, subscribeToCarouselImages } from '@/services/carouselService';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
-export const HeroCarousel: React.FC = () => {
+export const HeroCarousel: React.FC = memo(() => {
   const [images, setImages] = useState<CarouselImage[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     // Subscribe to real-time updates from Firebase
@@ -21,6 +23,25 @@ export const HeroCarousel: React.FC = () => {
     return unsubscribe;
   }, []);
 
+  // Preload images for smoother transitions
+  useEffect(() => {
+    if (images.length > 0) {
+      const preloadImages = () => {
+        images.forEach((image, index) => {
+          if (!loadedImages.has(index)) {
+            const img = new Image();
+            img.onload = () => {
+              setLoadedImages(prev => new Set([...prev, index]));
+            };
+            img.src = image.src;
+          }
+        });
+      };
+
+      preloadImages();
+    }
+  }, [images, loadedImages]);
+
   useEffect(() => {
     if (images.length > 0) {
       const timer = setInterval(() => {
@@ -31,17 +52,17 @@ export const HeroCarousel: React.FC = () => {
     }
   }, [images.length]);
 
-  const goToPrevious = () => {
+  const goToPrevious = useCallback(() => {
     setCurrentIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
-  };
+  }, [images.length]);
 
-  const goToNext = () => {
+  const goToNext = useCallback(() => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-  };
+  }, [images.length]);
 
   if (isLoading) {
     return (
-      <div className="w-full h-[400px] bg-gray-100 animate-pulse" />
+      <Skeleton className="w-full h-[400px]" />
     );
   }
 
@@ -64,6 +85,7 @@ export const HeroCarousel: React.FC = () => {
               src={image.src}
               alt={image.alt}
               className="w-full h-full object-cover"
+              loading={index === 0 ? "eager" : "lazy"}
             />
             <div className="absolute inset-0 bg-black/40" />
             <div className="absolute inset-0 flex items-center justify-center">
@@ -109,4 +131,6 @@ export const HeroCarousel: React.FC = () => {
       </div>
     </div>
   );
-};
+});
+
+HeroCarousel.displayName = 'HeroCarousel';

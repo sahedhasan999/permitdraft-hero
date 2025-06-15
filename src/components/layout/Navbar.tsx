@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, memo, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -16,7 +16,7 @@ const staticNavLinks: NavLinkItem[] = [
   { title: "Contact", href: "/contact" },
 ];
 
-const Navbar = () => {
+const Navbar = memo(() => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrollPosition, setScrollPosition] = useState(0);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -51,7 +51,7 @@ const Navbar = () => {
   };
 
   useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
@@ -59,8 +59,8 @@ const Navbar = () => {
 
   const isScrolled = scrollPosition > 20;
 
-  // Combine static links with dynamic service links
-  const navLinks = [
+  // Memoize navLinks to prevent unnecessary re-renders
+  const navLinks = useMemo(() => [
     ...staticNavLinks.slice(0, 1), // Home
     {
       title: "Services",
@@ -71,7 +71,7 @@ const Navbar = () => {
       }))
     },
     ...staticNavLinks.slice(1) // Rest of static links
-  ];
+  ], [services]);
 
   return (
     <header
@@ -118,6 +118,8 @@ const Navbar = () => {
       />
     </header>
   );
-};
+});
+
+Navbar.displayName = 'Navbar';
 
 export default Navbar;

@@ -4,49 +4,63 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './components/admin/ProtectedRoute';
+import { Skeleton } from './components/ui/skeleton';
 
 // Layout
 import Footer from './components/layout/Footer';
 
-// Pages
+// Critical pages (not lazy loaded)
 import Index from './pages/Index';
-import About from './pages/About';
-import Contact from './pages/Contact';
-import Testimonials from './pages/Testimonials';
-import Portfolio from './pages/Portfolio';
-import Quote from './pages/Quote';
-import Order from './pages/Order';
-import NotFound from './pages/NotFound';
 import Login from './pages/Login';
 import AdminLogin from './pages/admin/Login';
 
+// Lazy loaded pages
+const About = lazy(() => import('./pages/About'));
+const Contact = lazy(() => import('./pages/Contact'));
+const Testimonials = lazy(() => import('./pages/Testimonials'));
+const Portfolio = lazy(() => import('./pages/Portfolio'));
+const Quote = lazy(() => import('./pages/Quote'));
+const Order = lazy(() => import('./pages/Order'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+
 // Service Pages
-import Deck from './pages/services/Deck';
-import Patio from './pages/services/Patio';
-import Pergola from './pages/services/Pergola';
-import OutdoorKitchen from './pages/services/OutdoorKitchen';
-import HomeAddition from './pages/services/HomeAddition';
+const Deck = lazy(() => import('./pages/services/Deck'));
+const Patio = lazy(() => import('./pages/services/Patio'));
+const Pergola = lazy(() => import('./pages/services/Pergola'));
+const OutdoorKitchen = lazy(() => import('./pages/services/OutdoorKitchen'));
+const HomeAddition = lazy(() => import('./pages/services/HomeAddition'));
 
 // Admin Pages
-import Dashboard from './pages/admin/Dashboard';
-import Orders from './pages/admin/Orders';
-import Leads from './pages/admin/Leads';
-import Communications from './pages/admin/Communications';
-import Services from './pages/admin/Services';
-import ContentManager from './pages/admin/ContentManager';
+const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
+const Orders = lazy(() => import('./pages/admin/Orders'));
+const Leads = lazy(() => import('./pages/admin/Leads'));
+const Communications = lazy(() => import('./pages/admin/Communications'));
+const Services = lazy(() => import('./pages/admin/Services'));
+const ContentManager = lazy(() => import('./pages/admin/ContentManager'));
 
 // Client Pages
-import ClientDashboard from './pages/client/Dashboard';
-import ClientOrders from './pages/client/Orders';
-import ClientDocuments from './pages/client/Documents';
-import ClientMessages from './pages/client/Messages';
+const ClientDashboard = lazy(() => import('./pages/client/Dashboard'));
+const ClientOrders = lazy(() => import('./pages/client/Orders'));
+const ClientDocuments = lazy(() => import('./pages/client/Documents'));
+const ClientMessages = lazy(() => import('./pages/client/Messages'));
 
 import { Toaster } from './components/ui/toaster';
+
+// Loading component for Suspense fallback
+const PageSkeleton = () => (
+  <div className="min-h-screen p-6">
+    <Skeleton className="h-8 w-64 mb-6" />
+    <Skeleton className="h-4 w-full mb-4" />
+    <Skeleton className="h-4 w-3/4 mb-4" />
+    <Skeleton className="h-32 w-full mb-4" />
+    <Skeleton className="h-4 w-1/2" />
+  </div>
+);
 
 function App() {
   return (
     <BrowserRouter>
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<PageSkeleton />}>
         <Routes>
           {/* Public Routes */}
           <Route
