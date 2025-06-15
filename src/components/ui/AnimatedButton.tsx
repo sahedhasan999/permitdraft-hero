@@ -26,11 +26,11 @@ const AnimatedButton = React.forwardRef<HTMLButtonElement, AnimatedButtonProps>(
     const baseStyles = "relative inline-flex items-center justify-center font-semibold transition-all duration-300 transform focus:outline-none focus:ring-2 focus:ring-offset-2 overflow-hidden";
     
     const variantStyles = {
-      primary: "bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-primary/30",
-      secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 focus:ring-secondary/30",
-      outline: "border border-input bg-background hover:bg-secondary focus:ring-primary/30",
-      ghost: "hover:bg-secondary focus:ring-primary/20",
-      link: "text-primary underline-offset-4 hover:underline focus:ring-0",
+      primary: "bg-teal-600 text-white hover:bg-teal-700 focus:ring-teal-500/30 border-0",
+      secondary: "bg-white text-teal-600 hover:bg-gray-50 focus:ring-teal-500/30 border border-gray-200",
+      outline: "border border-teal-600 bg-transparent text-teal-600 hover:bg-teal-50 focus:ring-teal-500/30",
+      ghost: "text-teal-600 hover:bg-teal-50 focus:ring-teal-500/20",
+      link: "text-teal-600 underline-offset-4 hover:underline focus:ring-0",
     };
     
     const sizeStyles = {
@@ -58,7 +58,7 @@ const AnimatedButton = React.forwardRef<HTMLButtonElement, AnimatedButtonProps>(
       >
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-inherit">
-            <div className="h-5 w-5 rounded-full border-2 border-t-transparent border-white animate-spin" />
+            <div className="h-5 w-5 rounded-full border-2 border-t-transparent border-current animate-spin" />
           </div>
         )}
         <span className={cn("flex items-center justify-center gap-2", isLoading && "opacity-0")}>
