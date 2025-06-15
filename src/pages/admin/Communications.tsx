@@ -10,13 +10,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { MessageSquare, Users } from 'lucide-react';
 
 const Communications = () => {
   const [conversations, setConversations] = useState<ConversationType[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedConversation, setSelectedConversation] = useState<ConversationType | null>(null);
-  const [replyText, setReplyText] = useState('');
-  const [suggestedReply, setSuggestedReply] = useState("I'd be happy to provide more information about our services. Could you please provide some specific details about your project requirements?");
   const [showNewConversationDialog, setShowNewConversationDialog] = useState(false);
   const [newConversationSubject, setNewConversationSubject] = useState('');
   const [newConversationMessage, setNewConversationMessage] = useState('');
@@ -30,14 +29,12 @@ const Communications = () => {
       console.log('Admin received conversations:', allConversations);
       setConversations(allConversations);
       
-      // Update selected conversation if it exists in the new data
       if (selectedConversation) {
         const updatedSelectedConversation = allConversations.find(conv => conv.id === selectedConversation.id);
         if (updatedSelectedConversation) {
           setSelectedConversation(updatedSelectedConversation);
         }
       } else if (allConversations.length > 0) {
-        // Auto-select first conversation if none selected
         setSelectedConversation(allConversations[0]);
       }
     });
@@ -46,7 +43,6 @@ const Communications = () => {
   }, []);
 
   useEffect(() => {
-    // Check if we need to start a conversation with a specific customer
     const customerToMessage = sessionStorage.getItem('customerToMessage');
     if (customerToMessage) {
       const customerData = JSON.parse(customerToMessage);
@@ -59,26 +55,23 @@ const Communications = () => {
     }
   }, []);
 
-  const handleSendReply = async (attachments?: FileAttachment[]) => {
+  const handleSendReply = async (message: string, attachments?: FileAttachment[]) => {
     if (!selectedConversation) return;
     
-    const textToSend = replyText || suggestedReply;
-    if (!textToSend.trim() && (!attachments || attachments.length === 0)) return;
+    if (!message.trim() && (!attachments || attachments.length === 0)) return;
 
     try {
-      await sendMessage(selectedConversation.id, 'admin', textToSend, attachments || []);
-      setReplyText('');
-      setSuggestedReply("Is there anything else I can help you with regarding your project?");
+      await sendMessage(selectedConversation.id, 'admin', message, attachments || []);
       
       toast({
         title: "Message sent",
-        description: "Your reply has been sent successfully."
+        description: "Your message has been sent successfully."
       });
     } catch (error) {
       console.error('Error sending reply:', error);
       toast({
         title: "Error",
-        description: "Failed to send reply.",
+        description: "Failed to send message.",
         variant: "destructive"
       });
     }
@@ -95,7 +88,7 @@ const Communications = () => {
     }
 
     try {
-      const conversationId = await createConversation(
+      await createConversation(
         'admin-created',
         newConversationEmail,
         newConversationName,
@@ -124,28 +117,72 @@ const Communications = () => {
     }
   };
 
+  const activeConversations = conversations.filter(conv => conv.status === 'active');
+  const totalMessages = conversations.reduce((sum, conv) => sum + (conv.messages?.length || 0), 0);
+
   return (
     <AdminLayout>
       <div className="h-full flex flex-col">
-        <div className="mb-6 flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">AI Communications Center</h1>
-            <p className="text-muted-foreground mt-1">
-              Manage and monitor AI-assisted customer communications
-            </p>
+        {/* Header */}
+        <div className="mb-6">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Communications Center</h1>
+              <p className="text-gray-600 mt-1">
+                Manage customer conversations and support requests
+              </p>
+            </div>
           </div>
-          <Button onClick={() => setShowNewConversationDialog(true)}>
-            Start New Conversation
-          </Button>
+          
+          {/* Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="bg-white p-4 rounded-lg border shadow-sm">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <MessageSquare className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Total Conversations</p>
+                  <p className="text-2xl font-semibold text-gray-900">{conversations.length}</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg border shadow-sm">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                  <Users className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Active Conversations</p>
+                  <p className="text-2xl font-semibold text-gray-900">{activeConversations.length}</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg border shadow-sm">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <MessageSquare className="h-5 w-5 text-purple-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Total Messages</p>
+                  <p className="text-2xl font-semibold text-gray-900">{totalMessages}</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="flex flex-col md:flex-row h-[calc(100vh-13rem)] space-y-4 md:space-y-0 md:space-x-4">
+        {/* Main Content */}
+        <div className="flex-1 flex bg-gray-50 rounded-lg shadow-sm overflow-hidden">
           <ConversationList
             conversations={conversations}
             selectedConversation={selectedConversation}
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
             setSelectedConversation={setSelectedConversation}
+            onNewConversation={() => setShowNewConversationDialog(true)}
           />
           
           <ConversationDetail
@@ -153,59 +190,59 @@ const Communications = () => {
             conversations={conversations}
             setConversations={setConversations}
             setSelectedConversation={setSelectedConversation}
-            suggestedReply={suggestedReply}
-            setSuggestedReply={setSuggestedReply}
-            replyText={replyText}
-            setReplyText={setReplyText}
             handleSendReply={handleSendReply}
           />
         </div>
 
         {/* New Conversation Dialog */}
         <Dialog open={showNewConversationDialog} onOpenChange={setShowNewConversationDialog}>
-          <DialogContent>
+          <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Start New Conversation</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium">Customer Name</label>
+                <label className="text-sm font-medium text-gray-700">Customer Name</label>
                 <Input
                   placeholder="Enter customer name"
                   value={newConversationName}
                   onChange={(e) => setNewConversationName(e.target.value)}
+                  className="mt-1"
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Customer Email</label>
+                <label className="text-sm font-medium text-gray-700">Customer Email</label>
                 <Input
+                  type="email"
                   placeholder="Enter customer email"
                   value={newConversationEmail}
                   onChange={(e) => setNewConversationEmail(e.target.value)}
+                  className="mt-1"
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Subject</label>
+                <label className="text-sm font-medium text-gray-700">Subject</label>
                 <Input
                   placeholder="Enter conversation subject"
                   value={newConversationSubject}
                   onChange={(e) => setNewConversationSubject(e.target.value)}
+                  className="mt-1"
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Initial Message</label>
+                <label className="text-sm font-medium text-gray-700">Initial Message</label>
                 <Textarea
                   placeholder="Type your initial message..."
                   value={newConversationMessage}
                   onChange={(e) => setNewConversationMessage(e.target.value)}
-                  className="min-h-[100px]"
+                  className="min-h-[80px] mt-1"
                 />
               </div>
               
-              <div className="flex gap-2">
+              <div className="flex gap-2 pt-4">
                 <Button 
                   onClick={handleCreateNewConversation}
-                  className="flex-1"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
                 >
                   Start Conversation
                 </Button>

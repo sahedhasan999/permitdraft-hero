@@ -28,7 +28,6 @@ const ClientMessaging: React.FC = memo(() => {
       console.log('Client received conversations update:', userConversations);
       setConversations(userConversations);
       
-      // Update active conversation if it exists in the new data
       if (activeConversation) {
         const updatedActiveConversation = userConversations.find(conv => conv.id === activeConversation.id);
         if (updatedActiveConversation) {
@@ -70,7 +69,6 @@ const ClientMessaging: React.FC = memo(() => {
   const handleConversationSelect = (conversation: ConversationType) => {
     console.log('Selecting conversation:', conversation.id);
     setActiveConversation(conversation);
-    // Reset messages when conversation changes, will be populated by the effect
     setCurrentMessages([]);
   };
 
@@ -82,39 +80,37 @@ const ClientMessaging: React.FC = memo(() => {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <div className="lg:col-span-1 space-y-4">
-              <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-16 w-full" />
-              <Skeleton className="h-16 w-full" />
-              <Skeleton className="h-16 w-full" />
-            </div>
-            <div className="lg:col-span-3 space-y-4">
-              <Skeleton className="h-8 w-64" />
-              <Skeleton className="h-64 w-full" />
-              <Skeleton className="h-12 w-full" />
-            </div>
+      <div className="h-[600px] bg-white rounded-lg shadow-sm border">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 p-6">
+          <div className="lg:col-span-1 space-y-4">
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-16 w-full" />
           </div>
-        </CardContent>
-      </Card>
+          <div className="lg:col-span-3 space-y-4">
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </div>
+        </div>
+      </div>
     );
   }
 
   if (!currentUser) {
     return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-center">Please log in to access messages.</div>
-        </CardContent>
-      </Card>
+      <div className="h-[600px] bg-white rounded-lg shadow-sm border flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Please log in to access messages.</p>
+        </div>
+      </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-      <div className="lg:col-span-1">
+    <div className="h-[600px] bg-gray-50 rounded-lg shadow-sm overflow-hidden flex">
+      <div className="w-80 border-r bg-white">
         <ConversationsList
           conversations={conversations}
           activeConversation={activeConversation}
@@ -123,7 +119,7 @@ const ClientMessaging: React.FC = memo(() => {
         />
       </div>
 
-      <div className="lg:col-span-3">
+      <div className="flex-1">
         <ActiveConversationView
           activeConversation={activeConversation}
           currentMessages={currentMessages}
