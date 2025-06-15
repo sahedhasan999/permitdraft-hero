@@ -18,19 +18,16 @@ const ServiceManagement = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [debugInfo, setDebugInfo] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const { toast } = useToast();
 
   // Function to manually fetch services for debugging
   const fetchServicesManually = async () => {
     setIsLoading(true);
-    setDebugInfo('Fetching services manually...');
     setErrorMessage('');
     try {
       const data = await getServices();
       setServices(data);
-      setDebugInfo(`Successfully fetched ${data.length} services manually.`);
       toast({
         title: "Services fetched",
         description: `Found ${data.length} services in the database.`,
@@ -38,7 +35,6 @@ const ServiceManagement = () => {
     } catch (error) {
       console.error("Error fetching services:", error);
       const errorMsg = error instanceof Error ? error.message : String(error);
-      setDebugInfo(`Error fetching services: ${errorMsg}`);
       setErrorMessage(errorMsg);
       toast({
         title: "Error fetching services",
@@ -52,7 +48,6 @@ const ServiceManagement = () => {
 
   useEffect(() => {
     // Subscribe to real-time updates from Firestore
-    setDebugInfo('Setting up subscription to Firestore...');
     setErrorMessage('');
     
     let unsubscribe: () => void;
@@ -64,10 +59,8 @@ const ServiceManagement = () => {
             // Ensure services is always an array, even if undefined is returned
             const safeServices = Array.isArray(updatedServices) ? updatedServices : [];
             setServices(safeServices);
-            setDebugInfo(`Subscription updated: ${safeServices.length} services received.`);
           } catch (err) {
             console.error("Error processing services update:", err);
-            setDebugInfo(`Error processing services update: ${err instanceof Error ? err.message : String(err)}`);
             // Set services to empty array to prevent undefined errors
             setServices([]);
           } finally {
@@ -77,14 +70,7 @@ const ServiceManagement = () => {
         (error) => {
           console.error("Error in subscription:", error);
           const errorMsg = error?.message || 'Unknown error occurred';
-          setDebugInfo(`Subscription error: ${errorMsg}`);
           setErrorMessage(errorMsg);
-          
-          // Check if the error is related to Firestore indexes
-          if (errorMsg.includes('index') || errorMsg.includes('indexes')) {
-            setDebugInfo(`Firestore index error detected: ${errorMsg}`);
-            // The SeedServices component will handle this error
-          }
           
           toast({
             title: "Error fetching services",
@@ -99,7 +85,6 @@ const ServiceManagement = () => {
     } catch (error) {
       console.error("Error setting up subscription:", error);
       const errorMsg = error instanceof Error ? error.message : String(error);
-      setDebugInfo(`Error setting up subscription: ${errorMsg}`);
       setErrorMessage(errorMsg);
       setIsLoading(false);
       // Set services to empty array to prevent undefined errors
@@ -115,7 +100,6 @@ const ServiceManagement = () => {
     // Cleanup subscription on component unmount
     return () => {
       try {
-        setDebugInfo('Unsubscribing from Firestore...');
         if (typeof unsubscribe === 'function') {
           unsubscribe();
         }
@@ -378,23 +362,6 @@ const ServiceManagement = () => {
           </Button>
         </div>
       </div>
-
-      {/* Debug information */}
-      {debugInfo && (
-        <div className="bg-muted p-4 rounded-md mb-4">
-          <h3 className="text-sm font-medium mb-2">Debug Information:</h3>
-          <p className="text-sm text-muted-foreground">{debugInfo}</p>
-          <p className="text-sm mt-2">Services count: {services.length}</p>
-          {services.length > 0 && (
-            <div className="mt-2">
-              <p className="text-sm font-medium">First service:</p>
-              <pre className="text-xs bg-background p-2 rounded mt-1 overflow-auto max-h-40">
-                {JSON.stringify(services[0], null, 2)}
-              </pre>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Show seed services component if no services are found and not loading */}
       {!isLoading && services.length === 0 && (
