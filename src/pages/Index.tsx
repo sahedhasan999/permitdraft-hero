@@ -1,5 +1,5 @@
+
 import React, { useEffect } from "react";
-import { HeroCarousel } from '@/components/home/HeroCarousel';
 import Hero from '@/components/home/Hero';
 import Services from '@/components/home/Services';
 import Benefits from '@/components/home/Benefits';
@@ -18,7 +18,6 @@ const Index = () => {
       <Navbar />
       <main>
         <Hero />
-        <HeroCarousel />
         <Services />
         <Benefits />
         <Testimonials />
