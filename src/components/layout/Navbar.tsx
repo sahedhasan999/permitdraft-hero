@@ -1,5 +1,4 @@
 
-```javascript
 import React, { useState, useEffect, useMemo, memo } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
@@ -125,4 +124,3 @@ const Navbar = memo(() => {
 Navbar.displayName = "Navbar";
 
 export default Navbar;
-```

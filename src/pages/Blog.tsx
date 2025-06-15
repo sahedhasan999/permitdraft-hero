@@ -1,5 +1,4 @@
 
-```javascript
 import React, { useEffect } from "react";
 import Navbar from "@/components/layout/Navbar";
 
@@ -82,4 +81,3 @@ const BlogPage = () => {
 };
 
 export default BlogPage;
-```
