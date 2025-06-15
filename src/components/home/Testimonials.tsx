@@ -1,63 +1,92 @@
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
+import { Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { GlassMorphismCard } from "../ui/GlassMorphismCard";
-import { AnimatedButton } from "../ui/AnimatedButton";
-import { ChevronLeft, ChevronRight, Quote } from "lucide-react";
-import { Link } from "react-router-dom";
-import { getActiveTestimonials, Testimonial } from "@/services/testimonialsService";
+import { subscribeToTestimonials, Testimonial } from "@/services/testimonialsService";
+
+const TestimonialCard: React.FC<{ testimonial: Testimonial; index: number }> = ({ testimonial, index }) => {
+  return (
+    <div 
+      className="animate-fade-up"
+      style={{ animationDelay: `${index * 100}ms` }}
+    >
+      <GlassMorphismCard variant="hover" className="h-full">
+        <div className="flex flex-col h-full">
+          <div className="flex items-center mb-4">
+            {[...Array(5)].map((_, i) => (
+              <Star
+                key={i}
+                size={16}
+                className={`mr-1 ${i < testimonial.rating ? "text-yellow-400 fill-current" : "text-gray-300"}`}
+              />
+            ))}
+          </div>
+          <blockquote className="text-muted-foreground mb-4 flex-grow italic">
+            "{testimonial.review}"
+          </blockquote>
+          <div className="flex items-center">
+            <div className="bg-teal-100 rounded-full w-10 h-10 flex items-center justify-center mr-3">
+              <span className="text-teal-600 font-semibold text-sm">
+                {testimonial.name.charAt(0)}
+              </span>
+            </div>
+            <div>
+              <div className="font-semibold text-sm">{testimonial.name}</div>
+              <div className="text-xs text-muted-foreground">{testimonial.location}</div>
+            </div>
+          </div>
+        </div>
+      </GlassMorphismCard>
+    </div>
+  );
+};
 
 const Testimonials = () => {
+  const testimonialsRef = useRef<HTMLDivElement>(null);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
-  const [loading, setLoading] = useState(true);
-  const testimonialsRef = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadTestimonials();
+    const unsubscribe = subscribeToTestimonials((data) => {
+      // Filter active testimonials and sort by order
+      const activeTestimonials = data
+        .filter(testimonial => testimonial.active)
+        .sort((a, b) => (a.order || 0) - (b.order || 0));
+      
+      setTestimonials(activeTestimonials);
+      setIsLoading(false);
+    });
+
+    return unsubscribe;
   }, []);
 
-  const loadTestimonials = async () => {
-    try {
-      const activeTestimonials = await getActiveTestimonials();
-      setTestimonials(activeTestimonials);
-    } catch (error) {
-      console.error('Failed to load testimonials:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const goToPrevious = () => {
-    setSlideDirection('left');
-    setCurrentIndex((prevIndex) => 
-      prevIndex === 0 ? testimonials.length - 1 : prevIndex - 1
-    );
-  };
-
-  const goToNext = () => {
-    setSlideDirection('right');
-    setCurrentIndex((prevIndex) => 
+  const nextTestimonial = () => {
+    setCurrentIndex((prevIndex) =>
       prevIndex === testimonials.length - 1 ? 0 : prevIndex + 1
     );
   };
 
-  useEffect(() => {
-    if (testimonials.length > 0) {
-      const interval = setInterval(() => {
-        goToNext();
-      }, 8000);
+  const prevTestimonial = () => {
+    setCurrentIndex((prevIndex) =>
+      prevIndex === 0 ? testimonials.length - 1 : prevIndex - 1
+    );
+  };
 
+  // Auto-advance testimonials
+  useEffect(() => {
+    if (testimonials.length > 1) {
+      const interval = setInterval(nextTestimonial, 5000);
       return () => clearInterval(interval);
     }
-  }, [testimonials.length, currentIndex]);
+  }, [testimonials.length]);
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <section id="testimonials" className="section-padding bg-zinc-50">
+      <section className="py-24 bg-zinc-50">
         <div className="container px-4 mx-auto">
-          <div className="flex justify-center items-center p-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div className="flex justify-center">
+            <div className="h-8 w-8 border-4 border-teal-600 border-t-transparent rounded-full animate-spin"></div>
           </div>
         </div>
       </section>
@@ -68,10 +97,8 @@ const Testimonials = () => {
     return null;
   }
 
-  const currentTestimonial = testimonials[currentIndex];
-
   return (
-    <section id="testimonials" className="section-padding bg-zinc-50" ref={testimonialsRef}>
+    <section id="testimonials" className="py-24 bg-zinc-50" ref={testimonialsRef}>
       <div className="container px-4 mx-auto">
         <div className="max-w-2xl mx-auto text-center mb-16 animate-fade-up">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
@@ -82,95 +109,51 @@ const Testimonials = () => {
           </p>
         </div>
 
-        <div className="relative max-w-4xl mx-auto animate-fade-up" style={{ animationDelay: "200ms" }}>
-          <GlassMorphismCard variant="default" className="relative overflow-hidden p-0">
-            <div className="absolute top-4 left-4 text-primary opacity-50">
-              <Quote size={52} />
-            </div>
-            
-            <div className="relative z-10 p-8 md:p-12">
-              <div 
-                className={`transition-all duration-500 transform ${
-                  slideDirection === 'right' ? 'animate-slide-in-right' : 'animate-slide-in-left'
-                }`}
-                key={currentIndex}
-              >
-                <blockquote className="text-lg md:text-xl italic mb-6 relative z-10">
-                  "{currentTestimonial.content}"
-                </blockquote>
-                
-                <div className="flex items-center">
-                  <img 
-                    src={currentTestimonial.image} 
-                    alt={currentTestimonial.name}
-                    className="w-12 h-12 rounded-full object-cover border-2 border-primary/20"
-                  />
-                  <div className="ml-4">
-                    <div className="font-semibold">{currentTestimonial.name}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {currentTestimonial.role}, {currentTestimonial.company}
-                    </div>
-                  </div>
-                  <div className="ml-auto flex">
-                    {[...Array(5)].map((_, i) => (
-                      <svg 
-                        key={i}
-                        className={`w-5 h-5 ${i < currentTestimonial.rating ? 'text-yellow-400' : 'text-gray-300'}`}
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </GlassMorphismCard>
-          
-          <div className="flex justify-between mt-8">
-            <AnimatedButton 
-              variant="outline" 
-              size="sm" 
-              onClick={goToPrevious}
-              className="rounded-full p-3"
-              aria-label="Previous testimonial"
-            >
-              <ChevronLeft size={24} />
-            </AnimatedButton>
-            
-            <div className="flex space-x-2 items-center">
-              {testimonials.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentIndex(index)}
-                  className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                    index === currentIndex ? 'bg-primary' : 'bg-gray-300'
-                  }`}
-                  aria-label={`Go to testimonial ${index + 1}`}
-                />
-              ))}
-            </div>
-            
-            <AnimatedButton 
-              variant="outline" 
-              size="sm" 
-              onClick={goToNext}
-              className="rounded-full p-3"
-              aria-label="Next testimonial"
-            >
-              <ChevronRight size={24} />
-            </AnimatedButton>
-          </div>
+        {/* Desktop View - Grid Layout */}
+        <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {testimonials.slice(0, 6).map((testimonial, index) => (
+            <TestimonialCard key={testimonial.id} testimonial={testimonial} index={index} />
+          ))}
         </div>
-        
-        <div className="mt-10 text-center animate-fade-up" style={{ animationDelay: "400ms" }}>
-          <Link to="/testimonials">
-            <AnimatedButton variant="ghost" size="md">
-              View All Testimonials
-            </AnimatedButton>
-          </Link>
+
+        {/* Mobile View - Carousel */}
+        <div className="md:hidden">
+          <div className="relative">
+            <TestimonialCard testimonial={testimonials[currentIndex]} index={0} />
+            
+            {testimonials.length > 1 && (
+              <div className="flex justify-center items-center mt-6 space-x-4">
+                <button
+                  onClick={prevTestimonial}
+                  className="p-2 rounded-full bg-white/80 border border-gray-200 shadow-sm hover:bg-white transition-colors"
+                  aria-label="Previous testimonial"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                
+                <div className="flex space-x-2">
+                  {testimonials.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentIndex(index)}
+                      className={`w-2 h-2 rounded-full transition-colors ${
+                        index === currentIndex ? "bg-teal-600" : "bg-gray-300"
+                      }`}
+                      aria-label={`Go to testimonial ${index + 1}`}
+                    />
+                  ))}
+                </div>
+                
+                <button
+                  onClick={nextTestimonial}
+                  className="p-2 rounded-full bg-white/80 border border-gray-200 shadow-sm hover:bg-white transition-colors"
+                  aria-label="Next testimonial"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </section>
