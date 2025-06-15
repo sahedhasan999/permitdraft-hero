@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, memo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -22,21 +21,25 @@ const ClientMessaging: React.FC = memo(() => {
       return;
     }
 
-    console.log('Setting up conversations subscription for user:', currentUser.uid);
+    console.log('Setting up conversations subscription for user:', currentUser.uid, currentUser.email);
     
-    const unsubscribe = subscribeToUserConversations(currentUser.uid, (userConversations) => {
-      console.log('Client received conversations update:', userConversations);
-      setConversations(userConversations);
-      
-      if (activeConversation) {
-        const updatedActiveConversation = userConversations.find(conv => conv.id === activeConversation.id);
-        if (updatedActiveConversation) {
-          setActiveConversation(updatedActiveConversation);
+    const unsubscribe = subscribeToUserConversations(
+      currentUser.uid, 
+      currentUser.email || '', 
+      (userConversations) => {
+        console.log('Client received conversations update:', userConversations);
+        setConversations(userConversations);
+        
+        if (activeConversation) {
+          const updatedActiveConversation = userConversations.find(conv => conv.id === activeConversation.id);
+          if (updatedActiveConversation) {
+            setActiveConversation(updatedActiveConversation);
+          }
         }
+        
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
-    });
+    );
 
     return () => {
       console.log('Cleaning up conversations subscription');

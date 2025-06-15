@@ -1,4 +1,3 @@
-
 import { 
   collection, 
   addDoc, 
@@ -28,7 +27,7 @@ export const createConversation = async (
   userName: string,
   subject: string,
   initialMessage: string,
-  pendingFiles: File[] = [] // Changed from attachments: FileAttachment[]
+  pendingFiles: File[] = []
 ): Promise<string> => {
   try {
     const batch = writeBatch(db);
@@ -36,7 +35,7 @@ export const createConversation = async (
     // Create conversation document
     const conversationDocRef = doc(conversationsRef);
     const conversationData = {
-      userId: userId === 'admin-created' ? `admin-${Date.now()}` : userId,
+      userId: userId === 'admin-created' ? userEmail : userId, // Use email for admin-created conversations
       userEmail,
       userName,
       subject,
@@ -44,7 +43,8 @@ export const createConversation = async (
       createdAt: serverTimestamp(),
       lastUpdated: serverTimestamp(),
       lastMessage: initialMessage,
-      messageCount: 1
+      messageCount: 1,
+      isAdminCreated: userId === 'admin-created' // Add flag to identify admin-created conversations
     };
 
     batch.set(conversationDocRef, conversationData);
@@ -55,7 +55,7 @@ export const createConversation = async (
       conversationId: conversationDocRef.id,
       sender: userId === 'admin-created' ? 'admin' : 'customer',
       content: initialMessage,
-      attachments: [], // Initially empty, will be updated later
+      attachments: [],
       timestamp: serverTimestamp(),
       read: false
     });
@@ -72,7 +72,6 @@ export const createConversation = async (
           uploadedAttachments.push(attachment);
         } catch (uploadError) {
           console.error('Error uploading an attachment during conversation creation:', uploadError);
-          // Decide if you want to throw, or continue creating conversation without this attachment
         }
       }
 
@@ -160,13 +159,14 @@ const formatFileSize = (bytes: number): string => {
 
 export const subscribeToUserConversations = (
   userId: string,
+  userEmail: string,
   callback: (conversations: ConversationType[]) => void
 ) => {
-  console.log('Subscribing to conversations for user:', userId);
+  console.log('Subscribing to conversations for user:', userId, userEmail);
   
+  // Query for conversations where userId matches OR userEmail matches (for admin-created conversations)
   const q = query(
     conversationsRef,
-    where('userId', '==', userId),
     orderBy('lastUpdated', 'desc')
   );
 
@@ -177,36 +177,40 @@ export const subscribeToUserConversations = (
     
     for (const docSnapshot of snapshot.docs) {
       const data = docSnapshot.data();
-      console.log('Processing user conversation:', docSnapshot.id, data);
       
-      // Get the latest messages for this conversation
-      const messagesQuery = query(
-        messagesRef,
-        where('conversationId', '==', docSnapshot.id),
-        orderBy('timestamp', 'desc')
-      );
-      
-      const messagesSnapshot = await getDocs(messagesQuery);
-      const messages: MessageType[] = messagesSnapshot.docs.map(msgDoc => {
-        const msgData = msgDoc.data();
-        return {
-          id: msgDoc.id,
-          sender: msgData.sender,
-          content: msgData.content,
-          timestamp: msgData.timestamp?.toDate?.()?.toISOString() || new Date().toISOString(),
-          attachments: msgData.attachments || []
-        };
-      }).reverse(); // Reverse to get chronological order
-      
-      conversations.push({
-        id: docSnapshot.id,
-        customer: data.userName,
-        email: data.userEmail,
-        subject: data.subject,
-        messages,
-        status: data.status,
-        lastUpdated: data.lastUpdated?.toDate?.()?.toISOString() || new Date().toISOString()
-      });
+      // Filter conversations that belong to this user (either by userId or by email for admin-created)
+      if (data.userId === userId || data.userEmail === userEmail) {
+        console.log('Processing user conversation:', docSnapshot.id, data);
+        
+        // Get the latest messages for this conversation
+        const messagesQuery = query(
+          messagesRef,
+          where('conversationId', '==', docSnapshot.id),
+          orderBy('timestamp', 'desc')
+        );
+        
+        const messagesSnapshot = await getDocs(messagesQuery);
+        const messages: MessageType[] = messagesSnapshot.docs.map(msgDoc => {
+          const msgData = msgDoc.data();
+          return {
+            id: msgDoc.id,
+            sender: msgData.sender,
+            content: msgData.content,
+            timestamp: msgData.timestamp?.toDate?.()?.toISOString() || new Date().toISOString(),
+            attachments: msgData.attachments || []
+          };
+        }).reverse();
+        
+        conversations.push({
+          id: docSnapshot.id,
+          customer: data.userName,
+          email: data.userEmail,
+          subject: data.subject,
+          messages,
+          status: data.status,
+          lastUpdated: data.lastUpdated?.toDate?.()?.toISOString() || new Date().toISOString()
+        });
+      }
     }
     
     console.log('Final user conversations array:', conversations);
@@ -282,7 +286,7 @@ export const subscribeToAllConversations = (
           timestamp: msgData.timestamp?.toDate?.()?.toISOString() || new Date().toISOString(),
           attachments: msgData.attachments || []
         };
-      }).reverse(); // Reverse to get chronological order
+      }).reverse();
       
       conversations.push({
         id: docSnapshot.id,
