@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -7,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { DollarSign, CheckCircle, Trash2, ChevronUp, ChevronDown, Loader2, Tag } from 'lucide-react';
 import { Service } from '@/services/servicesService';
+import { ImageSelector } from '../shared/ImageSelector';
 
 interface ServiceDialogProps {
   isOpen: boolean;
@@ -218,15 +220,12 @@ const ServiceDialog = ({
             </div>
           </div>
           
-          <div className="grid gap-2">
-            <Label htmlFor="image">Image URL</Label>
-            <Input 
-              id="image" 
-              value={currentService?.image || ''} 
-              onChange={(e) => handleInputChange('image', e.target.value)}
-              placeholder="URL of service image"
-            />
-          </div>
+          <ImageSelector
+            value={currentService?.image || ''}
+            onChange={(image) => handleInputChange('image', image)}
+            label="Service Image"
+            placeholder="Select image from gallery or enter URL"
+          />
           
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center space-x-2">

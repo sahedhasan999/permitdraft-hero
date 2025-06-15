@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { CarouselImage, getCarouselImages, addCarouselImage, updateCarouselImage, deleteCarouselImage, updateCarouselImageOrder, subscribeToCarouselImages } from '@/services/carouselService';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { toast } from 'sonner';
 import { Loader2, GripVertical, Trash2, Plus } from 'lucide-react';
+import { ImageSelector } from '../shared/ImageSelector';
 
 export const CarouselManager: React.FC = () => {
   const [images, setImages] = useState<CarouselImage[]>([]);
@@ -120,15 +122,12 @@ export const CarouselManager: React.FC = () => {
     <div className="space-y-6">
       <div className="grid gap-4 p-4 border rounded-lg">
         <h3 className="text-lg font-semibold">Add New Image</h3>
-        <div className="grid gap-2">
-          <Label htmlFor="src">Image URL</Label>
-          <Input
-            id="src"
-            value={newImage.src}
-            onChange={(e) => setNewImage({ ...newImage, src: e.target.value })}
-            placeholder="Enter image URL"
-          />
-        </div>
+        <ImageSelector
+          value={newImage.src || ''}
+          onChange={(src) => setNewImage({ ...newImage, src })}
+          label="Image"
+          placeholder="Select image from gallery or enter URL"
+        />
         <div className="grid gap-2">
           <Label htmlFor="alt">Alt Text</Label>
           <Input

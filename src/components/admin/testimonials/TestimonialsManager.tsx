@@ -1,405 +1,416 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Edit, Trash2, MoveUp, MoveDown, Eye, Star } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { 
-  Testimonial, 
-  getTestimonials, 
-  addTestimonial, 
-  updateTestimonial, 
-  deleteTestimonial,
-  subscribeToTestimonials 
-} from '@/services/testimonialsService';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Star, Plus, Edit, Trash2, Loader2, GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+import { Testimonial, getTestimonials, addTestimonial, updateTestimonial, deleteTestimonial, updateTestimonialOrder } from '@/services/testimonialsService';
+import { ImageSelector } from '../shared/ImageSelector';
 
 export const TestimonialsManager: React.FC = () => {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
-  const [currentTestimonial, setCurrentTestimonial] = useState<Partial<Testimonial> | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [previewMode, setPreviewMode] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+  const [isSaving, setIsSaving] = useState(false);
+  const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    location: '',
+    content: '',
+    rating: 5,
+    active: true,
+    order: 0,
+    profileImage: ''
+  });
 
   useEffect(() => {
-    const unsubscribe = subscribeToTestimonials((items) => {
-      setTestimonials(items);
-      setLoading(false);
-    });
-
-    return unsubscribe;
+    loadTestimonials();
   }, []);
 
-  const sortedTestimonials = [...testimonials].sort((a, b) => a.order - b.order);
-  const activeTestimonials = sortedTestimonials.filter(item => item.active);
+  const loadTestimonials = async () => {
+    try {
+      setIsLoading(true);
+      const data = await getTestimonials();
+      setTestimonials(data.sort((a, b) => (a.order || 0) - (b.order || 0)));
+    } catch (error) {
+      toast.error('Failed to load testimonials');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const handleAddTestimonial = () => {
-    setCurrentTestimonial({
+  const openDialog = (testimonial?: Testimonial) => {
+    if (testimonial) {
+      setEditingTestimonial(testimonial);
+      setFormData({
+        name: testimonial.name,
+        location: testimonial.location,
+        content: testimonial.content,
+        rating: testimonial.rating,
+        active: testimonial.active,
+        order: testimonial.order || 0,
+        profileImage: testimonial.profileImage || ''
+      });
+    } else {
+      setEditingTestimonial(null);
+      setFormData({
+        name: '',
+        location: '',
+        content: '',
+        rating: 5,
+        active: true,
+        order: testimonials.length,
+        profileImage: ''
+      });
+    }
+    setIsDialogOpen(true);
+  };
+
+  const closeDialog = () => {
+    setIsDialogOpen(false);
+    setEditingTestimonial(null);
+    setFormData({
       name: '',
-      role: '',
-      company: '',
-      content: '',
-      image: 'https://randomuser.me/api/portraits/men/32.jpg',
-      rating: 5,
-      project: '',
       location: '',
+      content: '',
+      rating: 5,
       active: true,
-      order: testimonials.length + 1
+      order: 0,
+      profileImage: ''
     });
-    setIsEditing(false);
-    setIsDialogOpen(true);
   };
 
-  const handleEditTestimonial = (testimonial: Testimonial) => {
-    setCurrentTestimonial({ ...testimonial });
-    setIsEditing(true);
-    setIsDialogOpen(true);
-  };
-
-  const handleDeletePrompt = (testimonial: Testimonial) => {
-    setCurrentTestimonial(testimonial);
-    setIsDeleteDialogOpen(true);
-  };
-
-  const handleDeleteTestimonial = async () => {
-    if (!currentTestimonial?.id) return;
-    try {
-      await deleteTestimonial(currentTestimonial.id);
-      setIsDeleteDialogOpen(false);
-      toast({
-        title: "Testimonial deleted",
-        description: "The testimonial has been removed",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete testimonial",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleSaveTestimonial = async () => {
-    if (!currentTestimonial || !currentTestimonial.name || !currentTestimonial.content) return;
-
-    try {
-      if (isEditing && currentTestimonial.id) {
-        await updateTestimonial(currentTestimonial.id, currentTestimonial);
-        toast({
-          title: "Testimonial updated",
-          description: "Your changes have been saved",
-        });
-      } else {
-        await addTestimonial(currentTestimonial as Omit<Testimonial, 'id'>);
-        toast({
-          title: "Testimonial added",
-          description: "New testimonial has been added",
-        });
-      }
-      setIsDialogOpen(false);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to save testimonial",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleMoveTestimonial = async (id: string, direction: 'up' | 'down') => {
-    const currentIndex = sortedTestimonials.findIndex(item => item.id === id);
-    if ((direction === 'up' && currentIndex === 0) || 
-        (direction === 'down' && currentIndex === sortedTestimonials.length - 1)) {
+  const handleSave = async () => {
+    if (!formData.name || !formData.location || !formData.content) {
+      toast.error('Please fill in all required fields');
       return;
     }
 
-    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-    const itemToMove = sortedTestimonials[currentIndex];
-    const itemToSwap = sortedTestimonials[newIndex];
-
     try {
-      await updateTestimonial(itemToMove.id, { order: itemToSwap.order });
-      await updateTestimonial(itemToSwap.id, { order: itemToMove.order });
+      setIsSaving(true);
+      
+      if (editingTestimonial) {
+        await updateTestimonial(editingTestimonial.id, formData);
+        toast.success('Testimonial updated successfully');
+      } else {
+        await addTestimonial(formData);
+        toast.success('Testimonial added successfully');
+      }
+      
+      await loadTestimonials();
+      closeDialog();
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to reorder testimonials",
-        variant: "destructive"
-      });
+      toast.error('Failed to save testimonial');
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const handleToggleActive = async (id: string) => {
-    const testimonial = testimonials.find(item => item.id === id);
-    if (!testimonial) return;
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this testimonial?')) return;
 
     try {
-      await updateTestimonial(id, { active: !testimonial.active });
-      toast({
-        title: testimonial.active ? "Testimonial hidden" : "Testimonial shown",
-        description: `The testimonial has been ${testimonial.active ? "hidden" : "made visible"}`,
-      });
+      await deleteTestimonial(id);
+      toast.success('Testimonial deleted successfully');
+      loadTestimonials();
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update testimonial status",
-        variant: "destructive"
-      });
+      toast.error('Failed to delete testimonial');
     }
   };
 
-  if (loading) {
-    return <div className="flex justify-center items-center p-8">Loading...</div>;
+  const handleToggleActive = async (testimonial: Testimonial) => {
+    try {
+      await updateTestimonial(testimonial.id, { ...testimonial, active: !testimonial.active });
+      toast.success('Testimonial status updated');
+      loadTestimonials();
+    } catch (error) {
+      toast.error('Failed to update testimonial status');
+    }
+  };
+
+  const handleDragEnd = async (result: any) => {
+    if (!result.destination) return;
+
+    const items = Array.from(testimonials);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    // Update order values
+    const updatedItems = items.map((item, index) => ({
+      ...item,
+      order: index
+    }));
+
+    setTestimonials(updatedItems);
+
+    try {
+      await updateTestimonialOrder(reorderedItem.id, result.destination.index);
+      toast.success('Testimonial order updated');
+    } catch (error) {
+      toast.error('Failed to update testimonial order');
+      loadTestimonials(); // Reload to revert changes if failed
+    }
+  };
+
+  const renderStars = (rating: number) => {
+    return [...Array(5)].map((_, i) => (
+      <Star
+        key={i}
+        size={16}
+        className={`${i < rating ? "text-yellow-400 fill-current" : "text-gray-300"}`}
+      />
+    ));
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
   }
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">Testimonials Management</h3>
-        <div className="space-x-2">
-          <Button variant="outline" onClick={() => setPreviewMode(!previewMode)}>
-            <Eye className="h-4 w-4 mr-2" />
-            {previewMode ? 'Exit Preview' : 'Preview'}
-          </Button>
-          <Button onClick={handleAddTestimonial}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Testimonial
-          </Button>
+        <div>
+          <h2 className="text-2xl font-bold">Testimonials Management</h2>
+          <p className="text-muted-foreground">Manage customer testimonials and reviews</p>
         </div>
-      </div>
-
-      {previewMode ? (
-        <div className="border rounded-lg p-6 bg-muted/20">
-          <h4 className="text-lg font-medium mb-4">Testimonials Preview</h4>
-          {activeTestimonials.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {activeTestimonials.map((testimonial) => (
-                <div key={testimonial.id} className="bg-white rounded-lg p-6 shadow-md">
-                  <div className="flex items-center mb-4">
-                    <img 
-                      src={testimonial.image} 
-                      alt={testimonial.name}
-                      className="w-12 h-12 rounded-full mr-4" 
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={() => openDialog()}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Testimonial
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>
+                {editingTestimonial ? 'Edit Testimonial' : 'Add New Testimonial'}
+              </DialogTitle>
+              <DialogDescription>
+                {editingTestimonial 
+                  ? 'Update the testimonial details below.' 
+                  : 'Enter the details for the new testimonial.'
+                }
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="name">Customer Name *</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="Enter customer name"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="location">Location *</Label>
+                  <Input
+                    id="location"
+                    value={formData.location}
+                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    placeholder="e.g. New York, NY"
+                  />
+                </div>
+              </div>
+              
+              <div className="grid gap-2">
+                <Label htmlFor="content">Testimonial Content *</Label>
+                <Textarea
+                  id="content"
+                  rows={4}
+                  value={formData.content}
+                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  placeholder="Enter the testimonial content..."
+                />
+              </div>
+              
+              <ImageSelector
+                value={formData.profileImage}
+                onChange={(profileImage) => setFormData({ ...formData, profileImage })}
+                label="Profile Image (Optional)"
+                placeholder="Select profile image from gallery or enter URL"
+              />
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="rating">Rating</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="rating"
+                      type="number"
+                      min="1"
+                      max="5"
+                      value={formData.rating}
+                      onChange={(e) => setFormData({ ...formData, rating: parseInt(e.target.value) || 5 })}
+                      className="w-20"
                     />
-                    <div>
-                      <h3 className="font-semibold">{testimonial.name}</h3>
-                      <p className="text-sm text-gray-500">{testimonial.role}</p>
+                    <div className="flex">
+                      {renderStars(formData.rating)}
                     </div>
                   </div>
-                  <div className="flex mb-4">
-                    {[...Array(5)].map((_, i) => (
-                      <Star 
-                        key={i} 
-                        className={`h-4 w-4 ${i < testimonial.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} 
-                      />
-                    ))}
-                  </div>
-                  <p className="text-gray-700 mb-4">"{testimonial.content}"</p>
-                  <div className="text-sm text-gray-500">
-                    <p>{testimonial.project} • {testimonial.location}</p>
-                  </div>
                 </div>
-              ))}
+                
+                <div className="grid gap-2">
+                  <Label htmlFor="order">Display Order</Label>
+                  <Input
+                    id="order"
+                    type="number"
+                    min="0"
+                    value={formData.order}
+                    onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })}
+                    placeholder="Display order"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="active"
+                  checked={formData.active}
+                  onCheckedChange={(active) => setFormData({ ...formData, active })}
+                />
+                <Label htmlFor="active">Active (visible on website)</Label>
+              </div>
             </div>
-          ) : (
-            <div className="text-center py-12 border border-dashed rounded-lg">
-              <p className="text-muted-foreground">No active testimonials to display</p>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={closeDialog} disabled={isSaving}>
+                Cancel
+              </Button>
+              <Button onClick={handleSave} disabled={isSaving}>
+                {isSaving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  editingTestimonial ? 'Update Testimonial' : 'Add Testimonial'
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="testimonials">
+          {(provided) => (
+            <div
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+              className="grid gap-4"
+            >
+              {testimonials.map((testimonial, index) => (
+                <Draggable key={testimonial.id} draggableId={testimonial.id} index={index}>
+                  {(provided, snapshot) => (
+                    <Card
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      className={cn(
+                        "transition-shadow",
+                        snapshot.isDragging && "shadow-lg"
+                      )}
+                    >
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div {...provided.dragHandleProps}>
+                              <GripVertical className="w-5 h-5 text-gray-500 cursor-grab" />
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="bg-teal-100 rounded-full w-8 h-8 flex items-center justify-center">
+                                <span className="text-teal-600 font-semibold text-xs">
+                                  {testimonial.name.charAt(0)}
+                                </span>
+                              </div>
+                              <div>
+                                <CardTitle className="text-base">{testimonial.name}</CardTitle>
+                                <CardDescription className="text-sm">{testimonial.location}</CardDescription>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={testimonial.active ? "default" : "secondary"}>
+                              {testimonial.active ? "Active" : "Inactive"}
+                            </Badge>
+                            <div className="flex items-center gap-1">
+                              {renderStars(testimonial.rating)}
+                            </div>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <blockquote className="text-sm text-muted-foreground mb-4 italic">
+                          "{testimonial.content}"
+                        </blockquote>
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-muted-foreground">
+                            Order: {testimonial.order || 0}
+                          </span>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleToggleActive(testimonial)}
+                            >
+                              {testimonial.active ? 'Deactivate' : 'Activate'}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => openDialog(testimonial)}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDelete(testimonial.id)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
             </div>
           )}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sortedTestimonials.map((testimonial, index) => (
-            <Card key={testimonial.id} className={!testimonial.active ? 'opacity-60' : ''}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg flex items-center justify-between">
-                  <span>{testimonial.name}</span>
-                  {!testimonial.active && (
-                    <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
-                      Hidden
-                    </span>
-                  )}
-                </CardTitle>
-                <CardDescription>{testimonial.role}, {testimonial.company}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex mb-2">
-                  {[...Array(5)].map((_, i) => (
-                    <Star 
-                      key={i} 
-                      className={`h-4 w-4 ${i < testimonial.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} 
-                    />
-                  ))}
-                </div>
-                <p className="text-sm text-muted-foreground line-clamp-3">"{testimonial.content}"</p>
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <div className="flex space-x-1">
-                  <Button size="sm" variant="ghost" onClick={() => handleMoveTestimonial(testimonial.id, 'up')} disabled={index === 0}>
-                    <MoveUp className="h-4 w-4" />
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => handleMoveTestimonial(testimonial.id, 'down')} disabled={index === sortedTestimonials.length - 1}>
-                    <MoveDown className="h-4 w-4" />
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => handleEditTestimonial(testimonial)}>
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive/90" onClick={() => handleDeletePrompt(testimonial)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-                <Button 
-                  size="sm" 
-                  variant={testimonial.active ? "ghost" : "outline"}
-                  onClick={() => handleToggleActive(testimonial.id)}
-                >
-                  {testimonial.active ? 'Hide' : 'Show'}
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
-      )}
+        </Droppable>
+      </DragDropContext>
 
-      {/* Edit/Add Testimonial Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{isEditing ? 'Edit Testimonial' : 'Add New Testimonial'}</DialogTitle>
-            <DialogDescription>
-              {isEditing ? 'Update testimonial details below.' : 'Enter the details for the new testimonial.'}
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Name</Label>
-                <Input 
-                  id="name" 
-                  value={currentTestimonial?.name || ''} 
-                  onChange={(e) => setCurrentTestimonial({...currentTestimonial, name: e.target.value})}
-                  placeholder="Enter name"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="role">Role</Label>
-                <Input 
-                  id="role" 
-                  value={currentTestimonial?.role || ''} 
-                  onChange={(e) => setCurrentTestimonial({...currentTestimonial, role: e.target.value})}
-                  placeholder="Enter role"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="company">Company</Label>
-                <Input 
-                  id="company" 
-                  value={currentTestimonial?.company || ''} 
-                  onChange={(e) => setCurrentTestimonial({...currentTestimonial, company: e.target.value})}
-                  placeholder="Enter company"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="location">Location</Label>
-                <Input 
-                  id="location" 
-                  value={currentTestimonial?.location || ''} 
-                  onChange={(e) => setCurrentTestimonial({...currentTestimonial, location: e.target.value})}
-                  placeholder="Enter location"
-                />
-              </div>
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="project">Project</Label>
-              <Input 
-                id="project" 
-                value={currentTestimonial?.project || ''} 
-                onChange={(e) => setCurrentTestimonial({...currentTestimonial, project: e.target.value})}
-                placeholder="Enter project type"
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="image">Image URL</Label>
-              <Input 
-                id="image" 
-                value={currentTestimonial?.image || ''} 
-                onChange={(e) => setCurrentTestimonial({...currentTestimonial, image: e.target.value})}
-                placeholder="Enter image URL"
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="rating">Rating</Label>
-              <Input 
-                id="rating" 
-                type="number"
-                min="1"
-                max="5"
-                value={currentTestimonial?.rating || 5} 
-                onChange={(e) => setCurrentTestimonial({...currentTestimonial, rating: parseInt(e.target.value)})}
-              />
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="content">Content</Label>
-              <Textarea 
-                id="content" 
-                value={currentTestimonial?.content || ''} 
-                onChange={(e) => setCurrentTestimonial({...currentTestimonial, content: e.target.value})}
-                placeholder="Enter testimonial content"
-                rows={4}
-              />
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="active"
-                checked={currentTestimonial?.active}
-                onCheckedChange={(checked) => 
-                  setCurrentTestimonial({...currentTestimonial, active: checked})
-                }
-              />
-              <Label htmlFor="active">Active (visible on website)</Label>
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSaveTestimonial} disabled={!currentTestimonial?.name || !currentTestimonial?.content}>
-              {isEditing ? 'Update' : 'Add'} Testimonial
+      {testimonials.length === 0 && (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <Star className="w-12 h-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No testimonials yet</h3>
+            <p className="text-muted-foreground text-center mb-4">
+              Start building trust with your customers by adding testimonials
+            </p>
+            <Button onClick={() => openDialog()}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add First Testimonial
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Testimonial</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this testimonial? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={handleDeleteTestimonial}>Delete</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
