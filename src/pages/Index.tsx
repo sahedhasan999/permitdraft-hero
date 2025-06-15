@@ -18,10 +18,14 @@ const Index = () => {
       <Navbar />
       <main>
         <Hero />
-        <Services />
+        <div className="py-12">
+          <Services />
+        </div>
         <Benefits />
         <Testimonials />
-        <CTASection />
+        <div className="py-12">
+          <CTASection />
+        </div>
       </main>
     </div>
   );
