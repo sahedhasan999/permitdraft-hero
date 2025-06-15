@@ -1,4 +1,5 @@
 
+
 import React, { useEffect, useRef, useState } from "react";
 import { ArrowRight, Heart, Clock, ArrowUpRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -116,6 +117,11 @@ const Hero = () => {
                 Start Your Project
               </AnimatedButton>
             </div>
+            <div className="mt-6 text-muted-foreground">
+              <span className="text-sm">
+                Trusted by <span className="text-foreground font-medium">200+</span> clients in the US
+              </span>
+            </div>
           </div>
 
           {/* Hero Image */}
@@ -178,3 +184,4 @@ const Hero = () => {
 };
 
 export default Hero;
+
