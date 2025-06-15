@@ -52,7 +52,7 @@ const NavLink: React.FC<NavLinkProps> = ({
         <button
           className={cn(
             mobile 
-              ? "w-full px-4 py-2 text-center flex justify-center items-center hover:bg-secondary rounded-md transition-colors relative" 
+              ? "w-full px-6 py-3 text-center flex justify-center items-center hover:bg-secondary rounded-lg transition-colors relative text-base font-medium" 
               : "px-0 py-2 text-sm font-medium flex items-center transition-colors hover:text-teal-600 group",
           )}
           onClick={toggleDropdown}
@@ -60,9 +60,9 @@ const NavLink: React.FC<NavLinkProps> = ({
         >
           {link.title}
           <ChevronDown 
-            size={mobile ? 16 : 14} 
+            size={mobile ? 18 : 14} 
             className={cn(
-              mobile ? "absolute right-4 transition-transform duration-200" : "ml-1 transition-transform duration-200 group-hover:rotate-180",
+              mobile ? "absolute right-6 transition-transform duration-200" : "ml-1 transition-transform duration-200 group-hover:rotate-180",
               activeDropdown === link.title ? "rotate-180" : ""
             )} 
           />
@@ -70,7 +70,7 @@ const NavLink: React.FC<NavLinkProps> = ({
         
         {link.children && activeDropdown === link.title && (
           <div className={mobile 
-            ? "pl-4 mt-1 space-y-1 animate-fade-in"
+            ? "px-4 mt-2 space-y-2 animate-fade-in"
             : "absolute left-0 mt-1 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 transition-all duration-200 animate-fade-down origin-top-right"
           }>
             <div className={mobile ? "" : "py-1 rounded-md bg-white overflow-hidden"}>
@@ -79,7 +79,7 @@ const NavLink: React.FC<NavLinkProps> = ({
                   key={child.title}
                   to={child.href}
                   className={mobile
-                    ? "block px-4 py-2 text-sm hover:bg-secondary rounded-md transition-colors"
+                    ? "block px-6 py-3 text-sm hover:bg-secondary rounded-lg transition-colors bg-gray-50 hover:bg-gray-100"
                     : "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                   }
                   onClick={() => {
@@ -101,7 +101,7 @@ const NavLink: React.FC<NavLinkProps> = ({
     <Link
       to={link.href}
       className={mobile
-        ? "block px-4 py-2 hover:bg-secondary rounded-md transition-colors"
+        ? "block px-6 py-3 hover:bg-secondary rounded-lg transition-colors text-base font-medium"
         : "px-0 py-2 text-sm font-medium hover:text-teal-600 transition-colors"
       }
       onClick={handleItemClick}
