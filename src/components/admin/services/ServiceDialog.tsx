@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -86,10 +85,16 @@ const ServiceDialog = ({
   const handleInputChange = (field: string, value: string | number | boolean) => {
     if (!currentService) return;
     
-    const updatedService = {
+    let updatedService = {
       ...currentService,
       [field]: value
     };
+
+    // Auto-generate link when title changes for new services
+    if (field === 'title' && typeof value === 'string' && !isEditing) {
+      const slug = value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      updatedService.link = `/services/${slug}`;
+    }
     
     // This is a prop update in the parent component
     window.dispatchEvent(new CustomEvent('updateCurrentService', { 
@@ -103,7 +108,7 @@ const ServiceDialog = ({
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Edit Service' : 'Add New Service'}</DialogTitle>
           <DialogDescription>
-            {isEditing ? 'Update service details below.' : 'Enter the details for the new service.'}
+            {isEditing ? 'Update service details below.' : 'Enter the details for the new service. A page will be automatically generated.'}
           </DialogDescription>
         </DialogHeader>
         
@@ -215,8 +220,14 @@ const ServiceDialog = ({
                 id="link" 
                 value={currentService?.link || ''} 
                 onChange={(e) => handleInputChange('link', e.target.value)}
-                placeholder="e.g. /services/deck"
+                placeholder="Auto-generated from title"
+                disabled={!isEditing}
               />
+              {!isEditing && (
+                <p className="text-xs text-muted-foreground">
+                  The page link will be automatically generated from the service title
+                </p>
+              )}
             </div>
           </div>
           

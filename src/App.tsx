@@ -1,3 +1,4 @@
+
 import './App.css';
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
@@ -29,6 +30,7 @@ const Patio = lazy(() => import('./pages/services/Patio'));
 const Pergola = lazy(() => import('./pages/services/Pergola'));
 const OutdoorKitchen = lazy(() => import('./pages/services/OutdoorKitchen'));
 const HomeAddition = lazy(() => import('./pages/services/HomeAddition'));
+const DynamicService = lazy(() => import('./pages/services/DynamicService'));
 
 // Admin Pages
 const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
@@ -81,12 +83,15 @@ function App() {
                   <Route path="/order" element={<Order />} />
                   <Route path="/login" element={<Login />} />
                   
-                  {/* Service Routes */}
+                  {/* Static Service Routes (for backward compatibility) */}
                   <Route path="/services/deck" element={<Deck />} />
                   <Route path="/services/patio" element={<Patio />} />
                   <Route path="/services/pergola" element={<Pergola />} />
                   <Route path="/services/outdoor-kitchen" element={<OutdoorKitchen />} />
                   <Route path="/services/home-addition" element={<HomeAddition />} />
+                  
+                  {/* Dynamic Service Route */}
+                  <Route path="/services/:serviceId" element={<DynamicService />} />
                   
                   {/* 404 */}
                   <Route path="*" element={<NotFound />} />

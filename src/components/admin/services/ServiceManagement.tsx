@@ -156,7 +156,7 @@ const ServiceManagement = () => {
         active: true,
         image: '',
         cta: 'Get Started',
-        link: '/services',
+        link: '', // Will be auto-generated from title
         displayOrder: services.length + 1,
         showInNavigation: true,
         showOnHomepage: true
@@ -262,6 +262,12 @@ const ServiceManagement = () => {
         // Add new service
         const serviceData = currentService as Omit<Service, 'id'>;
         
+        // Auto-generate link if not set
+        if (!serviceData.link && serviceData.title) {
+          const slug = serviceData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+          serviceData.link = `/services/${slug}`;
+        }
+        
         // Ensure regularPrice is set if not provided
         if (!serviceData.regularPrice && serviceData.basePrice) {
           serviceData.regularPrice = serviceData.basePrice;
@@ -277,10 +283,6 @@ const ServiceManagement = () => {
           serviceData.cta = 'Get Started';
         }
         
-        if (!serviceData.link) {
-          serviceData.link = '/services';
-        }
-        
         // Set display order if not provided
         if (!serviceData.displayOrder) {
           serviceData.displayOrder = services.length + 1;
@@ -289,7 +291,7 @@ const ServiceManagement = () => {
         await addService(serviceData);
         toast({
           title: "Service created",
-          description: "The new service has been successfully created.",
+          description: `The new service has been created with a page at ${serviceData.link}`,
         });
       }
       setIsDialogOpen(false);
