@@ -9,6 +9,7 @@ export interface Testimonial {
   company: string;
   content: string;
   image: string;
+  profileImage?: string; // Optional profile image for new testimonials
   rating: number;
   project: string;
   location: string;
@@ -68,6 +69,16 @@ export const updateTestimonial = async (id: string, data: Partial<Testimonial>):
     await updateDoc(docRef, data);
   } catch (error) {
     console.error('Error updating testimonial:', error);
+    throw error;
+  }
+};
+
+export const updateTestimonialOrder = async (id: string, newOrder: number): Promise<void> => {
+  try {
+    const docRef = doc(db, COLLECTION_NAME, id);
+    await updateDoc(docRef, { order: newOrder });
+  } catch (error) {
+    console.error('Error updating testimonial order:', error);
     throw error;
   }
 };

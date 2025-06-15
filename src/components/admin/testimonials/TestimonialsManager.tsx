@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Star, Plus, Edit, Trash2, Loader2, GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
+import { Star, Plus, Edit, Trash2, Loader2, GripVertical } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -23,11 +22,15 @@ export const TestimonialsManager: React.FC = () => {
   const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
   const [formData, setFormData] = useState({
     name: '',
+    role: '',
+    company: '',
     location: '',
+    project: '',
     content: '',
     rating: 5,
     active: true,
     order: 0,
+    image: '',
     profileImage: ''
   });
 
@@ -52,22 +55,30 @@ export const TestimonialsManager: React.FC = () => {
       setEditingTestimonial(testimonial);
       setFormData({
         name: testimonial.name,
+        role: testimonial.role,
+        company: testimonial.company,
         location: testimonial.location,
+        project: testimonial.project,
         content: testimonial.content,
         rating: testimonial.rating,
         active: testimonial.active,
         order: testimonial.order || 0,
+        image: testimonial.image,
         profileImage: testimonial.profileImage || ''
       });
     } else {
       setEditingTestimonial(null);
       setFormData({
         name: '',
+        role: '',
+        company: '',
         location: '',
+        project: '',
         content: '',
         rating: 5,
         active: true,
         order: testimonials.length,
+        image: '',
         profileImage: ''
       });
     }
@@ -79,11 +90,15 @@ export const TestimonialsManager: React.FC = () => {
     setEditingTestimonial(null);
     setFormData({
       name: '',
+      role: '',
+      company: '',
       location: '',
+      project: '',
       content: '',
       rating: 5,
       active: true,
       order: 0,
+      image: '',
       profileImage: ''
     });
   };
@@ -97,11 +112,17 @@ export const TestimonialsManager: React.FC = () => {
     try {
       setIsSaving(true);
       
+      // Use profileImage as the main image if provided, otherwise use image field
+      const testimonialData = {
+        ...formData,
+        image: formData.profileImage || formData.image
+      };
+      
       if (editingTestimonial) {
-        await updateTestimonial(editingTestimonial.id, formData);
+        await updateTestimonial(editingTestimonial.id, testimonialData);
         toast.success('Testimonial updated successfully');
       } else {
-        await addTestimonial(formData);
+        await addTestimonial(testimonialData);
         toast.success('Testimonial added successfully');
       }
       
@@ -225,6 +246,37 @@ export const TestimonialsManager: React.FC = () => {
                     placeholder="e.g. New York, NY"
                   />
                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="role">Role</Label>
+                  <Input
+                    id="role"
+                    value={formData.role}
+                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                    placeholder="e.g. Homeowner"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="company">Company</Label>
+                  <Input
+                    id="company"
+                    value={formData.company}
+                    onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                    placeholder="Company name (optional)"
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="project">Project</Label>
+                <Input
+                  id="project"
+                  value={formData.project}
+                  onChange={(e) => setFormData({ ...formData, project: e.target.value })}
+                  placeholder="e.g. Deck Construction"
+                />
               </div>
               
               <div className="grid gap-2">
