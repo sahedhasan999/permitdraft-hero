@@ -1,5 +1,4 @@
 
-```javascript
 import React, { useEffect } from "react";
 import ServiceLayout from "@/components/services/ServiceLayout";
 
@@ -98,4 +97,3 @@ const DeckService = () => {
 };
 
 export default DeckService;
-```

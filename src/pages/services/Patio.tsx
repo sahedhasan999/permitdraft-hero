@@ -1,5 +1,4 @@
 
-```javascript
 import React, { useEffect } from "react";
 import ServiceLayout from "@/components/services/ServiceLayout";
 
@@ -97,4 +96,3 @@ const PatioService = () => {
 };
 
 export default PatioService;
-```

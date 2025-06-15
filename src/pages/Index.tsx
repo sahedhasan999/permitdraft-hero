@@ -1,5 +1,4 @@
 
-```javascript
 import React, { useEffect } from "react";
 import Hero from '@/components/home/Hero';
 import Services from '@/components/home/Services';
@@ -33,4 +32,3 @@ const Index = () => {
 };
 
 export default Index;
-```
