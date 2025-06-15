@@ -1,5 +1,4 @@
 
-
 import React, { useEffect, useRef, useState } from "react";
 import { ArrowRight, Heart, Clock, ArrowUpRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -91,15 +90,15 @@ const Hero = () => {
       <div className="container relative px-4 mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-6 items-center">
           {/* Hero Content */}
-          <div className="order-2 lg:order-1 animate-fade-up">
+          <div className="order-2 lg:order-1 animate-fade-up text-center lg:text-left">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 tracking-tight">
               Outdoor Designs, <br />
               <span className="text-primary">Approved Results</span>
             </h1>
-            <p className="text-base text-muted-foreground mb-6 max-w-lg">
+            <p className="text-base text-muted-foreground mb-6 max-w-lg mx-auto lg:mx-0">
               Professional architectural drafting services specializing in outdoor space designs for US permit applications. High-quality drawings at competitive prices.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <AnimatedButton 
                 variant="primary" 
                 size="lg" 
@@ -184,4 +183,3 @@ const Hero = () => {
 };
 
 export default Hero;
-
