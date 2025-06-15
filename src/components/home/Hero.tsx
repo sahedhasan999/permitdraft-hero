@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from "react";
 import { ArrowRight, Heart, Clock, ArrowUpRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -90,11 +91,6 @@ const Hero = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-6 items-center">
           {/* Hero Content */}
           <div className="order-2 lg:order-1 animate-fade-up">
-            <div className="inline-block mb-4">
-              <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
-                Architectural Drafting Services
-              </span>
-            </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 tracking-tight">
               Outdoor Designs, <br />
               <span className="text-primary">Approved Results</span>
@@ -119,28 +115,6 @@ const Hero = () => {
               >
                 Start Your Project
               </AnimatedButton>
-            </div>
-            <div className="mt-6 flex items-center text-muted-foreground">
-              <div className="flex -space-x-2 mr-3">
-                <img
-                  src="https://randomuser.me/api/portraits/men/1.jpg"
-                  alt="Customer"
-                  className="w-8 h-8 rounded-full border-2 border-white"
-                />
-                <img
-                  src="https://randomuser.me/api/portraits/women/2.jpg"
-                  alt="Customer"
-                  className="w-8 h-8 rounded-full border-2 border-white"
-                />
-                <img
-                  src="https://randomuser.me/api/portraits/men/3.jpg"
-                  alt="Customer"
-                  className="w-8 h-8 rounded-full border-2 border-white"
-                />
-              </div>
-              <span className="text-sm">
-                Trusted by <span className="text-foreground font-medium">2,000+</span> clients in the US
-              </span>
             </div>
           </div>
 
