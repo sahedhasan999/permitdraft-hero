@@ -6,22 +6,87 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// Fallback images for when Firebase data isn't available
+const fallbackImages: CarouselImage[] = [
+  {
+    id: 'fallback-1',
+    src: '/lovable-uploads/66619c27-f30e-4e6c-b1c7-0f5ad695cee0.png',
+    alt: 'Modern deck design',
+    caption: 'Modern deck with built-in lighting',
+    active: true,
+    displayOrder: 0
+  },
+  {
+    id: 'fallback-2',
+    src: '/lovable-uploads/dd2d3de4-09ef-4eb5-a833-36fb407ca0ad.png',
+    alt: 'Wooden deck with pergola',
+    caption: 'Wooden deck with overhead pergola',
+    active: true,
+    displayOrder: 1
+  },
+  {
+    id: 'fallback-3',
+    src: '/lovable-uploads/741fe312-9ad4-4de6-833f-cb39ab80875c.png',
+    alt: 'Custom patio design',
+    caption: 'Custom stone patio with firepit',
+    active: true,
+    displayOrder: 2
+  },
+  {
+    id: 'fallback-4',
+    src: '/lovable-uploads/3a843a1c-f661-483d-8811-7db962bc1ae3.png',
+    alt: 'Elevated deck with railing',
+    caption: 'Elevated deck with glass railing',
+    active: true,
+    displayOrder: 3
+  }
+];
+
 export const HeroCarousel: React.FC = memo(() => {
   const [images, setImages] = useState<CarouselImage[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
+  const [firebaseError, setFirebaseError] = useState(false);
 
   useEffect(() => {
-    // Subscribe to real-time updates from Firebase
-    const unsubscribe = subscribeToCarouselImages((allImages) => {
-      const activeImages = allImages.filter(img => img.active);
-      setImages(activeImages);
+    let unsubscribe: (() => void) | null = null;
+    
+    try {
+      // Try to subscribe to Firebase data
+      unsubscribe = subscribeToCarouselImages((allImages) => {
+        const activeImages = allImages.filter(img => img.active);
+        if (activeImages.length > 0) {
+          setImages(activeImages);
+          setFirebaseError(false);
+        } else {
+          // If no active images, use fallback
+          setImages(fallbackImages);
+        }
+        setIsLoading(false);
+      });
+    } catch (error) {
+      console.log('Firebase not available for carousel, using fallback images');
+      setFirebaseError(true);
+      setImages(fallbackImages);
       setIsLoading(false);
-    });
+    }
 
-    return unsubscribe;
-  }, []);
+    // Fallback timeout - if Firebase doesn't respond in 2 seconds, use fallback
+    const fallbackTimeout = setTimeout(() => {
+      if (isLoading) {
+        console.log('Firebase timeout, using fallback images');
+        setImages(fallbackImages);
+        setIsLoading(false);
+        setFirebaseError(true);
+      }
+    }, 2000);
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+      clearTimeout(fallbackTimeout);
+    };
+  }, [isLoading]);
 
   // Preload images for smoother transitions
   useEffect(() => {
@@ -32,6 +97,9 @@ export const HeroCarousel: React.FC = memo(() => {
             const img = new Image();
             img.onload = () => {
               setLoadedImages(prev => new Set([...prev, index]));
+            };
+            img.onerror = () => {
+              console.log(`Failed to load image: ${image.src}`);
             };
             img.src = image.src;
           }
