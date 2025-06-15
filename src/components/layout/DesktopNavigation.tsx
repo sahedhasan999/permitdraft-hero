@@ -55,7 +55,7 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = memo(({
 
   return (
     <>
-      <nav className="hidden md:flex items-center space-x-6">
+      <nav className="hidden lg:flex items-center space-x-6">
         {navLinks.map((link) => (
           <NavLink
             key={link.title}
@@ -67,7 +67,7 @@ const DesktopNavigation: React.FC<DesktopNavigationProps> = memo(({
         ))}
       </nav>
 
-      <div className="hidden md:flex items-center space-x-4">
+      <div className="hidden lg:flex items-center space-x-4">
         <button 
           className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
           onClick={handleStartProject}

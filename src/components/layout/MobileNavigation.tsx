@@ -60,7 +60,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = memo(({
   if (!isMenuOpen) return null;
 
   return (
-    <div className="md:hidden py-6 bg-background/95 backdrop-blur-lg border-t animate-fade-down shadow-lg">
+    <div className="lg:hidden py-6 bg-background/95 backdrop-blur-lg border-t animate-fade-down shadow-lg">
       <div className="container px-6 mx-auto">
         <nav className="flex flex-col space-y-3">
           {navLinks.map((link) => (
@@ -79,7 +79,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = memo(({
 
         <div className="mt-8 space-y-4 px-2">
           <button
-            className="w-full bg-teal-500 hover:bg-teal-600 text-white px-6 py-3 rounded-lg text-base font-medium transition-colors shadow-md hover:shadow-lg"
+            className="w-full bg-teal-500 hover:bg-teal-600 text-white px-6 py-4 rounded-lg text-lg font-medium transition-colors shadow-md hover:shadow-lg"
             onClick={() => {
               toggleMenu();
               handleStartProject();
@@ -95,9 +95,9 @@ const MobileNavigation: React.FC<MobileNavigationProps> = memo(({
                   toggleMenu();
                   handleDashboard();
                 }}
-                className="block w-full text-center py-3 px-4 text-base font-medium hover:text-teal-600 transition-colors flex items-center justify-center bg-gray-50 hover:bg-gray-100 rounded-lg"
+                className="block w-full text-center py-4 px-6 text-lg font-medium hover:text-teal-600 transition-colors flex items-center justify-center bg-gray-50 hover:bg-gray-100 rounded-lg"
               >
-                <User size={18} className="mr-2" />
+                <User size={20} className="mr-3" />
                 My Dashboard
               </button>
               <button 
@@ -105,9 +105,9 @@ const MobileNavigation: React.FC<MobileNavigationProps> = memo(({
                   toggleMenu();
                   handleLogout();
                 }}
-                className="block w-full text-center py-3 px-4 text-base font-medium hover:text-teal-600 transition-colors flex items-center justify-center bg-gray-50 hover:bg-gray-100 rounded-lg"
+                className="block w-full text-center py-4 px-6 text-lg font-medium hover:text-teal-600 transition-colors flex items-center justify-center bg-gray-50 hover:bg-gray-100 rounded-lg"
               >
-                <LogOut size={18} className="mr-2" />
+                <LogOut size={20} className="mr-3" />
                 Logout
               </button>
             </div>
@@ -117,7 +117,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = memo(({
                 toggleMenu();
                 handleLogin();
               }}
-              className="block w-full text-center py-3 px-4 text-base font-medium hover:text-teal-600 transition-colors bg-gray-50 hover:bg-gray-100 rounded-lg"
+              className="block w-full text-center py-4 px-6 text-lg font-medium hover:text-teal-600 transition-colors bg-gray-50 hover:bg-gray-100 rounded-lg"
             >
               Login
             </button>

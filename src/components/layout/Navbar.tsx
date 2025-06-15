@@ -89,7 +89,7 @@ const Navbar = memo(() => {
           </span>
         </Link>
 
-        {/* Desktop Navigation */}
+        {/* Desktop Navigation - only show on larger screens */}
         <DesktopNavigation 
           navLinks={navLinks}
           activeDropdown={activeDropdown}
@@ -97,9 +97,9 @@ const Navbar = memo(() => {
           closeDropdown={closeDropdown}
         />
 
-        {/* Mobile Menu Button */}
+        {/* Mobile/Tablet Menu Button - show on screens smaller than 1024px */}
         <button
-          className="md:hidden p-2 rounded-md text-foreground hover:bg-secondary"
+          className="lg:hidden p-2 rounded-md text-foreground hover:bg-secondary"
           onClick={toggleMenu}
           aria-label="Toggle menu"
         >
@@ -107,7 +107,7 @@ const Navbar = memo(() => {
         </button>
       </div>
 
-      {/* Mobile Navigation */}
+      {/* Mobile/Tablet Navigation - show on screens smaller than 1024px */}
       <MobileNavigation
         isMenuOpen={isMenuOpen}
         navLinks={navLinks}
