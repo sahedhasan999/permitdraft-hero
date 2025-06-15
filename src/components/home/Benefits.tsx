@@ -111,9 +111,9 @@ const Benefits = () => {
   ];
 
   return (
-    <section id="benefits" className="py-6 bg-background" ref={benefitsRef}>
+    <section id="benefits" className="py-12 bg-background" ref={benefitsRef}>
       <div className="container px-4 mx-auto">
-        <div className="max-w-2xl mx-auto text-center mb-12 animate-fade-up">
+        <div className="max-w-2xl mx-auto text-center mb-16 animate-fade-up">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
             Why Choose PermitDraft Pro?
           </h2>
