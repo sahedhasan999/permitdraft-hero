@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { MessageSquare, Headphones } from 'lucide-react';
 import { ConversationType, MessageType } from '@/types/communications';
@@ -34,11 +33,8 @@ const ActiveConversationView: React.FC<ActiveConversationViewProps> = ({
           </p>
           <NewConversationDialog
             onConversationCreated={onNewConversationCreated}
-            triggerElement={
-              <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
-                {hasConversations ? "Start New Conversation" : "Contact Support"}
-              </button>
-            }
+            triggerButtonText={hasConversations ? "Start New Conversation" : "Contact Support"}
+            triggerButtonClassName="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
           />
         </div>
       </div>

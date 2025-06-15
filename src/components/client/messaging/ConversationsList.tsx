@@ -34,12 +34,9 @@ const ConversationsList: React.FC<ConversationsListProps> = ({
           <h2 className="text-lg font-semibold text-gray-900">Messages</h2>
           <NewConversationDialog 
             onConversationCreated={onNewConversationCreated}
-            triggerElement={
-              <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-                <Plus className="h-4 w-4 mr-1" />
-                New
-              </Button>
-            }
+            triggerButtonText="New"
+            triggerButtonIcon={<Plus className="h-4 w-4 mr-1" />}
+            triggerButtonClassName="bg-blue-600 hover:bg-blue-700"
           />
         </div>
         
@@ -64,11 +61,8 @@ const ConversationsList: React.FC<ConversationsListProps> = ({
                 <p className="text-gray-500 text-sm mb-4">No conversations yet</p>
                 <NewConversationDialog 
                   onConversationCreated={onNewConversationCreated}
-                  triggerElement={
-                    <Button className="bg-blue-600 hover:bg-blue-700">
-                      Start your first conversation
-                    </Button>
-                  }
+                  triggerButtonText="Start your first conversation"
+                  triggerButtonClassName="bg-blue-600 hover:bg-blue-700"
                 />
               </>
             ) : (
