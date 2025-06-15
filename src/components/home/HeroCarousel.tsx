@@ -1,69 +1,24 @@
-import React, { useState, useEffect, memo, useCallback } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { CarouselImage, subscribeToCarouselImages } from '@/services/carouselService';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Skeleton } from '@/components/ui/skeleton';
 
-// Fallback images for when Firebase data isn't available
-const fallbackImages: CarouselImage[] = [
-  {
-    id: 'fallback-1',
-    src: '/lovable-uploads/66619c27-f30e-4e6c-b1c7-0f5ad695cee0.png',
-    alt: 'Modern deck design',
-    caption: 'Modern deck with built-in lighting',
-    active: true,
-    displayOrder: 0
-  },
-  {
-    id: 'fallback-2',
-    src: '/lovable-uploads/dd2d3de4-09ef-4eb5-a833-36fb407ca0ad.png',
-    alt: 'Wooden deck with pergola',
-    caption: 'Wooden deck with overhead pergola',
-    active: true,
-    displayOrder: 1
-  },
-  {
-    id: 'fallback-3',
-    src: '/lovable-uploads/741fe312-9ad4-4de6-833f-cb39ab80875c.png',
-    alt: 'Custom patio design',
-    caption: 'Custom stone patio with firepit',
-    active: true,
-    displayOrder: 2
-  },
-  {
-    id: 'fallback-4',
-    src: '/lovable-uploads/3a843a1c-f661-483d-8811-7db962bc1ae3.png',
-    alt: 'Elevated deck with railing',
-    caption: 'Elevated deck with glass railing',
-    active: true,
-    displayOrder: 3
-  }
-];
-
-export const HeroCarousel: React.FC = memo(() => {
-  const [images, setImages] = useState<CarouselImage[]>(fallbackImages);
+export const HeroCarousel: React.FC = () => {
+  const [images, setImages] = useState<CarouselImage[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      // Try to subscribe to Firebase data
-      const unsubscribe = subscribeToCarouselImages((allImages) => {
-        const activeImages = allImages.filter(img => img.active);
-        if (activeImages.length > 0) {
-          setImages(activeImages);
-        }
-        // If no active images from Firebase, keep using fallback images
-        setIsLoading(false);
-      });
-
-      return unsubscribe;
-    } catch (error) {
-      console.log('Firebase not available for carousel, using fallback images');
-      // Keep fallback images that were set in initial state
+    // Subscribe to real-time updates from Firebase
+    const unsubscribe = subscribeToCarouselImages((allImages) => {
+      const activeImages = allImages.filter(img => img.active);
+      setImages(activeImages);
       setIsLoading(false);
-    }
+    });
+
+    return unsubscribe;
   }, []);
 
   useEffect(() => {
@@ -76,17 +31,17 @@ export const HeroCarousel: React.FC = memo(() => {
     }
   }, [images.length]);
 
-  const goToPrevious = useCallback(() => {
+  const goToPrevious = () => {
     setCurrentIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
-  }, [images.length]);
+  };
 
-  const goToNext = useCallback(() => {
+  const goToNext = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-  }, [images.length]);
+  };
 
   if (isLoading) {
     return (
-      <Skeleton className="w-full h-[400px]" />
+      <div className="w-full h-[400px] bg-gray-100 animate-pulse" />
     );
   }
 
@@ -109,7 +64,6 @@ export const HeroCarousel: React.FC = memo(() => {
               src={image.src}
               alt={image.alt}
               className="w-full h-full object-cover"
-              loading={index === 0 ? "eager" : "lazy"}
             />
             <div className="absolute inset-0 bg-black/40" />
             <div className="absolute inset-0 flex items-center justify-center">
@@ -155,6 +109,4 @@ export const HeroCarousel: React.FC = memo(() => {
       </div>
     </div>
   );
-});
-
-HeroCarousel.displayName = 'HeroCarousel';
+};
