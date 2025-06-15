@@ -1,200 +1,87 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Toaster } from '@/components/ui/toaster';
+import { FirebaseProvider } from '@/contexts/FirebaseContext';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { ContentProvider } from '@/contexts/ContentContext';
+import { PortfolioProvider } from '@/contexts/PortfolioContext';
+import FloatingChatButton from '@/components/client/messaging/FloatingChatButton';
+import HomePage from './pages/HomePage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import DashboardPage from './pages/DashboardPage';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import Communications from './pages/admin/Communications';
+import ProtectedRoute from './components/ProtectedRoute';
+import AdminRoute from './components/AdminRoute';
+import ServicesPage from './pages/ServicesPage';
+import PricingPage from './pages/PricingPage';
+import ContactPage from './pages/ContactPage';
+import PortfolioPage from './pages/PortfolioPage';
+import BlogPage from './pages/BlogPage';
+import BlogPostPage from './pages/BlogPostPage';
+import EditBlogPost from './pages/admin/EditBlogPost';
+import NewBlogPost from './pages/admin/NewBlogPost';
+import SettingsPage from './pages/SettingsPage';
+import NewProjectPage from './pages/admin/NewProjectPage';
+import EditProjectPage from './pages/admin/EditProjectPage';
+import NewServicePage from './pages/admin/NewServicePage';
+import EditServicePage from './pages/admin/EditServicePage';
+import NewPricingPlanPage from './pages/admin/NewPricingPlanPage';
+import EditPricingPlanPage from './pages/admin/EditPricingPlanPage';
+import PublicPortfolioPage from './pages/PublicPortfolioPage';
+import PublicServicesPage from './pages/PublicServicesPage';
+import PublicPricingPage from './pages/PublicPricingPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 import './App.css';
-import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from './contexts/AuthContext';
-import ProtectedRoute from './components/admin/ProtectedRoute';
-import { Skeleton } from './components/ui/skeleton';
-
-// Layout
-import Footer from './components/layout/Footer';
-
-// Critical pages (not lazy loaded)
-import Index from './pages/Index';
-import Login from './pages/Login';
-
-// Lazy loaded pages
-const About = lazy(() => import('./pages/About'));
-const Contact = lazy(() => import('./pages/Contact'));
-const Testimonials = lazy(() => import('./pages/Testimonials'));
-const Portfolio = lazy(() => import('./pages/Portfolio'));
-const Quote = lazy(() => import('./pages/Quote'));
-const Order = lazy(() => import('./pages/Order'));
-const Blog = lazy(() => import('./pages/Blog'));
-const NotFound = lazy(() => import('./pages/NotFound'));
-const AdminLogin = lazy(() => import('./pages/admin/Login'));
-
-// Service Pages
-const Deck = lazy(() => import('./pages/services/Deck'));
-const Patio = lazy(() => import('./pages/services/Patio'));
-const Pergola = lazy(() => import('./pages/services/Pergola'));
-const OutdoorKitchen = lazy(() => import('./pages/services/OutdoorKitchen'));
-const HomeAddition = lazy(() => import('./pages/services/HomeAddition'));
-const DynamicService = lazy(() => import('./pages/services/DynamicService'));
-
-// Admin Pages
-const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
-const Orders = lazy(() => import('./pages/admin/Orders'));
-const Leads = lazy(() => import('./pages/admin/Leads'));
-const Communications = lazy(() => import('./pages/admin/Communications'));
-const Services = lazy(() => import('./pages/admin/Services'));
-const ContentManager = lazy(() => import('./pages/admin/ContentManager'));
-
-// Client Pages
-const ClientDashboard = lazy(() => import('./pages/client/Dashboard'));
-const ClientOrders = lazy(() => import('./pages/client/Orders'));
-const ClientDocuments = lazy(() => import('./pages/client/Documents'));
-const ClientMessages = lazy(() => import('./pages/client/Messages'));
-
-import { Toaster } from './components/ui/toaster';
-
-// Loading component for lazy routes
-const PageSkeleton = () => (
-  <div className="min-h-screen p-6">
-    <Skeleton className="h-8 w-64 mb-6" />
-    <Skeleton className="h-4 w-full mb-4" />
-    <Skeleton className="h-4 w-3/4 mb-4" />
-    <Skeleton className="h-64 w-full mb-6" />
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <Skeleton className="h-32 w-full" />
-      <Skeleton className="h-32 w-full" />
-    </div>
-  </div>
-);
 
 function App() {
   return (
-    <BrowserRouter>
-      <Suspense fallback={<PageSkeleton />}>
-        <Routes>
-          {/* Public Routes */}
-          <Route
-            path="/*"
-            element={
-              <>
+    <FirebaseProvider>
+      <AuthProvider>
+        <ContentProvider>
+          <PortfolioProvider>
+            <Router>
+              <div className="min-h-screen bg-gray-50">
                 <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/testimonials" element={<Testimonials />} />
-                  <Route path="/portfolio" element={<Portfolio />} />
-                  <Route path="/blog" element={<Blog />} />
-                  <Route path="/quote" element={<Quote />} />
-                  <Route path="/order" element={<Order />} />
-                  <Route path="/login" element={<Login />} />
-                  
-                  {/* Static Service Routes (for backward compatibility) */}
-                  <Route path="/services/deck" element={<Deck />} />
-                  <Route path="/services/patio" element={<Patio />} />
-                  <Route path="/services/pergola" element={<Pergola />} />
-                  <Route path="/services/outdoor-kitchen" element={<OutdoorKitchen />} />
-                  <Route path="/services/home-addition" element={<HomeAddition />} />
-                  
-                  {/* Dynamic Service Route */}
-                  <Route path="/services/:serviceId" element={<DynamicService />} />
-                  
-                  {/* 404 */}
-                  <Route path="*" element={<NotFound />} />
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
+                  <Route path="/services" element={<ServicesPage />} />
+                  <Route path="/pricing" element={<PricingPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
+                  <Route path="/portfolio" element={<PortfolioPage />} />
+                  <Route path="/blog" element={<BlogPage />} />
+                  <Route path="/blog/:id" element={<BlogPostPage />} />
+                  <Route path="/public/portfolio/:uid" element={<PublicPortfolioPage />} />
+                  <Route path="/public/services/:uid" element={<PublicServicesPage />} />
+                  <Route path="/public/pricing/:uid" element={<PublicPricingPage />} />
+                  <Route path="*" element={<NotFoundPage />} />
+
+                  {/* Protected Routes */}
+                  <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+                  <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+
+                  {/* Admin Routes */}
+                  <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+                  <Route path="/admin/communications" element={<AdminRoute><Communications /></AdminRoute>} />
+                  <Route path="/admin/blog/new" element={<AdminRoute><NewBlogPost /></AdminRoute>} />
+                  <Route path="/admin/blog/edit/:id" element={<AdminRoute><EditBlogPost /></AdminRoute>} />
+                  <Route path="/admin/portfolio/new" element={<AdminRoute><NewProjectPage /></AdminRoute>} />
+                  <Route path="/admin/portfolio/edit/:id" element={<AdminRoute><EditProjectPage /></AdminRoute>} />
+                  <Route path="/admin/services/new" element={<AdminRoute><NewServicePage /></AdminRoute>} />
+                  <Route path="/admin/services/edit/:id" element={<AdminRoute><EditServicePage /></AdminRoute>} />
+                  <Route path="/admin/pricing/new" element={<AdminRoute><NewPricingPlanPage /></AdminRoute>} />
+                  <Route path="/admin/pricing/edit/:id" element={<AdminRoute><EditPricingPlanPage /></AdminRoute>} />
                 </Routes>
-                <Footer />
-              </>
-            }
-          />
-          
-          {/* Admin Routes */}
-          <Route path="/admin">
-            <Route path="login" element={<AdminLogin />} />
-            <Route
-              path="dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="orders"
-              element={
-                <ProtectedRoute>
-                  <Orders />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="leads"
-              element={
-                <ProtectedRoute>
-                  <Leads />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="communications"
-              element={
-                <ProtectedRoute>
-                  <Communications />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="services"
-              element={
-                <ProtectedRoute>
-                  <Services />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="content"
-              element={
-                <ProtectedRoute>
-                  <ContentManager />
-                </ProtectedRoute>
-              }
-            />
-            <Route index element={<Navigate to="/admin/dashboard" replace />} />
-          </Route>
-          
-          {/* Client Routes */}
-          <Route path="/client">
-            <Route
-              path="dashboard"
-              element={
-                <ProtectedRoute>
-                  <ClientDashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="orders"
-              element={
-                <ProtectedRoute>
-                  <ClientOrders />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="documents"
-              element={
-                <ProtectedRoute>
-                  <ClientDocuments />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="messages"
-              element={
-                <ProtectedRoute>
-                  <ClientMessages />
-                </ProtectedRoute>
-              }
-            />
-            <Route index element={<Navigate to="/client/dashboard" replace />} />
-          </Route>
-        </Routes>
-      </Suspense>
-      <Toaster />
-    </BrowserRouter>
+                <FloatingChatButton />
+                <Toaster />
+              </div>
+            </Router>
+          </PortfolioProvider>
+        </ContentProvider>
+      </AuthProvider>
+    </FirebaseProvider>
   );
 }
 
