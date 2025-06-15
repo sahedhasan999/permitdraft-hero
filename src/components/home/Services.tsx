@@ -1,3 +1,4 @@
+
 import React, { useRef, useState, useEffect } from "react";
 import { Check, ArrowRight, Tag } from "lucide-react";
 import { AnimatedButton } from "../ui/AnimatedButton";
@@ -174,7 +175,7 @@ const Services = () => {
   }, [toast]);
 
   return (
-    <section id="services" className="section-padding bg-zinc-50" ref={servicesRef}>
+    <section id="services" className="py-24 bg-zinc-50" ref={servicesRef}>
       <div className="container px-4 mx-auto">
         <div className="max-w-2xl mx-auto text-center mb-16 animate-fade-up">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
