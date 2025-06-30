@@ -57,7 +57,7 @@ const ActiveConversationView: React.FC<ActiveConversationViewProps> = ({
               variant="ghost"
               size="sm"
               onClick={onBackToList}
-              className"p-2"
+              className="p-2"
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
