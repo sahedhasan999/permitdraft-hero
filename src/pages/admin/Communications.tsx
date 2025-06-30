@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import ConversationList from '@/components/admin/communications/ConversationList';
@@ -10,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { MessageSquare, Users } from 'lucide-react';
 
 const Communications = () => {
@@ -21,7 +21,9 @@ const Communications = () => {
   const [newConversationMessage, setNewConversationMessage] = useState('');
   const [newConversationEmail, setNewConversationEmail] = useState('');
   const [newConversationName, setNewConversationName] = useState('');
+  const [showConversationList, setShowConversationList] = useState(true);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     console.log('Setting up admin conversations subscription');
@@ -117,81 +119,127 @@ const Communications = () => {
     }
   };
 
+  const handleConversationSelect = (conversation: ConversationType) => {
+    setSelectedConversation(conversation);
+    if (isMobile) {
+      setShowConversationList(false);
+    }
+  };
+
+  const handleBackToList = () => {
+    if (isMobile) {
+      setShowConversationList(true);
+      setSelectedConversation(null);
+    }
+  };
+
   const activeConversations = conversations.filter(conv => conv.status === 'active');
   const totalMessages = conversations.reduce((sum, conv) => sum + (conv.messages?.length || 0), 0);
 
   return (
     <AdminLayout>
       <div className="h-full flex flex-col">
-        {/* Header */}
-        <div className="mb-6">
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Communications Center</h1>
-              <p className="text-gray-600 mt-1">
-                Manage customer conversations and support requests
-              </p>
-            </div>
-          </div>
-          
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-white p-4 rounded-lg border shadow-sm">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <MessageSquare className="h-5 w-5 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Total Conversations</p>
-                  <p className="text-2xl font-semibold text-gray-900">{conversations.length}</p>
-                </div>
+        {/* Header - Hide on mobile when viewing conversation */}
+        {(!isMobile || showConversationList) && (
+          <div className="mb-4 lg:mb-6">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Communications Center</h1>
+                <p className="text-gray-600 mt-1 text-sm lg:text-base">
+                  Manage customer conversations and support requests
+                </p>
               </div>
             </div>
             
-            <div className="bg-white p-4 rounded-lg border shadow-sm">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <Users className="h-5 w-5 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Active Conversations</p>
-                  <p className="text-2xl font-semibold text-gray-900">{activeConversations.length}</p>
+            {/* Stats */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4 mb-4 lg:mb-6">
+              <div className="bg-white p-3 lg:p-4 rounded-lg border shadow-sm">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 lg:w-10 lg:h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <MessageSquare className="h-4 w-4 lg:h-5 lg:w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-xs lg:text-sm text-gray-600">Total Conversations</p>
+                    <p className="text-lg lg:text-2xl font-semibold text-gray-900">{conversations.length}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <div className="bg-white p-4 rounded-lg border shadow-sm">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <MessageSquare className="h-5 w-5 text-purple-600" />
+              
+              <div className="bg-white p-3 lg:p-4 rounded-lg border shadow-sm">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 lg:w-10 lg:h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <Users className="h-4 w-4 lg:h-5 lg:w-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-xs lg:text-sm text-gray-600">Active Conversations</p>
+                    <p className="text-lg lg:text-2xl font-semibold text-gray-900">{activeConversations.length}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-600">Total Messages</p>
-                  <p className="text-2xl font-semibold text-gray-900">{totalMessages}</p>
+              </div>
+              
+              <div className="bg-white p-3 lg:p-4 rounded-lg border shadow-sm">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 lg:w-10 lg:h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <MessageSquare className="h-4 w-4 lg:h-5 lg:w-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <p className="text-xs lg:text-sm text-gray-600">Total Messages</p>
+                    <p className="text-lg lg:text-2xl font-semibold text-gray-900">{totalMessages}</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Main Content */}
         <div className="flex-1 flex bg-gray-50 rounded-lg shadow-sm overflow-hidden">
-          <ConversationList
-            conversations={conversations}
-            selectedConversation={selectedConversation}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            setSelectedConversation={setSelectedConversation}
-            onNewConversation={() => setShowNewConversationDialog(true)}
-          />
-          
-          <ConversationDetail
-            selectedConversation={selectedConversation}
-            conversations={conversations}
-            setConversations={setConversations}
-            setSelectedConversation={setSelectedConversation}
-            handleSendReply={handleSendReply}
-          />
+          {isMobile ? (
+            /* Mobile: Show either conversation list or detail */
+            <>
+              {showConversationList ? (
+                <ConversationList
+                  conversations={conversations}
+                  selectedConversation={selectedConversation}
+                  searchTerm={searchTerm}
+                  setSearchTerm={setSearchTerm}
+                  setSelectedConversation={handleConversationSelect}
+                  onNewConversation={() => setShowNewConversationDialog(true)}
+                />
+              ) : (
+                <ConversationDetail
+                  selectedConversation={selectedConversation}
+                  conversations={conversations}
+                  setConversations={setConversations}
+                  setSelectedConversation={setSelectedConversation}
+                  handleSendReply={handleSendReply}
+                  onBackToList={handleBackToList}
+                  isMobile={isMobile}
+                />
+              )}
+            </>
+          ) : (
+            /* Desktop: Show both side by side */
+            <>
+              <ConversationList
+                conversations={conversations}
+                selectedConversation={selectedConversation}
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                setSelectedConversation={handleConversationSelect}
+                onNewConversation={() => setShowNewConversationDialog(true)}
+              />
+              
+              <ConversationDetail
+                selectedConversation={selectedConversation}
+                conversations={conversations}
+                setConversations={setConversations}
+                setSelectedConversation={setSelectedConversation}
+                handleSendReply={handleSendReply}
+                isMobile={isMobile}
+              />
+            </>
+          )}
         </div>
 
         {/* New Conversation Dialog */}

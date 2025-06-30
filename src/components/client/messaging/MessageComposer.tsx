@@ -53,14 +53,14 @@ const MessageComposer: React.FC<MessageComposerProps> = ({ conversationId }) => 
   };
 
   return (
-    <div className="space-y-4">
-      <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="space-y-3 lg:space-y-4">
+      <div className="border border-gray-200 rounded-lg overflow-hidden shadow-sm">
         <Textarea
           placeholder="Type your message here..."
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="border-0 resize-none focus:ring-0 min-h-[80px]"
+          className="border-0 resize-none focus:ring-0 min-h-[60px] lg:min-h-[80px] text-sm lg:text-base"
         />
         
         {showFileUpload && (
@@ -79,16 +79,17 @@ const MessageComposer: React.FC<MessageComposerProps> = ({ conversationId }) => 
             variant="ghost"
             size="sm"
             onClick={() => setShowFileUpload(!showFileUpload)}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 hover:text-gray-700 text-sm"
           >
             <Paperclip className="h-4 w-4 mr-1" />
-            Attach File
+            <span className="hidden sm:inline">Attach File</span>
+            <span className="sm:hidden">File</span>
           </Button>
           
           <Button 
             onClick={handleSendMessage}
             disabled={isSending || (!newMessage.trim() && attachments.length === 0)}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-blue-600 hover:bg-blue-700 text-sm lg:text-base px-4 lg:px-6"
           >
             <Send className="h-4 w-4 mr-1" />
             {isSending ? 'Sending...' : 'Send'}

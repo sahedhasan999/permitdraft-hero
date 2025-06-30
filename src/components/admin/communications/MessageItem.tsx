@@ -21,15 +21,15 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
   const isFromCustomer = message.sender === 'customer';
 
   return (
-    <div className={`flex ${isFromCustomer ? 'justify-start' : 'justify-end'} mb-6`}>
-      <div className={`max-w-2xl ${isFromCustomer ? 'mr-12' : 'ml-12'}`}>
+    <div className={`flex ${isFromCustomer ? 'justify-start' : 'justify-end'} mb-4 lg:mb-6`}>
+      <div className={`max-w-[85%] sm:max-w-xl lg:max-w-2xl ${isFromCustomer ? 'mr-4 lg:mr-12' : 'ml-4 lg:ml-12'}`}>
         {/* Message bubble */}
-        <div className={`rounded-2xl p-4 shadow-sm ${
+        <div className={`rounded-2xl p-3 lg:p-4 shadow-sm ${
           isFromCustomer 
             ? 'bg-white border border-gray-200' 
             : 'bg-blue-600 text-white'
         }`}>
-          <p className={`text-sm leading-relaxed ${
+          <p className={`text-sm lg:text-base leading-relaxed break-words ${
             isFromCustomer ? 'text-gray-900' : 'text-white'
           }`}>
             {message.content}
@@ -47,10 +47,10 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
                 <div key={index} className={`flex items-center justify-between p-2 rounded-lg ${
                   isFromCustomer ? 'bg-gray-50' : 'bg-blue-500'
                 }`}>
-                  <div className="flex items-center space-x-2 min-w-0">
+                  <div className="flex items-center space-x-2 min-w-0 flex-1">
                     <Paperclip className="h-3 w-3 flex-shrink-0" />
                     <span className="text-xs truncate">{attachment.name}</span>
-                    <span className={`text-xs ${
+                    <span className={`text-xs flex-shrink-0 ${
                       isFromCustomer ? 'text-gray-500' : 'text-blue-200'
                     }`}>
                       ({attachment.size})
@@ -60,7 +60,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleDownload(attachment)}
-                    className="h-6 w-6 p-0 hover:bg-white/20"
+                    className="h-6 w-6 p-0 hover:bg-white/20 ml-2"
                   >
                     <Download className="h-3 w-3" />
                   </Button>
