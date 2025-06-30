@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -13,12 +12,14 @@ import { useToast } from '@/hooks/use-toast';
 interface NewConversationDialogProps {
   onConversationCreated?: (conversation: ConversationType) => void;
   triggerButtonText?: string;
+  triggerButtonIcon?: React.ReactNode;
   triggerButtonClassName?: string;
 }
 
 const NewConversationDialog: React.FC<NewConversationDialogProps> = ({
   onConversationCreated,
   triggerButtonText = "New Conversation",
+  triggerButtonIcon,
   triggerButtonClassName = "bg-blue-600 hover:bg-blue-700 text-white"
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -113,6 +114,7 @@ const NewConversationDialog: React.FC<NewConversationDialogProps> = ({
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button className={triggerButtonClassName}>
+          {triggerButtonIcon}
           {triggerButtonText}
         </Button>
       </DialogTrigger>
