@@ -3,7 +3,7 @@ import React from 'react';
 import { MessageSquare, Headphones, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ConversationType, MessageType } from '@/types/communications';
-import MessageItem from '@/components/admin/communications/MessageItem';
+import ClientMessageItem from './ClientMessageItem';
 import MessageComposer from './MessageComposer';
 import NewConversationDialog from './NewConversationDialog';
 
@@ -89,7 +89,7 @@ const ActiveConversationView: React.FC<ActiveConversationViewProps> = ({
         ) : (
           <div className="space-y-3 lg:space-y-4 max-w-4xl mx-auto">
             {currentMessages.map((message) => (
-              <MessageItem key={message.id} message={message} />
+              <ClientMessageItem key={message.id} message={message} />
             ))}
           </div>
         )}

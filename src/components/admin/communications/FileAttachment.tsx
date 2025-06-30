@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Paperclip, X, Upload } from 'lucide-react';
 import { FileAttachment } from '@/types/communications';
-import { formatFileSize } from '@/utils/fileUtils';
+import { uploadFile } from '@/services/firebaseMessagingService';
+import { useToast } from '@/hooks/use-toast';
 
 interface FileAttachmentProps {
   onAttachmentsChange: (attachments: FileAttachment[]) => void;
@@ -16,6 +17,7 @@ const FileAttachmentComponent: React.FC<FileAttachmentProps> = ({
   attachments
 }) => {
   const [isUploading, setIsUploading] = useState(false);
+  const { toast } = useToast();
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -29,23 +31,24 @@ const FileAttachmentComponent: React.FC<FileAttachmentProps> = ({
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         
-        // Create a mock URL for demo purposes
-        // In a real app, you'd upload to Firebase Storage
-        const mockUrl = URL.createObjectURL(file);
-        
-        const attachment: FileAttachment = {
-          name: file.name,
-          url: mockUrl,
-          size: formatFileSize(file.size),
-          type: file.type
-        };
-        
+        // Upload to Firebase Storage using a temporary conversation ID
+        const attachment = await uploadFile(file, 'temp-admin-upload');
         newAttachments.push(attachment);
       }
       
       onAttachmentsChange([...attachments, ...newAttachments]);
+      
+      toast({
+        title: "Files uploaded",
+        description: `${newAttachments.length} file(s) uploaded successfully.`
+      });
     } catch (error) {
       console.error('Error uploading files:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload files.",
+        variant: "destructive"
+      });
     } finally {
       setIsUploading(false);
       // Reset input
@@ -89,7 +92,7 @@ const FileAttachmentComponent: React.FC<FileAttachmentProps> = ({
           onChange={handleFileSelect}
           className="hidden"
           id="file-upload"
-          accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
+          accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.heic,.heif"
         />
         <Button
           variant="outline"

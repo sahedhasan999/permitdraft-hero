@@ -4,13 +4,13 @@ import { MessageType } from '@/types/communications';
 import { Paperclip, Download, User, Headphones, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-interface MessageItemProps {
+interface ClientMessageItemProps {
   message: MessageType;
 }
 
-const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
+const ClientMessageItem: React.FC<ClientMessageItemProps> = ({ message }) => {
   const handleDownload = (attachment: any) => {
-    // For Firebase Storage URLs, we can directly download or open in new tab
+    // For Firebase Storage URLs, we can directly download
     const link = document.createElement('a');
     link.href = attachment.url;
     link.target = '_blank';
@@ -28,16 +28,16 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
   const isFromCustomer = message.sender === 'customer';
 
   return (
-    <div className={`flex ${isFromCustomer ? 'justify-start' : 'justify-end'} mb-4 lg:mb-6`}>
-      <div className={`max-w-[85%] sm:max-w-xl lg:max-w-2xl ${isFromCustomer ? 'mr-4 lg:mr-12' : 'ml-4 lg:ml-12'}`}>
+    <div className={`flex ${isFromCustomer ? 'justify-end' : 'justify-start'} mb-4 lg:mb-6`}>
+      <div className={`max-w-[85%] sm:max-w-xl lg:max-w-2xl ${isFromCustomer ? 'ml-4 lg:ml-12' : 'mr-4 lg:mr-12'}`}>
         {/* Message bubble */}
         <div className={`rounded-2xl p-3 lg:p-4 shadow-sm ${
           isFromCustomer 
-            ? 'bg-white border border-gray-200' 
-            : 'bg-blue-600 text-white'
+            ? 'bg-blue-600 text-white' 
+            : 'bg-white border border-gray-200'
         }`}>
           <p className={`text-sm lg:text-base leading-relaxed break-words ${
-            isFromCustomer ? 'text-gray-900' : 'text-white'
+            isFromCustomer ? 'text-white' : 'text-gray-900'
           }`}>
             {message.content}
           </p>
@@ -46,19 +46,19 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
           {message.attachments && message.attachments.length > 0 && (
             <div className="mt-3 space-y-2">
               <p className={`text-xs font-medium ${
-                isFromCustomer ? 'text-gray-600' : 'text-blue-100'
+                isFromCustomer ? 'text-blue-100' : 'text-gray-600'
               }`}>
                 Attachments:
               </p>
               {message.attachments.map((attachment, index) => (
                 <div key={index} className={`flex items-center justify-between p-2 rounded-lg ${
-                  isFromCustomer ? 'bg-gray-50' : 'bg-blue-500'
+                  isFromCustomer ? 'bg-blue-500' : 'bg-gray-50'
                 }`}>
                   <div className="flex items-center space-x-2 min-w-0 flex-1">
                     <Paperclip className="h-3 w-3 flex-shrink-0" />
                     <span className="text-xs truncate">{attachment.name}</span>
                     <span className={`text-xs flex-shrink-0 ${
-                      isFromCustomer ? 'text-gray-500' : 'text-blue-200'
+                      isFromCustomer ? 'text-blue-200' : 'text-gray-500'
                     }`}>
                       ({attachment.size})
                     </span>
@@ -91,7 +91,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
         
         {/* Message info */}
         <div className={`flex items-center mt-2 space-x-2 text-xs text-gray-500 ${
-          isFromCustomer ? 'justify-start' : 'justify-end'
+          isFromCustomer ? 'justify-end' : 'justify-start'
         }`}>
           <div className="flex items-center space-x-1">
             {isFromCustomer ? (
@@ -99,7 +99,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
             ) : (
               <Headphones className="h-3 w-3" />
             )}
-            <span>{isFromCustomer ? 'Customer' : 'Support'}</span>
+            <span>{isFromCustomer ? 'You' : 'Support'}</span>
           </div>
           <span>•</span>
           <span>
@@ -116,4 +116,4 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
   );
 };
 
-export default MessageItem;
+export default ClientMessageItem;
