@@ -39,7 +39,7 @@ const ConversationDetail: React.FC<ConversationDetailProps> = ({
 
   if (!selectedConversation) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-gray-50 rounded-lg">
+      <div className="h-full flex items-center justify-center bg-gray-50">
         <div className="text-center p-6 lg:p-8">
           <MessageSquare className="h-12 w-12 lg:h-16 lg:w-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg lg:text-xl font-semibold text-gray-600 mb-2">No Conversation Selected</h3>
@@ -69,11 +69,11 @@ const ConversationDetail: React.FC<ConversationDetailProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-white rounded-lg shadow-sm border">
+    <div className="h-full flex flex-col bg-white">
       {/* Header */}
-      <div className="p-4 lg:p-6 border-b bg-white rounded-t-lg">
+      <div className="flex-shrink-0 p-3 lg:p-4 border-b bg-white">
         <div className="flex justify-between items-start">
-          <div className="flex items-start space-x-3 lg:space-x-4 flex-1 min-w-0">
+          <div className="flex items-start space-x-2 lg:space-x-3 flex-1 min-w-0">
             {isMobile && onBackToList && (
               <Button
                 variant="ghost"
@@ -84,19 +84,19 @@ const ConversationDetail: React.FC<ConversationDetailProps> = ({
                 <ArrowLeft className="h-4 w-4" />
               </Button>
             )}
-            <div className="w-10 h-10 lg:w-12 lg:h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <User className="h-5 w-5 lg:h-6 lg:w-6 text-blue-600" />
+            <div className="w-8 h-8 lg:w-10 lg:h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <User className="h-4 w-4 lg:h-5 lg:w-5 text-blue-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <h2 className="text-lg lg:text-xl font-semibold text-gray-900 truncate">{selectedConversation.subject}</h2>
-              <p className="text-sm text-gray-600 mt-1 truncate">
-                Conversation with <span className="font-medium">{selectedConversation.customer}</span>
+              <h2 className="text-sm lg:text-lg font-semibold text-gray-900 truncate">{selectedConversation.subject}</h2>
+              <p className="text-xs lg:text-sm text-gray-600 truncate">
+                <span className="font-medium">{selectedConversation.customer}</span>
               </p>
-              <p className="text-xs text-gray-500 mt-1 truncate">{selectedConversation.email}</p>
+              <p className="text-xs text-gray-500 truncate">{selectedConversation.email}</p>
             </div>
           </div>
-          <div className="flex items-center space-x-2 lg:space-x-3 flex-shrink-0">
-            <div className={`px-2 lg:px-3 py-1 rounded-full text-xs font-medium ${
+          <div className="flex items-center space-x-1 lg:space-x-2 flex-shrink-0">
+            <div className={`px-2 py-1 rounded-full text-xs font-medium ${
               selectedConversation.status === 'active' 
                 ? 'bg-green-100 text-green-800' 
                 : 'bg-gray-100 text-gray-800'
@@ -107,7 +107,7 @@ const ConversationDetail: React.FC<ConversationDetailProps> = ({
               variant="outline"
               size="sm"
               onClick={toggleConversationStatus}
-              className="text-xs whitespace-nowrap"
+              className="text-xs whitespace-nowrap px-2 py-1"
             >
               {selectedConversation.status === 'active' ? 'Close' : 'Reopen'}
             </Button>
@@ -116,7 +116,7 @@ const ConversationDetail: React.FC<ConversationDetailProps> = ({
       </div>
       
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-3 lg:space-y-4 bg-gray-50">
+      <div className="flex-1 overflow-y-auto p-3 lg:p-4 bg-gray-50">
         {selectedConversation.messages.length === 0 ? (
           <div className="text-center py-6 lg:py-8">
             <Clock className="h-10 w-10 lg:h-12 lg:w-12 text-gray-300 mx-auto mb-3" />
@@ -133,13 +133,13 @@ const ConversationDetail: React.FC<ConversationDetailProps> = ({
       
       {/* Reply Section */}
       {selectedConversation.status === 'active' && (
-        <div className="p-4 lg:p-6 border-t bg-white rounded-b-lg">
-          <div className="max-w-4xl mx-auto space-y-3 lg:space-y-4">
+        <div className="flex-shrink-0 p-3 lg:p-4 border-t bg-white">
+          <div className="max-w-4xl mx-auto space-y-3">
             <Textarea
               placeholder="Type your response here..."
               value={replyText}
               onChange={(e) => setReplyText(e.target.value)}
-              className="min-h-[60px] lg:min-h-[80px] border-gray-200 focus:border-blue-500 focus:ring-blue-500 text-sm lg:text-base"
+              className="min-h-[60px] lg:min-h-[80px] border-gray-200 focus:border-blue-500 focus:ring-blue-500 text-sm"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
@@ -157,7 +157,7 @@ const ConversationDetail: React.FC<ConversationDetailProps> = ({
               <Button 
                 onClick={handleSend} 
                 disabled={!replyText.trim() && attachments.length === 0}
-                className="bg-blue-600 hover:bg-blue-700 text-sm lg:text-base px-4 lg:px-6"
+                className="bg-blue-600 hover:bg-blue-700 text-sm px-4 py-2"
               >
                 <Send className="h-4 w-4 mr-2" />
                 Send Message

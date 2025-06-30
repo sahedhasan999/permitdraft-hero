@@ -100,17 +100,17 @@ const ClientMessaging: React.FC = memo(() => {
 
   if (isLoading) {
     return (
-      <div className="h-[600px] lg:h-[700px] bg-white rounded-lg shadow-sm border">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 p-6">
+      <div className="h-[500px] lg:h-[600px] bg-white rounded-lg shadow-sm border">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 p-4 lg:p-6 h-full">
           <div className="lg:col-span-1 space-y-4">
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-16 w-full" />
-            <Skeleton className="h-16 w-full" />
-            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-6 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
           </div>
           <div className="lg:col-span-3 space-y-4">
-            <Skeleton className="h-8 w-64" />
-            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-48 w-full" />
             <Skeleton className="h-12 w-full" />
           </div>
         </div>
@@ -120,7 +120,7 @@ const ClientMessaging: React.FC = memo(() => {
 
   if (!currentUser) {
     return (
-      <div className="h-[600px] lg:h-[700px] bg-white rounded-lg shadow-sm border flex items-center justify-center">
+      <div className="h-[500px] lg:h-[600px] bg-white rounded-lg shadow-sm border flex items-center justify-center">
         <div className="text-center p-6">
           <p className="text-gray-600">Please log in to access messages.</p>
         </div>
@@ -129,7 +129,7 @@ const ClientMessaging: React.FC = memo(() => {
   }
 
   return (
-    <div className="h-[600px] lg:h-[700px] bg-gray-50 rounded-lg shadow-lg overflow-hidden flex flex-col lg:flex-row">
+    <div className="h-[500px] lg:h-[600px] bg-gray-50 rounded-lg shadow-lg overflow-hidden flex flex-col lg:flex-row">
       {/* Mobile: Show either conversation list or active conversation */}
       {isMobile ? (
         <>
