@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, memo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -34,10 +33,14 @@ const ClientMessaging: React.FC = memo(() => {
         console.log('Client received conversations update:', userConversations);
         setConversations(userConversations);
         
+        // Only update active conversation if it still exists, don't auto-select
         if (activeConversation) {
           const updatedActiveConversation = userConversations.find(conv => conv.id === activeConversation.id);
           if (updatedActiveConversation) {
             setActiveConversation(updatedActiveConversation);
+          } else {
+            // If active conversation no longer exists, clear it
+            setActiveConversation(null);
           }
         }
         
@@ -49,7 +52,7 @@ const ClientMessaging: React.FC = memo(() => {
       console.log('Cleaning up conversations subscription');
       unsubscribe();
     };
-  }, [currentUser, activeConversation?.id]);
+  }, [currentUser]); // Removed activeConversation?.id from dependencies
 
   useEffect(() => {
     let messageSubscriptionUnsubscribe: (() => void) | undefined;
@@ -63,6 +66,9 @@ const ClientMessaging: React.FC = memo(() => {
           setCurrentMessages(receivedMessages);
         }
       );
+    } else {
+      // Clear messages when no active conversation
+      setCurrentMessages([]);
     }
 
     return () => {
