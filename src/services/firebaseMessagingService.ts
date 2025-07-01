@@ -21,6 +21,10 @@ import { ConversationType, MessageType, FileAttachment } from '@/types/communica
 const conversationsRef = collection(db, 'conversations');
 const messagesRef = collection(db, 'messages');
 
+// Cache for admin conversations to avoid refetching unchanged data
+let adminConversationsCache = new Map<string, ConversationType>();
+let messagesListeners = new Map<string, () => void>();
+
 export const createConversation = async (
   userId: string,
   userEmail: string,
@@ -253,27 +257,43 @@ export const subscribeToConversationMessages = (
   });
 };
 
+// Optimized admin subscription that uses separate message listeners
 export const subscribeToAllConversations = (
   callback: (conversations: ConversationType[]) => void
 ) => {
-  console.log('Subscribing to all conversations for admin');
+  console.log('Subscribing to all conversations for admin - OPTIMIZED');
+  
+  // Clean up existing message listeners
+  messagesListeners.forEach(unsubscribe => unsubscribe());
+  messagesListeners.clear();
+  adminConversationsCache.clear();
   
   const q = query(conversationsRef, orderBy('lastUpdated', 'desc'));
 
   return onSnapshot(q, async (snapshot) => {
-    console.log('All conversations snapshot received, count:', snapshot.docs.length);
+    console.log('Admin conversations snapshot received, count:', snapshot.docs.length);
     
-    const conversations: ConversationType[] = [];
-    
-    for (const docSnapshot of snapshot.docs) {
+    const conversationPromises = snapshot.docs.map(async (docSnapshot) => {
       const data = docSnapshot.data();
-      console.log('Processing admin conversation:', docSnapshot.id, data);
+      const conversationId = docSnapshot.id;
       
-      // Get the latest messages for this conversation
+      // Check if we already have this conversation cached
+      const cachedConversation = adminConversationsCache.get(conversationId);
+      const dataLastUpdated = data.lastUpdated?.toDate?.()?.getTime() || 0;
+      const cachedLastUpdated = new Date(cachedConversation?.lastUpdated || 0).getTime();
+      
+      // If conversation hasn't changed, return cached version
+      if (cachedConversation && dataLastUpdated <= cachedLastUpdated) {
+        return cachedConversation;
+      }
+      
+      console.log('Fetching messages for conversation:', conversationId);
+      
+      // Get messages for this conversation
       const messagesQuery = query(
         messagesRef,
-        where('conversationId', '==', docSnapshot.id),
-        orderBy('timestamp', 'desc')
+        where('conversationId', '==', conversationId),
+        orderBy('timestamp', 'asc')
       );
       
       const messagesSnapshot = await getDocs(messagesQuery);
@@ -286,18 +306,44 @@ export const subscribeToAllConversations = (
           timestamp: msgData.timestamp?.toDate?.()?.toISOString() || new Date().toISOString(),
           attachments: msgData.attachments || []
         };
-      }).reverse();
+      });
       
-      conversations.push({
-        id: docSnapshot.id,
+      const conversation: ConversationType = {
+        id: conversationId,
         customer: data.userName,
         email: data.userEmail,
         subject: data.subject,
         messages,
         status: data.status,
         lastUpdated: data.lastUpdated?.toDate?.()?.toISOString() || new Date().toISOString()
-      });
-    }
+      };
+      
+      // Cache the conversation
+      adminConversationsCache.set(conversationId, conversation);
+      
+      // Set up real-time message listener for this conversation
+      if (!messagesListeners.has(conversationId)) {
+        const messageListener = subscribeToConversationMessages(conversationId, (updatedMessages) => {
+          // Update the cached conversation with new messages
+          const cachedConv = adminConversationsCache.get(conversationId);
+          if (cachedConv) {
+            cachedConv.messages = updatedMessages;
+            adminConversationsCache.set(conversationId, cachedConv);
+            
+            // Trigger callback with updated conversations
+            const allConversations = Array.from(adminConversationsCache.values())
+              .sort((a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime());
+            callback(allConversations);
+          }
+        });
+        
+        messagesListeners.set(conversationId, messageListener);
+      }
+      
+      return conversation;
+    });
+    
+    const conversations = await Promise.all(conversationPromises);
     
     console.log('Final admin conversations array:', conversations);
     callback(conversations);
