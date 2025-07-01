@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import ConversationList from '@/components/admin/communications/ConversationList';
@@ -65,11 +64,6 @@ const Communications = () => {
 
     try {
       await sendMessage(selectedConversation.id, 'admin', message, attachments || []);
-      
-      toast({
-        title: "Message sent",
-        description: "Your message has been sent successfully."
-      });
     } catch (error) {
       console.error('Error sending reply:', error);
       toast({

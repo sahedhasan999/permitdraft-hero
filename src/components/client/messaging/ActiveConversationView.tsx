@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { MessageSquare, Headphones, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ConversationType, MessageType } from '@/types/communications';
@@ -24,6 +24,16 @@ const ActiveConversationView: React.FC<ActiveConversationViewProps> = ({
   onBackToList,
   isMobile = false
 }) => {
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [currentMessages]);
+
   if (!activeConversation) {
     return (
       <div className="h-full flex items-center justify-center bg-white">
@@ -91,6 +101,7 @@ const ActiveConversationView: React.FC<ActiveConversationViewProps> = ({
             {currentMessages.map((message) => (
               <ClientMessageItem key={message.id} message={message} />
             ))}
+            <div ref={messagesEndRef} />
           </div>
         )}
       </div>

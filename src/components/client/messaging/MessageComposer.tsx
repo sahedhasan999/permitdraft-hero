@@ -28,11 +28,6 @@ const MessageComposer: React.FC<MessageComposerProps> = ({ conversationId }) => 
       setNewMessage('');
       setAttachments([]);
       setShowFileUpload(false);
-
-      toast({
-        title: "Message sent",
-        description: "Your message has been sent successfully."
-      });
     } catch (error) {
       console.error('Error sending message:', error);
       toast({

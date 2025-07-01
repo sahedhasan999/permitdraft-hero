@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Send, MessageSquare, Clock, User, ArrowLeft } from 'lucide-react';
@@ -28,6 +28,17 @@ const ConversationDetail: React.FC<ConversationDetailProps> = ({
 }) => {
   const [replyText, setReplyText] = React.useState('');
   const [attachments, setAttachments] = React.useState<FileAttachment[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    if (selectedConversation?.messages) {
+      scrollToBottom();
+    }
+  }, [selectedConversation?.messages]);
 
   const handleSend = () => {
     if (!replyText.trim() && attachments.length === 0) return;
@@ -127,6 +138,7 @@ const ConversationDetail: React.FC<ConversationDetailProps> = ({
             {selectedConversation.messages.map((message) => (
               <MessageItem key={message.id} message={message} />
             ))}
+            <div ref={messagesEndRef} />
           </div>
         )}
       </div>
