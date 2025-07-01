@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Send, MessageSquare, Clock, User, ArrowLeft } from 'lucide-react';
@@ -30,26 +30,24 @@ const ConversationDetail: React.FC<ConversationDetailProps> = ({
   const [attachments, setAttachments] = React.useState<FileAttachment[]>([]);
   const [isSending, setIsSending] = React.useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+      const scrollElement = messagesContainerRef.current;
+      scrollElement.scrollTop = scrollElement.scrollHeight;
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (selectedConversation?.messages) {
-      // Small delay to ensure DOM is updated
-      const timeoutId = setTimeout(() => {
+      // Use requestAnimationFrame for smoother scrolling
+      requestAnimationFrame(() => {
         scrollToBottom();
-      }, 100);
-
-      return () => clearTimeout(timeoutId);
+      });
     }
-  }, [selectedConversation?.messages]);
+  }, [selectedConversation?.messages, scrollToBottom]);
 
-  const handleSend = async () => {
+  const handleSend = useCallback(async () => {
     if (!replyText.trim() && attachments.length === 0) return;
     
     setIsSending(true);
@@ -62,14 +60,33 @@ const ConversationDetail: React.FC<ConversationDetailProps> = ({
     } finally {
       setIsSending(false);
     }
-  };
+  }, [replyText, attachments, handleSendReply]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
-  };
+  }, [handleSend]);
+
+  const toggleConversationStatus = useCallback(() => {
+    const updatedConversations = conversations.map(conv => {
+      if (conv.id === selectedConversation?.id) {
+        const newStatus: 'active' | 'closed' = conv.status === 'active' ? 'closed' : 'active';
+        return {
+          ...conv,
+          status: newStatus
+        };
+      }
+      return conv;
+    });
+    
+    setConversations(updatedConversations);
+    const updatedConversation = updatedConversations.find(c => c.id === selectedConversation?.id);
+    if (updatedConversation) {
+      setSelectedConversation(updatedConversation);
+    }
+  }, [conversations, selectedConversation, setConversations, setSelectedConversation]);
 
   if (!selectedConversation) {
     return (
@@ -82,25 +99,6 @@ const ConversationDetail: React.FC<ConversationDetailProps> = ({
       </div>
     );
   }
-
-  const toggleConversationStatus = () => {
-    const updatedConversations = conversations.map(conv => {
-      if (conv.id === selectedConversation.id) {
-        const newStatus: 'active' | 'closed' = conv.status === 'active' ? 'closed' : 'active';
-        return {
-          ...conv,
-          status: newStatus
-        };
-      }
-      return conv;
-    });
-    
-    setConversations(updatedConversations);
-    const updatedConversation = updatedConversations.find(c => c.id === selectedConversation.id);
-    if (updatedConversation) {
-      setSelectedConversation(updatedConversation);
-    }
-  };
 
   return (
     <div className="h-full flex flex-col bg-white">
@@ -153,6 +151,7 @@ const ConversationDetail: React.FC<ConversationDetailProps> = ({
       <div 
         ref={messagesContainerRef}
         className="flex-1 overflow-y-auto p-3 lg:p-4 bg-gray-50"
+        style={{ scrollBehavior: 'smooth' }}
       >
         {selectedConversation.messages.length === 0 ? (
           <div className="text-center py-6 lg:py-8">
@@ -164,7 +163,6 @@ const ConversationDetail: React.FC<ConversationDetailProps> = ({
             {selectedConversation.messages.map((message) => (
               <MessageItem key={message.id} message={message} />
             ))}
-            <div ref={messagesEndRef} />
           </div>
         )}
       </div>

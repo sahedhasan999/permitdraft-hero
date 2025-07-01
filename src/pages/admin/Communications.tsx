@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import ConversationList from '@/components/admin/communications/ConversationList';
 import ConversationDetail from '@/components/admin/communications/ConversationDetail';
@@ -8,7 +9,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MessageSquare, Users } from 'lucide-react';
 
@@ -22,27 +22,29 @@ const Communications = () => {
   const [newConversationEmail, setNewConversationEmail] = useState('');
   const [newConversationName, setNewConversationName] = useState('');
   const [showConversationList, setShowConversationList] = useState(true);
-  const { toast } = useToast();
   const isMobile = useIsMobile();
+
+  // Memoize conversation updates to prevent unnecessary re-renders
+  const handleConversationsUpdate = useCallback((allConversations: ConversationType[]) => {
+    console.log('Admin received conversations:', allConversations);
+    setConversations(allConversations);
+    
+    // Update selected conversation if it exists
+    if (selectedConversation) {
+      const updatedSelectedConversation = allConversations.find(conv => conv.id === selectedConversation.id);
+      if (updatedSelectedConversation) {
+        setSelectedConversation(updatedSelectedConversation);
+      }
+    } else if (allConversations.length > 0) {
+      setSelectedConversation(allConversations[0]);
+    }
+  }, [selectedConversation]);
 
   useEffect(() => {
     console.log('Setting up admin conversations subscription');
-    const unsubscribe = subscribeToAllConversations((allConversations) => {
-      console.log('Admin received conversations:', allConversations);
-      setConversations(allConversations);
-      
-      if (selectedConversation) {
-        const updatedSelectedConversation = allConversations.find(conv => conv.id === selectedConversation.id);
-        if (updatedSelectedConversation) {
-          setSelectedConversation(updatedSelectedConversation);
-        }
-      } else if (allConversations.length > 0) {
-        setSelectedConversation(allConversations[0]);
-      }
-    });
-
+    const unsubscribe = subscribeToAllConversations(handleConversationsUpdate);
     return () => unsubscribe();
-  }, []);
+  }, [handleConversationsUpdate]);
 
   useEffect(() => {
     const customerToMessage = sessionStorage.getItem('customerToMessage');
@@ -57,30 +59,22 @@ const Communications = () => {
     }
   }, []);
 
-  const handleSendReply = async (message: string, attachments?: FileAttachment[]) => {
+  // Optimized message sending with immediate UI update
+  const handleSendReply = useCallback(async (message: string, attachments?: FileAttachment[]) => {
     if (!selectedConversation) return;
     
     if (!message.trim() && (!attachments || attachments.length === 0)) return;
 
     try {
+      // Send message without showing toast notification
       await sendMessage(selectedConversation.id, 'admin', message, attachments || []);
     } catch (error) {
       console.error('Error sending reply:', error);
-      toast({
-        title: "Error",
-        description: "Failed to send message.",
-        variant: "destructive"
-      });
     }
-  };
+  }, [selectedConversation]);
 
-  const handleCreateNewConversation = async () => {
+  const handleCreateNewConversation = useCallback(async () => {
     if (!newConversationEmail.trim() || !newConversationName.trim() || !newConversationSubject.trim() || !newConversationMessage.trim()) {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields.",
-        variant: "destructive"
-      });
       return;
     }
 
@@ -99,37 +93,31 @@ const Communications = () => {
       setNewConversationName('');
       setNewConversationSubject('');
       setNewConversationMessage('');
-
-      toast({
-        title: "Conversation created",
-        description: "New conversation has been started with the customer."
-      });
     } catch (error) {
       console.error('Error creating conversation:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create conversation.",
-        variant: "destructive"
-      });
     }
-  };
+  }, [newConversationEmail, newConversationName, newConversationSubject, newConversationMessage]);
 
-  const handleConversationSelect = (conversation: ConversationType) => {
+  const handleConversationSelect = useCallback((conversation: ConversationType) => {
     setSelectedConversation(conversation);
     if (isMobile) {
       setShowConversationList(false);
     }
-  };
+  }, [isMobile]);
 
-  const handleBackToList = () => {
+  const handleBackToList = useCallback(() => {
     if (isMobile) {
       setShowConversationList(true);
       setSelectedConversation(null);
     }
-  };
+  }, [isMobile]);
 
-  const activeConversations = conversations.filter(conv => conv.status === 'active');
-  const totalMessages = conversations.reduce((sum, conv) => sum + (conv.messages?.length || 0), 0);
+  // Memoize stats calculations
+  const stats = React.useMemo(() => {
+    const activeConversations = conversations.filter(conv => conv.status === 'active');
+    const totalMessages = conversations.reduce((sum, conv) => sum + (conv.messages?.length || 0), 0);
+    return { activeConversations, totalMessages };
+  }, [conversations]);
 
   return (
     <AdminLayout>
@@ -167,7 +155,7 @@ const Communications = () => {
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">Active</p>
-                    <p className="text-sm lg:text-lg font-semibold text-gray-900">{activeConversations.length}</p>
+                    <p className="text-sm lg:text-lg font-semibold text-gray-900">{stats.activeConversations.length}</p>
                   </div>
                 </div>
               </div>
@@ -179,7 +167,7 @@ const Communications = () => {
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">Messages</p>
-                    <p className="text-sm lg:text-lg font-semibold text-gray-900">{totalMessages}</p>
+                    <p className="text-sm lg:text-lg font-semibold text-gray-900">{stats.totalMessages}</p>
                   </div>
                 </div>
               </div>
