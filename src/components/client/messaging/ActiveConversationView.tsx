@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import { MessageSquare, Headphones, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -24,14 +23,22 @@ const ActiveConversationView: React.FC<ActiveConversationViewProps> = ({
   onBackToList,
   isMobile = false
 }) => {
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
   };
 
   useEffect(() => {
-    scrollToBottom();
+    // Small delay to ensure DOM is updated
+    const timeoutId = setTimeout(() => {
+      scrollToBottom();
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
   }, [currentMessages]);
 
   if (!activeConversation) {
@@ -60,7 +67,7 @@ const ActiveConversationView: React.FC<ActiveConversationViewProps> = ({
   return (
     <div className="h-full flex flex-col bg-white">
       {/* Header */}
-      <div className="p-4 lg:p-6 border-b bg-white shadow-sm">
+      <div className="p-4 lg:p-6 border-b bg-white shadow-sm flex-shrink-0">
         <div className="flex items-center space-x-3 lg:space-x-4">
           {isMobile && onBackToList && (
             <Button
@@ -90,7 +97,10 @@ const ActiveConversationView: React.FC<ActiveConversationViewProps> = ({
       </div>
       
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 lg:p-6 bg-gray-50">
+      <div 
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto p-4 lg:p-6 bg-gray-50"
+      >
         {currentMessages.length === 0 ? (
           <div className="text-center py-8 lg:py-12">
             <MessageSquare className="h-10 w-10 lg:h-12 lg:w-12 text-gray-300 mx-auto mb-3" />
@@ -108,7 +118,7 @@ const ActiveConversationView: React.FC<ActiveConversationViewProps> = ({
       
       {/* Message Composer */}
       {activeConversation.status === 'active' && (
-        <div className="p-4 lg:p-6 border-t bg-white">
+        <div className="p-4 lg:p-6 border-t bg-white flex-shrink-0">
           <div className="max-w-4xl mx-auto">
             <MessageComposer conversationId={activeConversation.id} />
           </div>
@@ -116,7 +126,7 @@ const ActiveConversationView: React.FC<ActiveConversationViewProps> = ({
       )}
       
       {activeConversation.status === 'closed' && (
-        <div className="p-4 lg:p-6 border-t bg-gray-50">
+        <div className="p-4 lg:p-6 border-t bg-gray-50 flex-shrink-0">
           <div className="max-w-4xl mx-auto">
             <p className="text-center text-gray-500 text-sm lg:text-base">
               This conversation has been closed. Contact support to start a new conversation.

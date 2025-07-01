@@ -28,24 +28,47 @@ const ConversationDetail: React.FC<ConversationDetailProps> = ({
 }) => {
   const [replyText, setReplyText] = React.useState('');
   const [attachments, setAttachments] = React.useState<FileAttachment[]>([]);
+  const [isSending, setIsSending] = React.useState(false);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
   };
 
   useEffect(() => {
     if (selectedConversation?.messages) {
-      scrollToBottom();
+      // Small delay to ensure DOM is updated
+      const timeoutId = setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+
+      return () => clearTimeout(timeoutId);
     }
   }, [selectedConversation?.messages]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!replyText.trim() && attachments.length === 0) return;
     
-    handleSendReply(replyText, attachments);
-    setReplyText('');
-    setAttachments([]);
+    setIsSending(true);
+    try {
+      await handleSendReply(replyText, attachments);
+      setReplyText('');
+      setAttachments([]);
+    } catch (error) {
+      console.error('Error sending message:', error);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
   };
 
   if (!selectedConversation) {
@@ -127,7 +150,10 @@ const ConversationDetail: React.FC<ConversationDetailProps> = ({
       </div>
       
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-3 lg:p-4 bg-gray-50">
+      <div 
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto p-3 lg:p-4 bg-gray-50"
+      >
         {selectedConversation.messages.length === 0 ? (
           <div className="text-center py-6 lg:py-8">
             <Clock className="h-10 w-10 lg:h-12 lg:w-12 text-gray-300 mx-auto mb-3" />
@@ -152,12 +178,8 @@ const ConversationDetail: React.FC<ConversationDetailProps> = ({
               value={replyText}
               onChange={(e) => setReplyText(e.target.value)}
               className="min-h-[60px] lg:min-h-[80px] border-gray-200 focus:border-blue-500 focus:ring-blue-500 text-sm"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSend();
-                }
-              }}
+              onKeyDown={handleKeyDown}
+              disabled={isSending}
             />
             
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -168,11 +190,11 @@ const ConversationDetail: React.FC<ConversationDetailProps> = ({
               
               <Button 
                 onClick={handleSend} 
-                disabled={!replyText.trim() && attachments.length === 0}
+                disabled={(!replyText.trim() && attachments.length === 0) || isSending}
                 className="bg-blue-600 hover:bg-blue-700 text-sm px-4 py-2"
               >
                 <Send className="h-4 w-4 mr-2" />
-                Send Message
+                {isSending ? 'Sending...' : 'Send Message'}
               </Button>
             </div>
           </div>

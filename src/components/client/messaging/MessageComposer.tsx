@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Send, Paperclip } from 'lucide-react';
@@ -19,7 +19,7 @@ const MessageComposer: React.FC<MessageComposerProps> = ({ conversationId }) => 
   const [showFileUpload, setShowFileUpload] = useState(false);
   const { toast } = useToast();
 
-  const handleSendMessage = async () => {
+  const handleSendMessage = useCallback(async () => {
     if (!conversationId || (!newMessage.trim() && attachments.length === 0)) return;
 
     setIsSending(true);
@@ -38,14 +38,20 @@ const MessageComposer: React.FC<MessageComposerProps> = ({ conversationId }) => 
     } finally {
       setIsSending(false);
     }
-  };
+  }, [conversationId, newMessage, attachments, toast]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
-  };
+  }, [handleSendMessage]);
+
+  const toggleFileUpload = useCallback(() => {
+    setShowFileUpload(prev => !prev);
+  }, []);
+
+  const canSend = !isSending && (newMessage.trim() || attachments.length > 0);
 
   return (
     <div className="space-y-3 lg:space-y-4">
@@ -56,6 +62,7 @@ const MessageComposer: React.FC<MessageComposerProps> = ({ conversationId }) => 
           onChange={(e) => setNewMessage(e.target.value)}
           onKeyDown={handleKeyDown}
           className="border-0 resize-none focus:ring-0 min-h-[60px] lg:min-h-[80px] text-sm lg:text-base"
+          disabled={isSending}
         />
         
         {showFileUpload && (
@@ -73,8 +80,9 @@ const MessageComposer: React.FC<MessageComposerProps> = ({ conversationId }) => 
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setShowFileUpload(!showFileUpload)}
+            onClick={toggleFileUpload}
             className="text-gray-500 hover:text-gray-700 text-sm"
+            disabled={isSending}
           >
             <Paperclip className="h-4 w-4 mr-1" />
             <span className="hidden sm:inline">Attach File</span>
@@ -83,7 +91,7 @@ const MessageComposer: React.FC<MessageComposerProps> = ({ conversationId }) => 
           
           <Button 
             onClick={handleSendMessage}
-            disabled={isSending || (!newMessage.trim() && attachments.length === 0)}
+            disabled={!canSend}
             className="bg-blue-600 hover:bg-blue-700 text-sm lg:text-base px-4 lg:px-6"
           >
             <Send className="h-4 w-4 mr-1" />
