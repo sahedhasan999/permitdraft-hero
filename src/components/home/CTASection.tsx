@@ -37,7 +37,6 @@ const CTASection: React.FC = () => {
           onClick={handleStartProject}
           size="lg" 
           variant="secondary" 
-          iconRight={<ArrowRight size={16} />}
           className="bg-white text-teal-600 hover:bg-gray-100 font-bold px-8 border-0"
         >
           Start Your Project Now
