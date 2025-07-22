@@ -339,14 +339,15 @@ const Order = () => {
                           </div>
                         </div>
                         
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-start space-x-3">
                           <Checkbox 
                             id="render3D"
                             checked={formData.additionalServices.render3D}
                             onCheckedChange={() => handleAdditionalServiceChange('render3D')}
+                            className="mt-1"
                           />
                           <div>
-                            <Label htmlFor="render3D" className="font-medium">3D Rendering</Label>
+                            <Label htmlFor="render3D" className="text-lg font-semibold">3D Rendering</Label>
                             <p className="text-sm text-muted-foreground">Visualize your completed project (+$150)</p>
                           </div>
                         </div>
