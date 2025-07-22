@@ -77,7 +77,7 @@ const Hero = () => {
             <p className="text-base text-muted-foreground mb-6 max-w-lg mx-auto lg:mx-0">
               Professional architectural drafting services specializing in outdoor space designs for US permit applications. High-quality drawings at competitive prices.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start py-0 my-0 mx-0 px-[45px]">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start py-0 my-0 mx-0 px-0">
               <AnimatedButton variant="primary" size="lg" iconRight={<ArrowRight size={16} />} onClick={() => navigate('/quote')}>
                 Get a Quote
               </AnimatedButton>
