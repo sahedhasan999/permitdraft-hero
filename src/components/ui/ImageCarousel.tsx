@@ -1,5 +1,7 @@
 
 import React, { useState, useEffect, memo } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "./button";
 
 interface ImageCarouselProps {
   images: string[];
@@ -60,6 +62,14 @@ const ImageCarousel: React.FC<ImageCarouselProps> = memo(({
     return () => clearInterval(timer);
   }, [images.length, interval, imagesLoaded]);
 
+  const goToPrevious = () => {
+    setCurrentIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
+  };
+
+  const goToNext = () => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
+  };
+
   if (images.length === 0) {
     return null;
   }
@@ -76,7 +86,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = memo(({
   }
 
   return (
-    <div className={`relative overflow-hidden rounded-lg ${className}`}>
+    <div className={`relative overflow-hidden rounded-lg group ${className}`}>
       {images.map((image, index) => (
         <div
           key={index}
@@ -94,6 +104,31 @@ const ImageCarousel: React.FC<ImageCarouselProps> = memo(({
           )}
         </div>
       ))}
+      
+      {/* Navigation arrows - only show when there are multiple images */}
+      {images.length > 1 && (
+        <>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-black/20 hover:bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 h-10 w-10"
+            onClick={goToPrevious}
+            aria-label="Previous image"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-black/20 hover:bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 h-10 w-10"
+            onClick={goToNext}
+            aria-label="Next image"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </Button>
+        </>
+      )}
       
       {/* Dots indicator */}
       {images.length > 1 && (
