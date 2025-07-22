@@ -315,26 +315,28 @@ const Order = () => {
                     <div className="md:col-span-2">
                       <Label className="text-lg font-medium mb-3 block">Additional Services</Label>
                       <div className="space-y-4">
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-start space-x-3">
                           <Checkbox 
                             id="sitePlan"
                             checked={formData.additionalServices.sitePlan}
                             onCheckedChange={() => handleAdditionalServiceChange('sitePlan')}
+                            className="mt-1"
                           />
                           <div>
-                            <Label htmlFor="sitePlan" className="font-medium">Site Plan</Label>
+                            <Label htmlFor="sitePlan" className="text-lg font-semibold">Site Plan</Label>
                             <p className="text-sm text-muted-foreground">Detailed layout of your property (+$100)</p>
                           </div>
                         </div>
                         
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-start space-x-3">
                           <Checkbox 
                             id="materialList"
                             checked={formData.additionalServices.materialList}
                             onCheckedChange={() => handleAdditionalServiceChange('materialList')}
+                            className="mt-1"
                           />
                           <div>
-                            <Label htmlFor="materialList" className="font-medium">Material List</Label>
+                            <Label htmlFor="materialList" className="text-lg font-semibold">Material List</Label>
                             <p className="text-sm text-muted-foreground">Comprehensive list of required materials (+$50)</p>
                           </div>
                         </div>
