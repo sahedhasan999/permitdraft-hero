@@ -33,23 +33,13 @@ const ActiveConversationView: React.FC<ActiveConversationViewProps> = ({
   };
 
   useEffect(() => {
-    // Small delay to ensure DOM is updated, then scroll to bottom to show latest messages
+    // Small delay to ensure DOM is updated
     const timeoutId = setTimeout(() => {
       scrollToBottom();
     }, 100);
 
     return () => clearTimeout(timeoutId);
   }, [currentMessages]);
-
-  // Scroll to bottom when conversation changes to show latest messages
-  useEffect(() => {
-    if (activeConversation) {
-      const timeoutId = setTimeout(() => {
-        scrollToBottom();
-      }, 200);
-      return () => clearTimeout(timeoutId);
-    }
-  }, [activeConversation?.id]);
 
   if (!activeConversation) {
     return (
