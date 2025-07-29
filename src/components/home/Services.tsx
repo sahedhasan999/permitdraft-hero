@@ -35,16 +35,18 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
         {discountPercentage > 0 && <div className="absolute -right-8 top-6 bg-red-500 text-white py-1 px-10 transform rotate-45 shadow-md text-xs font-bold">
             {discountPercentage}% OFF
           </div>}
-        <div className="bg-teal-50 p-3 inline-block rounded-lg mb-4 w-fit">
+        <div className="bg-teal-50 p-3 inline-block rounded-lg mb-2 w-fit">
           {icon}
         </div>
         <h3 className="text-xl font-semibold mb-2">{title}</h3>
         <p className="text-muted-foreground mb-4">{description}</p>
         
-        <div className="mb-4 flex items-baseline">
-          <span className="text-sm text-muted-foreground mr-1">Start from</span>
-          <span className="text-2xl font-bold text-teal-600">${discountedPrice.toFixed(0)}</span>
-          {discountPercentage > 0 && <span className="ml-2 text-sm text-muted-foreground line-through">${regularPrice}</span>}
+        <div className="mb-4">
+          <span className="text-sm text-muted-foreground block mb-1">Start from</span>
+          <div className="flex items-baseline">
+            <span className="text-2xl font-bold text-teal-600">${discountedPrice.toFixed(0)}</span>
+            {discountPercentage > 0 && <span className="ml-2 text-sm text-muted-foreground line-through">${regularPrice}</span>}
+          </div>
         </div>
         
         <ul className="space-y-2 mb-6 flex-grow">
