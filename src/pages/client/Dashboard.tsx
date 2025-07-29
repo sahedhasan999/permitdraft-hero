@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useFirebase } from '@/contexts/FirebaseContext';
@@ -11,25 +10,25 @@ import { Calendar, Package, DollarSign, Clock, FileText, Phone, Mail, MessageSqu
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import ClientMessaging from '@/components/client/messaging/ClientMessaging';
-
 const ClientDashboard = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
-  const { currentUser } = useFirebase();
-
+  const {
+    toast
+  } = useToast();
+  const {
+    currentUser
+  } = useFirebase();
   useEffect(() => {
     window.scrollTo(0, 0);
     document.title = "Dashboard | PermitDraft Pro";
   }, []);
-
   useEffect(() => {
     const fetchOrders = async () => {
       if (!currentUser) {
         setIsLoading(false);
         return;
       }
-
       try {
         const userOrders = await getUserOrders(currentUser.uid, currentUser.email);
         setOrders(userOrders);
@@ -44,13 +43,10 @@ const ClientDashboard = () => {
         setIsLoading(false);
       }
     };
-
     fetchOrders();
   }, [currentUser, toast]);
-
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background">
+    return <div className="min-h-screen bg-background">
         <Navbar />
         <main className="pt-28 lg:pt-32 pb-24">
           <div className="container px-4 mx-auto">
@@ -60,26 +56,22 @@ const ClientDashboard = () => {
           </div>
         </main>
         <Footer />
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="pt-28 lg:pt-32 pb-24">
-        <div className="container px-4 mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold mb-8">Your Dashboard</h1>
+      <main className="pt-28 lg:pt-32 pb-24 py-[47px]">
+        <div className="container mx-0 py-0 my-0 px-0">
+          <h1 className="text-4xl md:text-5xl font-bold mb-8">Dashboard</h1>
 
-          <Tabs defaultValue="orders" className="w-full">
+          <Tabs defaultValue="orders" className="w-full py-0 px-0 mx-0 my-0">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="orders">Orders</TabsTrigger>
               <TabsTrigger value="messages">Messages</TabsTrigger>
             </TabsList>
             
             <TabsContent value="orders" className="mt-6">
-              {orders.length === 0 ? (
-                <Card className="mb-4">
+              {orders.length === 0 ? <Card className="mb-4">
                   <CardHeader>
                     <CardTitle>No Orders Yet</CardTitle>
                     <CardDescription>Start a new project to see your orders here.</CardDescription>
@@ -90,11 +82,8 @@ const ClientDashboard = () => {
                       <a href="/order">Start a New Project</a>
                     </Button>
                   </CardContent>
-                </Card>
-              ) : (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {orders.map((order) => (
-                    <Card key={order.id}>
+                </Card> : <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {orders.map(order => <Card key={order.id}>
                       <CardHeader>
                         <CardTitle>Order #{order.id.substring(0, 8).toUpperCase()}</CardTitle>
                         <CardDescription>
@@ -119,10 +108,8 @@ const ClientDashboard = () => {
                           <span>Status: {order.status}</span>
                         </div>
                       </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
+                    </Card>)}
+                </div>}
             </TabsContent>
             
             <TabsContent value="messages" className="mt-6">
@@ -132,8 +119,6 @@ const ClientDashboard = () => {
         </div>
       </main>
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default ClientDashboard;
