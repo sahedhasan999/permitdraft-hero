@@ -38,11 +38,11 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
         <div className="bg-teal-50 p-3 inline-block rounded-lg mb-2 w-fit">
           {icon}
         </div>
-        <h3 className="text-xl font-semibold mb-2">{title}</h3>
+        <h3 className="text-xl font-semibold mb-2 text-left">{title}</h3>
         <p className="text-muted-foreground mb-4">{description}</p>
         
         <div className="mb-4">
-          <span className="text-sm text-muted-foreground block mb-1">Start from</span>
+          <span className="text-sm text-muted-foreground block mb-1 text-left">Starting from</span>
           <div className="flex items-baseline">
             <span className="text-2xl font-bold text-teal-600">${discountedPrice.toFixed(0)}</span>
             {discountPercentage > 0 && <span className="ml-2 text-sm text-muted-foreground line-through">${regularPrice}</span>}
