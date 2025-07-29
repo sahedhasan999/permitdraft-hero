@@ -35,10 +35,12 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
         {discountPercentage > 0 && <div className="absolute -right-8 top-6 bg-red-500 text-white py-1 px-10 transform rotate-45 shadow-md text-xs font-bold">
             {discountPercentage}% OFF
           </div>}
-        <div className="bg-teal-50 p-3 inline-block rounded-lg mb-2 w-fit">
-          {icon}
+        <div className="flex items-center gap-3 mb-2">
+          <div className="bg-teal-50 p-3 rounded-lg w-fit">
+            {icon}
+          </div>
+          <h3 className="text-xl font-semibold">{title}</h3>
         </div>
-        <h3 className="text-xl font-semibold mb-2">{title}</h3>
         <p className="text-muted-foreground mb-4">{description}</p>
         
         <div className="mb-4">
