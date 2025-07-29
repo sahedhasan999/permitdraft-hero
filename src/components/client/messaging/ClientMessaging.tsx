@@ -139,20 +139,20 @@ const ClientMessaging: React.FC = memo(() => {
       {/* Mobile: Show either conversation list or active conversation */}
       {isMobile ? (
         <>
+          {/* Fixed Dashboard section at top */}
+          <div className="fixed top-0 left-0 right-0 z-20 p-3 bg-white border-b shadow-sm">
+            <div className="flex space-x-4">
+              <button className="px-4 py-2 text-sm font-medium text-gray-600 border-b-2 border-transparent">
+                Orders
+              </button>
+              <button className="px-4 py-2 text-sm font-medium text-primary border-b-2 border-primary">
+                Messages
+              </button>
+            </div>
+          </div>
+
           {showConversationList ? (
-            <div className="flex-1 bg-white flex flex-col">
-              {/* Dashboard section moved up */}
-              <div className="p-3 bg-white border-b">
-                <div className="flex space-x-4">
-                  <button className="px-4 py-2 text-sm font-medium text-gray-600 border-b-2 border-transparent">
-                    Orders
-                  </button>
-                  <button className="px-4 py-2 text-sm font-medium text-primary border-b-2 border-primary">
-                    Messages
-                  </button>
-                </div>
-              </div>
-              
+            <div className="flex-1 bg-white flex flex-col pt-16">
               {/* Conversations list taking remaining space */}
               <div className="flex-1 overflow-hidden">
                 <ConversationsList
@@ -164,7 +164,7 @@ const ClientMessaging: React.FC = memo(() => {
               </div>
             </div>
           ) : (
-            <div className="flex-1 flex flex-col h-full">
+            <div className="flex-1 flex flex-col h-full pt-16">
               <ActiveConversationView
                 activeConversation={activeConversation}
                 currentMessages={currentMessages}
