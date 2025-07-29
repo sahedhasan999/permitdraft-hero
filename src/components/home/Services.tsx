@@ -42,6 +42,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
         <p className="text-muted-foreground mb-4">{description}</p>
         
         <div className="mb-4 flex items-baseline">
+          <span className="text-sm text-muted-foreground mr-1">Start from</span>
           <span className="text-2xl font-bold text-teal-600">${discountedPrice.toFixed(0)}</span>
           {discountPercentage > 0 && <span className="ml-2 text-sm text-muted-foreground line-through">${regularPrice}</span>}
         </div>
