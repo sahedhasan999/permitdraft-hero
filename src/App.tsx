@@ -1,10 +1,11 @@
 
 import './App.css';
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './components/admin/ProtectedRoute';
 import { Skeleton } from './components/ui/skeleton';
+import { useIsMobile } from './hooks/use-mobile';
 
 // Layout
 import Footer from './components/layout/Footer';
@@ -63,6 +64,19 @@ const PageSkeleton = () => (
   </div>
 );
 
+// Component to conditionally render footer
+const ConditionalFooter = () => {
+  const location = useLocation();
+  const isMobile = useIsMobile();
+  
+  // Hide footer on mobile for client messages page
+  if (isMobile && location.pathname === '/client/messages') {
+    return null;
+  }
+  
+  return <Footer />;
+};
+
 function App() {
   return (
     <BrowserRouter>
@@ -97,7 +111,7 @@ function App() {
                   {/* 404 */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
-                <Footer />
+                <ConditionalFooter />
                 <FloatingChatButton />
               </>
             }
