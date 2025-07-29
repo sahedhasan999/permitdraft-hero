@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button';
 
 interface ClientMessageItemProps {
   message: MessageType;
+  isMobile?: boolean;
 }
 
-const ClientMessageItem: React.FC<ClientMessageItemProps> = ({ message }) => {
+const ClientMessageItem: React.FC<ClientMessageItemProps> = ({ message, isMobile = false }) => {
   const handleDownload = (attachment: any) => {
     // For Firebase Storage URLs, we can directly download
     const link = document.createElement('a');
@@ -28,16 +29,27 @@ const ClientMessageItem: React.FC<ClientMessageItemProps> = ({ message }) => {
   const isFromCustomer = message.sender === 'customer';
 
   return (
-    <div className={`flex ${isFromCustomer ? 'justify-end' : 'justify-start'} mb-4 lg:mb-6`}>
-      <div className={`max-w-[85%] sm:max-w-xl lg:max-w-2xl ${isFromCustomer ? 'ml-4 lg:ml-12' : 'mr-4 lg:mr-12'}`}>
-        {/* Message bubble */}
-        <div className={`rounded-2xl p-3 lg:p-4 shadow-sm ${
+    <div className={`flex ${isFromCustomer ? 'justify-end' : 'justify-start'} ${isMobile ? 'mb-2' : 'mb-4 lg:mb-6'}`}>
+      <div className={`${isMobile ? 'max-w-[80%]' : 'max-w-[85%] sm:max-w-xl lg:max-w-2xl'} ${isFromCustomer ? (isMobile ? 'ml-2' : 'ml-4 lg:ml-12') : (isMobile ? 'mr-2' : 'mr-4 lg:mr-12')}`}>
+        {/* Message bubble - WhatsApp style */}
+        <div className={`${isMobile ? 'rounded-lg' : 'rounded-2xl'} ${isMobile ? 'p-2.5' : 'p-3 lg:p-4'} shadow-sm relative ${
           isFromCustomer 
-            ? 'bg-blue-600 text-white' 
+            ? 'bg-primary text-primary-foreground' 
             : 'bg-white border border-gray-200'
         }`}>
-          <p className={`text-sm lg:text-base leading-relaxed break-words ${
-            isFromCustomer ? 'text-white' : 'text-gray-900'
+          {/* WhatsApp-style tail for mobile */}
+          {isMobile && (
+            <div 
+              className={`absolute top-0 ${
+                isFromCustomer 
+                  ? 'right-0 border-l-[8px] border-l-primary border-t-[8px] border-t-transparent -mr-2' 
+                  : 'left-0 border-r-[8px] border-r-white border-t-[8px] border-t-transparent -ml-2'
+              }`} 
+              style={{ transform: 'translateY(0px)' }}
+            />
+          )}
+          <p className={`${isMobile ? 'text-sm' : 'text-sm lg:text-base'} leading-relaxed break-words ${
+            isFromCustomer ? 'text-primary-foreground' : 'text-gray-900'
           }`}>
             {message.content}
           </p>
@@ -89,19 +101,21 @@ const ClientMessageItem: React.FC<ClientMessageItemProps> = ({ message }) => {
           )}
         </div>
         
-        {/* Message info */}
-        <div className={`flex items-center mt-2 space-x-2 text-xs text-gray-500 ${
+        {/* Message info - Simplified for mobile */}
+        <div className={`flex items-center ${isMobile ? 'mt-1' : 'mt-2'} space-x-2 text-xs text-gray-500 ${
           isFromCustomer ? 'justify-end' : 'justify-start'
         }`}>
-          <div className="flex items-center space-x-1">
-            {isFromCustomer ? (
-              <User className="h-3 w-3" />
-            ) : (
-              <Headphones className="h-3 w-3" />
-            )}
-            <span>{isFromCustomer ? 'You' : 'Support'}</span>
-          </div>
-          <span>•</span>
+          {!isMobile && (
+            <div className="flex items-center space-x-1">
+              {isFromCustomer ? (
+                <User className="h-3 w-3" />
+              ) : (
+                <Headphones className="h-3 w-3" />
+              )}
+              <span>{isFromCustomer ? 'You' : 'Support'}</span>
+            </div>
+          )}
+          {!isMobile && <span>•</span>}
           <span>
             {new Date(message.timestamp).toLocaleString('en-US', {
               month: 'short',

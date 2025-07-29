@@ -135,7 +135,7 @@ const ClientMessaging: React.FC = memo(() => {
   }
 
   return (
-    <div className="h-[500px] lg:h-[600px] bg-gray-50 rounded-lg shadow-lg overflow-hidden flex flex-col lg:flex-row">
+    <div className={`${isMobile ? 'h-full' : 'h-[500px] lg:h-[600px]'} bg-gray-50 ${!isMobile ? 'rounded-lg shadow-lg' : ''} overflow-hidden flex flex-col lg:flex-row`}>
       {/* Mobile: Show either conversation list or active conversation */}
       {isMobile ? (
         <>
@@ -149,7 +149,7 @@ const ClientMessaging: React.FC = memo(() => {
               />
             </div>
           ) : (
-            <div className="flex-1">
+            <div className="flex-1 flex flex-col">
               <ActiveConversationView
                 activeConversation={activeConversation}
                 currentMessages={currentMessages}

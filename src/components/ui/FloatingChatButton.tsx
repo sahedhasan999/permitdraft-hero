@@ -32,15 +32,15 @@ const FloatingChatButton = () => {
 
       {/* Chat Dialog */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-4xl h-[80vh] p-0">
-          <DialogHeader className="p-4 border-b">
+        <DialogContent className="max-w-4xl h-[85vh] sm:h-[80vh] p-0 m-2 sm:m-4">
+          <DialogHeader className="p-3 sm:p-4 border-b bg-primary">
             <DialogTitle className="flex items-center justify-between">
-              Messages
+              <span className="text-primary-foreground font-semibold">Messages</span>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsOpen(false)}
-                className="h-8 w-8 p-0"
+                className="h-8 w-8 p-0 text-primary-foreground hover:bg-primary-foreground/20"
               >
                 <X className="h-4 w-4" />
               </Button>
