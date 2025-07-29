@@ -32,10 +32,14 @@ const FloatingChatButton = () => {
 
       {/* Chat Dialog */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-4xl h-[85vh] sm:h-[80vh] p-0 m-2 sm:m-4">
-          <DialogHeader className="p-3 sm:p-4 border-b bg-primary">
+        <DialogContent className="max-w-5xl w-[95vw] h-[95vh] p-0 m-0 sm:m-2">
+          {/* Compact header with dashboard info moved up */}
+          <DialogHeader className="p-2 border-b bg-primary flex-shrink-0">
             <DialogTitle className="flex items-center justify-between">
-              <span className="text-primary-foreground font-semibold">Messages</span>
+              <div className="flex flex-col">
+                <span className="text-primary-foreground font-semibold text-sm">PermitDraftPro</span>
+                <span className="text-primary-foreground/80 text-xs">Your Dashboard - Messages</span>
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
@@ -46,7 +50,9 @@ const FloatingChatButton = () => {
               </Button>
             </DialogTitle>
           </DialogHeader>
-          <div className="flex-1 overflow-hidden">
+          
+          {/* Chat area taking full width */}
+          <div className="flex-1 overflow-hidden flex flex-col">
             <ClientMessaging />
           </div>
         </DialogContent>

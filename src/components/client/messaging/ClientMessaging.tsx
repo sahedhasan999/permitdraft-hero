@@ -135,21 +135,36 @@ const ClientMessaging: React.FC = memo(() => {
   }
 
   return (
-    <div className={`${isMobile ? 'h-full' : 'h-[500px] lg:h-[600px]'} bg-gray-50 ${!isMobile ? 'rounded-lg shadow-lg' : ''} overflow-hidden flex flex-col lg:flex-row`}>
+    <div className={`h-full bg-gray-50 overflow-hidden flex flex-col lg:flex-row`}>
       {/* Mobile: Show either conversation list or active conversation */}
       {isMobile ? (
         <>
           {showConversationList ? (
-            <div className="flex-1 bg-white">
-              <ConversationsList
-                conversations={conversations}
-                activeConversation={activeConversation}
-                onConversationSelect={handleConversationSelect}
-                onNewConversationCreated={handleNewConversationCreated}
-              />
+            <div className="flex-1 bg-white flex flex-col">
+              {/* Dashboard section moved up */}
+              <div className="p-3 bg-white border-b">
+                <div className="flex space-x-4">
+                  <button className="px-4 py-2 text-sm font-medium text-gray-600 border-b-2 border-transparent">
+                    Orders
+                  </button>
+                  <button className="px-4 py-2 text-sm font-medium text-primary border-b-2 border-primary">
+                    Messages
+                  </button>
+                </div>
+              </div>
+              
+              {/* Conversations list taking remaining space */}
+              <div className="flex-1 overflow-hidden">
+                <ConversationsList
+                  conversations={conversations}
+                  activeConversation={activeConversation}
+                  onConversationSelect={handleConversationSelect}
+                  onNewConversationCreated={handleNewConversationCreated}
+                />
+              </div>
             </div>
           ) : (
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col h-full">
               <ActiveConversationView
                 activeConversation={activeConversation}
                 currentMessages={currentMessages}
