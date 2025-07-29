@@ -47,6 +47,7 @@ const ClientDocuments = lazy(() => import('./pages/client/Documents'));
 const ClientMessages = lazy(() => import('./pages/client/Messages'));
 
 import { Toaster } from './components/ui/toaster';
+import FloatingChatButton from './components/ui/FloatingChatButton';
 
 // Loading component for lazy routes
 const PageSkeleton = () => (
@@ -97,6 +98,7 @@ function App() {
                   <Route path="*" element={<NotFound />} />
                 </Routes>
                 <Footer />
+                <FloatingChatButton />
               </>
             }
           />
