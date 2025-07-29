@@ -31,7 +31,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
   return <div className="animate-fade-up" style={{
     animationDelay: `${delay}ms`
   }}>
-      <GlassMorphismCard variant="interactive" className="h-full flex flex-col relative overflow-hidden">
+      <GlassMorphismCard variant="interactive" padding="sm" className="h-full flex flex-col relative overflow-hidden">
         {discountPercentage > 0 && <div className="absolute -right-8 top-6 bg-red-500 text-white py-1 px-10 transform rotate-45 shadow-md text-xs font-bold">
             {discountPercentage}% OFF
           </div>}
