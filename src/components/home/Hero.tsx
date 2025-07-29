@@ -70,12 +70,12 @@ const Hero = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-6 items-center">
           {/* Hero Content */}
           <div className="order-2 lg:order-1 animate-fade-up text-center lg:text-left mx-[25px]">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 tracking-tight">
+            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4 tracking-tight">
               Outdoor Designs, <br />
               <span className="text-primary">Approved Results</span>
             </h1>
-            <p className="text-base text-muted-foreground mb-6 max-w-lg mx-auto lg:mx-0">
-              Professional architectural drafting services specializing in outdoor space designs for US permit applications. High-quality drawings at competitive prices.
+            <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6 max-w-lg mx-auto lg:mx-0">
+              Professional drafting services for outdoor designs and US permit applications.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start py-0 my-0 mx-0 px-0">
               <AnimatedButton variant="primary" size="lg" iconRight={<ArrowRight size={16} />} onClick={() => navigate('/quote')}>
@@ -105,14 +105,14 @@ const Hero = () => {
               
               {/* Satisfaction tag */}
               <div className="absolute -bottom-6 -left-6 z-20">
-                <GlassMorphismCard className="px-4 py-2 shadow-lg" fadeIn>
-                  <div className="flex items-center space-x-3">
-                    <div className="bg-teal-100 p-2 rounded-full">
-                      <Heart size={16} className="text-primary" />
+                <GlassMorphismCard className="px-2 sm:px-4 py-1 sm:py-2 shadow-lg" fadeIn>
+                  <div className="flex items-center space-x-2 sm:space-x-3">
+                    <div className="bg-teal-100 p-1 sm:p-2 rounded-full">
+                      <Heart size={12} className="text-primary sm:w-4 sm:h-4" />
                     </div>
                     <div>
-                      <h3 className="text-sm font-semibold">100% Satisfaction</h3>
-                      <p className="text-xs text-muted-foreground">30-day guarantee</p>
+                      <h3 className="text-xs sm:text-sm font-semibold">100% Satisfaction</h3>
+                      <p className="text-xs text-muted-foreground hidden sm:block">30-day guarantee</p>
                     </div>
                   </div>
                 </GlassMorphismCard>
@@ -120,14 +120,14 @@ const Hero = () => {
               
               {/* Fast delivery tag */}
               <div className="absolute -top-6 -right-6 z-20">
-                <GlassMorphismCard className="px-4 py-2 shadow-lg" fadeIn>
-                  <div className="flex items-center space-x-3">
-                    <div className="bg-teal-100 p-2 rounded-full">
-                      <Clock size={16} className="text-primary" />
+                <GlassMorphismCard className="px-2 sm:px-4 py-1 sm:py-2 shadow-lg" fadeIn>
+                  <div className="flex items-center space-x-2 sm:space-x-3">
+                    <div className="bg-teal-100 p-1 sm:p-2 rounded-full">
+                      <Clock size={12} className="text-primary sm:w-4 sm:h-4" />
                     </div>
                     <div>
-                      <h3 className="text-sm font-semibold">Fast Turnaround</h3>
-                      <p className="text-xs text-muted-foreground">48-72 hour delivery</p>
+                      <h3 className="text-xs sm:text-sm font-semibold">Fast Turnaround</h3>
+                      <p className="text-xs text-muted-foreground hidden sm:block">48-72 hour delivery</p>
                     </div>
                   </div>
                 </GlassMorphismCard>
