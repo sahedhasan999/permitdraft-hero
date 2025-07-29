@@ -17,6 +17,8 @@ const ImageCarousel: React.FC<ImageCarouselProps> = memo(({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   // Preload images efficiently
   useEffect(() => {
@@ -70,6 +72,31 @@ const ImageCarousel: React.FC<ImageCarouselProps> = memo(({
     setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
   };
 
+  // Touch handlers for swipe gestures
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe && images.length > 1) {
+      goToNext();
+    }
+    if (isRightSwipe && images.length > 1) {
+      goToPrevious();
+    }
+  };
+
   if (images.length === 0) {
     return null;
   }
@@ -86,7 +113,12 @@ const ImageCarousel: React.FC<ImageCarouselProps> = memo(({
   }
 
   return (
-    <div className={`relative overflow-hidden rounded-lg group ${className}`}>
+    <div 
+      className={`relative overflow-hidden rounded-lg group ${className}`}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       {images.map((image, index) => (
         <div
           key={index}
