@@ -148,8 +148,8 @@ const Services = () => {
     };
     fetchServices();
   }, [toast]);
-  return <section id="services" ref={servicesRef} className="bg-zinc-50 py-[42px]">
-      <div className="container px-4 mx-auto">
+  return <section id="services" ref={servicesRef} className="bg-zinc-50 py-[20px]">
+      <div className="container px-[10px] py-0 my-0 mx-[4px]">
         <div className="max-w-2xl mx-auto text-center mb-16 animate-fade-up">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
             Specialized Outdoor Design Services
