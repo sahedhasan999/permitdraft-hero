@@ -3,8 +3,11 @@ import React, { useEffect } from "react";
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import ClientMessaging from '@/components/client/messaging/ClientMessaging';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const ClientMessages = () => {
+  const isMobile = useIsMobile();
+  
   useEffect(() => {
     window.scrollTo(0, 0);
     document.title = "Messages | PermitDraft Pro";
@@ -25,7 +28,7 @@ const ClientMessages = () => {
           <ClientMessaging />
         </div>
       </main>
-      <Footer />
+      {!isMobile && <Footer />}
     </div>
   );
 };
