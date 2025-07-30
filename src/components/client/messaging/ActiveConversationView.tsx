@@ -25,21 +25,32 @@ const ActiveConversationView: React.FC<ActiveConversationViewProps> = ({
 }) => {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isUserScrolling, setIsUserScrolling] = React.useState(false);
 
   const scrollToBottom = () => {
-    if (messagesContainerRef.current) {
+    if (messagesContainerRef.current && !isUserScrolling) {
       messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
     }
   };
 
+  const handleScroll = () => {
+    if (messagesContainerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+      const isAtBottom = Math.abs(scrollHeight - clientHeight - scrollTop) < 5;
+      setIsUserScrolling(!isAtBottom);
+    }
+  };
+
   useEffect(() => {
-    // Small delay to ensure DOM is updated
+    // Auto-scroll to bottom for new messages only if user isn't manually scrolling
     const timeoutId = setTimeout(() => {
-      scrollToBottom();
+      if (!isUserScrolling) {
+        scrollToBottom();
+      }
     }, 100);
 
     return () => clearTimeout(timeoutId);
-  }, [currentMessages]);
+  }, [currentMessages, isUserScrolling]);
 
   if (!activeConversation) {
     return (
@@ -103,6 +114,7 @@ const ActiveConversationView: React.FC<ActiveConversationViewProps> = ({
       {/* Messages - WhatsApp style background */}
       <div 
         ref={messagesContainerRef}
+        onScroll={handleScroll}
         className={`flex-1 overflow-y-auto ${isMobile ? 'p-3 pb-20' : 'p-4 lg:p-6'} bg-gradient-to-b from-gray-50 to-gray-100`}
         style={isMobile ? {
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f3f4f6' fill-opacity='0.3'%3E%3Cpath d='M30 0c16.569 0 30 13.431 30 30 0 16.569-13.431 30-30 30C13.431 60 0 46.569 0 30 0 13.431 13.431 0 30 0zm0 2C14.536 2 2 14.536 2 30s12.536 28 28 28 28-12.536 28-28S45.464 2 30 2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
