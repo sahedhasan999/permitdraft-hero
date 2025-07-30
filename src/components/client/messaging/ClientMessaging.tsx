@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, memo, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ConversationType, MessageType } from '@/types/communications';
@@ -79,30 +79,30 @@ const ClientMessaging: React.FC = memo(() => {
     };
   }, [activeConversation?.id]);
 
-  const handleConversationSelect = (conversation: ConversationType) => {
+  const handleConversationSelect = useCallback((conversation: ConversationType) => {
     console.log('Selecting conversation:', conversation.id);
     setActiveConversation(conversation);
     setCurrentMessages([]);
     if (isMobile) {
       setShowConversationList(false);
     }
-  };
+  }, [isMobile]);
 
-  const handleBackToList = () => {
+  const handleBackToList = useCallback(() => {
     if (isMobile) {
       setShowConversationList(true);
       setActiveConversation(null);
     }
-  };
+  }, [isMobile]);
 
-  const handleNewConversationCreated = (newConversation: ConversationType) => {
+  const handleNewConversationCreated = useCallback((newConversation: ConversationType) => {
     console.log('New conversation created:', newConversation);
     setConversations(prev => [newConversation, ...prev]);
     setActiveConversation(newConversation);
     if (isMobile) {
       setShowConversationList(false);
     }
-  };
+  }, [isMobile]);
 
   if (isLoading) {
     return (

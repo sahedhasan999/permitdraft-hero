@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import { MessageType } from '@/types/communications';
 import { Paperclip, Download, User, Headphones, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,8 +9,8 @@ interface ClientMessageItemProps {
   isMobile?: boolean;
 }
 
-const ClientMessageItem: React.FC<ClientMessageItemProps> = ({ message, isMobile = false }) => {
-  const handleDownload = (attachment: any) => {
+const ClientMessageItem: React.FC<ClientMessageItemProps> = memo(({ message, isMobile = false }) => {
+  const handleDownload = useCallback((attachment: any) => {
     // For Firebase Storage URLs, we can directly download
     const link = document.createElement('a');
     link.href = attachment.url;
@@ -19,12 +19,12 @@ const ClientMessageItem: React.FC<ClientMessageItemProps> = ({ message, isMobile
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  };
+  }, []);
 
-  const handleView = (attachment: any) => {
+  const handleView = useCallback((attachment: any) => {
     // Open in new tab for viewing
     window.open(attachment.url, '_blank');
-  };
+  }, []);
 
   const isFromCustomer = message.sender === 'customer';
 
@@ -128,6 +128,8 @@ const ClientMessageItem: React.FC<ClientMessageItemProps> = ({ message, isMobile
       </div>
     </div>
   );
-};
+});
+
+ClientMessageItem.displayName = "ClientMessageItem";
 
 export default ClientMessageItem;

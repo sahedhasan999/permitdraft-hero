@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, memo, useCallback, useMemo } from 'react';
 import { MessageSquare, Headphones, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ConversationType, MessageType } from '@/types/communications';
@@ -15,7 +15,7 @@ interface ActiveConversationViewProps {
   isMobile?: boolean;
 }
 
-const ActiveConversationView: React.FC<ActiveConversationViewProps> = ({
+const ActiveConversationView: React.FC<ActiveConversationViewProps> = memo(({
   activeConversation,
   currentMessages,
   hasConversations,
@@ -26,31 +26,40 @@ const ActiveConversationView: React.FC<ActiveConversationViewProps> = ({
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isUserScrolling, setIsUserScrolling] = React.useState(false);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout>();
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     if (messagesContainerRef.current && !isUserScrolling) {
       messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
     }
-  };
+  }, [isUserScrolling]);
 
-  const handleScroll = () => {
+  const handleScroll = useCallback(() => {
     if (messagesContainerRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
       const isAtBottom = Math.abs(scrollHeight - clientHeight - scrollTop) < 5;
       setIsUserScrolling(!isAtBottom);
     }
-  };
+  }, []);
 
+  // Debounced auto-scroll for better performance
   useEffect(() => {
-    // Auto-scroll to bottom for new messages only if user isn't manually scrolling
-    const timeoutId = setTimeout(() => {
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+    
+    scrollTimeoutRef.current = setTimeout(() => {
       if (!isUserScrolling) {
         scrollToBottom();
       }
     }, 100);
 
-    return () => clearTimeout(timeoutId);
-  }, [currentMessages, isUserScrolling]);
+    return () => {
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, [currentMessages, isUserScrolling, scrollToBottom]);
 
   if (!activeConversation) {
     return (
@@ -130,7 +139,11 @@ const ActiveConversationView: React.FC<ActiveConversationViewProps> = ({
         ) : (
           <div className={`space-y-2 ${!isMobile ? 'max-w-4xl mx-auto' : ''}`}>
             {currentMessages.map((message) => (
-              <ClientMessageItem key={message.id} message={message} isMobile={isMobile} />
+              <ClientMessageItem 
+                key={`${message.id}-${message.timestamp}`} 
+                message={message} 
+                isMobile={isMobile} 
+              />
             ))}
             <div ref={messagesEndRef} />
           </div>
@@ -157,6 +170,8 @@ const ActiveConversationView: React.FC<ActiveConversationViewProps> = ({
       )}
     </div>
   );
-};
+});
+
+ActiveConversationView.displayName = "ActiveConversationView";
 
 export default ActiveConversationView;
