@@ -63,11 +63,11 @@ const ClientDashboard = () => {
   }
   return <div className="min-h-screen bg-background">
       <Navbar />
-      {isMobile ? (
-        // Mobile: Fixed dashboard header with scrollable content below
-        <div className="pt-16 h-screen flex flex-col">
+      {isMobile ?
+    // Mobile: Fixed dashboard header with scrollable content below
+    <div className="pt-16 h-screen flex flex-col">
           {/* Fixed Dashboard Header */}
-          <div className="bg-background border-b px-4 py-6 flex-shrink-0">
+          <div className="bg-background border-b flex-shrink-0 px-[20px] py-px">
             <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
@@ -79,10 +79,8 @@ const ClientDashboard = () => {
           
           {/* Scrollable Content */}
           <div className="flex-1 overflow-hidden">
-            {activeTab === "orders" ? (
-              <div className="h-full overflow-y-auto p-4">
-                {orders.length === 0 ? (
-                  <Card className="mb-4">
+            {activeTab === "orders" ? <div className="h-full overflow-y-auto p-4">
+                {orders.length === 0 ? <Card className="mb-4">
                     <CardHeader>
                       <CardTitle>No Orders Yet</CardTitle>
                       <CardDescription>Start a new project to see your orders here.</CardDescription>
@@ -93,11 +91,8 @@ const ClientDashboard = () => {
                         <a href="/order">Start a New Project</a>
                       </Button>
                     </CardContent>
-                  </Card>
-                ) : (
-                  <div className="grid gap-6">
-                    {orders.map(order => (
-                      <Card key={order.id}>
+                  </Card> : <div className="grid gap-6">
+                    {orders.map(order => <Card key={order.id}>
                         <CardHeader>
                           <CardTitle>Order #{order.id.substring(0, 8).toUpperCase()}</CardTitle>
                           <CardDescription>
@@ -122,21 +117,15 @@ const ClientDashboard = () => {
                             <span>Status: {order.status}</span>
                           </div>
                         </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="h-full">
+                      </Card>)}
+                  </div>}
+              </div> : <div className="h-full">
                 <ClientMessaging />
-              </div>
-            )}
+              </div>}
           </div>
-        </div>
-      ) : (
-        // Desktop: Keep original layout
-        <main className="pt-28 lg:pt-32 pb-24 py-[47px]">
+        </div> :
+    // Desktop: Keep original layout
+    <main className="pt-28 lg:pt-32 pb-24 py-[47px]">
           <div className="container mx-0 py-0 my-0 px-0">
             <h1 className="text-4xl md:text-5xl font-bold mb-8">Dashboard</h1>
 
@@ -147,8 +136,7 @@ const ClientDashboard = () => {
               </TabsList>
               
               <TabsContent value="orders" className="mt-6">
-                {orders.length === 0 ? (
-                  <Card className="mb-4">
+                {orders.length === 0 ? <Card className="mb-4">
                     <CardHeader>
                       <CardTitle>No Orders Yet</CardTitle>
                       <CardDescription>Start a new project to see your orders here.</CardDescription>
@@ -159,11 +147,8 @@ const ClientDashboard = () => {
                         <a href="/order">Start a New Project</a>
                       </Button>
                     </CardContent>
-                  </Card>
-                ) : (
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {orders.map(order => (
-                      <Card key={order.id}>
+                  </Card> : <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {orders.map(order => <Card key={order.id}>
                         <CardHeader>
                           <CardTitle>Order #{order.id.substring(0, 8).toUpperCase()}</CardTitle>
                           <CardDescription>
@@ -188,10 +173,8 @@ const ClientDashboard = () => {
                             <span>Status: {order.status}</span>
                           </div>
                         </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
+                      </Card>)}
+                  </div>}
               </TabsContent>
               
               <TabsContent value="messages" className="mt-6">
@@ -199,8 +182,7 @@ const ClientDashboard = () => {
               </TabsContent>
             </Tabs>
           </div>
-        </main>
-      )}
+        </main>}
       {!isMobile && <Footer />}
     </div>;
 };

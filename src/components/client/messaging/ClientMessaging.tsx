@@ -7,47 +7,39 @@ import { useFirebase } from '@/contexts/FirebaseContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import ConversationsList from './ConversationsList';
 import ActiveConversationView from './ActiveConversationView';
-
 const ClientMessaging: React.FC = memo(() => {
   const [conversations, setConversations] = useState<ConversationType[]>([]);
   const [activeConversation, setActiveConversation] = useState<ConversationType | null>(null);
   const [currentMessages, setCurrentMessages] = useState<MessageType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showConversationList, setShowConversationList] = useState(true);
-  const { currentUser } = useFirebase();
+  const {
+    currentUser
+  } = useFirebase();
   const isMobile = useIsMobile();
-
   useEffect(() => {
     if (!currentUser) {
       console.log('No current user, skipping conversations subscription');
       setIsLoading(false);
       return;
     }
-
     console.log('Setting up conversations subscription for user:', currentUser.uid, currentUser.email);
-    
-    const unsubscribe = subscribeToUserConversations(
-      currentUser.uid, 
-      currentUser.email || '', 
-      (userConversations) => {
-        console.log('Client received conversations update:', userConversations);
-        setConversations(userConversations);
-        
-        // Only update active conversation if it still exists, don't auto-select
-        if (activeConversation) {
-          const updatedActiveConversation = userConversations.find(conv => conv.id === activeConversation.id);
-          if (updatedActiveConversation) {
-            setActiveConversation(updatedActiveConversation);
-          } else {
-            // If active conversation no longer exists, clear it
-            setActiveConversation(null);
-          }
-        }
-        
-        setIsLoading(false);
-      }
-    );
+    const unsubscribe = subscribeToUserConversations(currentUser.uid, currentUser.email || '', userConversations => {
+      console.log('Client received conversations update:', userConversations);
+      setConversations(userConversations);
 
+      // Only update active conversation if it still exists, don't auto-select
+      if (activeConversation) {
+        const updatedActiveConversation = userConversations.find(conv => conv.id === activeConversation.id);
+        if (updatedActiveConversation) {
+          setActiveConversation(updatedActiveConversation);
+        } else {
+          // If active conversation no longer exists, clear it
+          setActiveConversation(null);
+        }
+      }
+      setIsLoading(false);
+    });
     return () => {
       console.log('Cleaning up conversations subscription');
       unsubscribe();
@@ -56,21 +48,16 @@ const ClientMessaging: React.FC = memo(() => {
 
   useEffect(() => {
     let messageSubscriptionUnsubscribe: (() => void) | undefined;
-
     if (activeConversation) {
       console.log('Setting up message subscription for conversation:', activeConversation.id);
-      messageSubscriptionUnsubscribe = subscribeToConversationMessages(
-        activeConversation.id,
-        (receivedMessages) => {
-          console.log('Received messages update:', receivedMessages);
-          setCurrentMessages(receivedMessages);
-        }
-      );
+      messageSubscriptionUnsubscribe = subscribeToConversationMessages(activeConversation.id, receivedMessages => {
+        console.log('Received messages update:', receivedMessages);
+        setCurrentMessages(receivedMessages);
+      });
     } else {
       // Clear messages when no active conversation
       setCurrentMessages([]);
     }
-
     return () => {
       if (messageSubscriptionUnsubscribe) {
         console.log('Cleaning up message subscription for conversation:', activeConversation?.id);
@@ -78,7 +65,6 @@ const ClientMessaging: React.FC = memo(() => {
       }
     };
   }, [activeConversation?.id]);
-
   const handleConversationSelect = useCallback((conversation: ConversationType) => {
     console.log('Selecting conversation:', conversation.id);
     setActiveConversation(conversation);
@@ -87,14 +73,12 @@ const ClientMessaging: React.FC = memo(() => {
       setShowConversationList(false);
     }
   }, [isMobile]);
-
   const handleBackToList = useCallback(() => {
     if (isMobile) {
       setShowConversationList(true);
       setActiveConversation(null);
     }
   }, [isMobile]);
-
   const handleNewConversationCreated = useCallback((newConversation: ConversationType) => {
     console.log('New conversation created:', newConversation);
     setConversations(prev => [newConversation, ...prev]);
@@ -103,10 +87,8 @@ const ClientMessaging: React.FC = memo(() => {
       setShowConversationList(false);
     }
   }, [isMobile]);
-
   if (isLoading) {
-    return (
-      <div className="h-[500px] lg:h-[600px] bg-white rounded-lg shadow-sm border">
+    return <div className="h-[500px] lg:h-[600px] bg-white rounded-lg shadow-sm border">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 p-4 lg:p-6 h-full">
           <div className="lg:col-span-1 space-y-4">
             <Skeleton className="h-6 w-full" />
@@ -120,89 +102,40 @@ const ClientMessaging: React.FC = memo(() => {
             <Skeleton className="h-12 w-full" />
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
   if (!currentUser) {
-    return (
-      <div className="h-[500px] lg:h-[600px] bg-white rounded-lg shadow-sm border flex items-center justify-center">
+    return <div className="h-[500px] lg:h-[600px] bg-white rounded-lg shadow-sm border flex items-center justify-center">
         <div className="text-center p-6">
           <p className="text-gray-600">Please log in to access messages.</p>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className={`h-full bg-gray-50 overflow-hidden flex flex-col lg:flex-row`}>
+  return <div className={`h-full bg-gray-50 overflow-hidden flex flex-col lg:flex-row`}>
       {/* Mobile: Show either conversation list or active conversation */}
-      {isMobile ? (
-        <>
-          {showConversationList ? (
-            <div className="flex-1 bg-white flex flex-col">
+      {isMobile ? <>
+          {showConversationList ? <div className="flex-1 bg-white flex flex-col">
               {/* Dashboard section moved up */}
-              <div className="p-3 bg-white border-b">
-                <div className="flex space-x-4">
-                  <button className="px-4 py-2 text-sm font-medium text-gray-600 border-b-2 border-transparent">
-                    Orders
-                  </button>
-                  <button className="px-4 py-2 text-sm font-medium text-primary border-b-2 border-primary">
-                    Messages
-                  </button>
-                </div>
-              </div>
+              
               
               {/* Conversations list taking remaining space */}
               <div className="flex-1 overflow-hidden">
-                <ConversationsList
-                  conversations={conversations}
-                  activeConversation={activeConversation}
-                  onConversationSelect={handleConversationSelect}
-                  onNewConversationCreated={handleNewConversationCreated}
-                />
+                <ConversationsList conversations={conversations} activeConversation={activeConversation} onConversationSelect={handleConversationSelect} onNewConversationCreated={handleNewConversationCreated} />
               </div>
-            </div>
-          ) : (
-            <div className="flex-1 flex flex-col h-full">
-              <ActiveConversationView
-                activeConversation={activeConversation}
-                currentMessages={currentMessages}
-                hasConversations={conversations.length > 0}
-                onNewConversationCreated={handleNewConversationCreated}
-                onBackToList={handleBackToList}
-                isMobile={isMobile}
-              />
-            </div>
-          )}
-        </>
-      ) : (
-        /* Desktop: Show both side by side */
-        <>
+            </div> : <div className="flex-1 flex flex-col h-full">
+              <ActiveConversationView activeConversation={activeConversation} currentMessages={currentMessages} hasConversations={conversations.length > 0} onNewConversationCreated={handleNewConversationCreated} onBackToList={handleBackToList} isMobile={isMobile} />
+            </div>}
+        </> : (/* Desktop: Show both side by side */
+    <>
           <div className="w-80 border-r bg-white">
-            <ConversationsList
-              conversations={conversations}
-              activeConversation={activeConversation}
-              onConversationSelect={handleConversationSelect}
-              onNewConversationCreated={handleNewConversationCreated}
-            />
+            <ConversationsList conversations={conversations} activeConversation={activeConversation} onConversationSelect={handleConversationSelect} onNewConversationCreated={handleNewConversationCreated} />
           </div>
 
           <div className="flex-1">
-            <ActiveConversationView
-              activeConversation={activeConversation}
-              currentMessages={currentMessages}
-              hasConversations={conversations.length > 0}
-              onNewConversationCreated={handleNewConversationCreated}
-              isMobile={isMobile}
-            />
+            <ActiveConversationView activeConversation={activeConversation} currentMessages={currentMessages} hasConversations={conversations.length > 0} onNewConversationCreated={handleNewConversationCreated} isMobile={isMobile} />
           </div>
-        </>
-      )}
-    </div>
-  );
+        </>)}
+    </div>;
 });
-
 ClientMessaging.displayName = "ClientMessaging";
-
 export default ClientMessaging;
