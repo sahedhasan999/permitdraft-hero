@@ -35,7 +35,7 @@ const ClientMessageItem: React.FC<ClientMessageItemProps> = memo(({ message, isM
         <div className={`${isMobile ? 'rounded-lg' : 'rounded-2xl'} ${isMobile ? 'p-2.5' : 'p-3 lg:p-4'} shadow-sm relative ${
           isFromCustomer 
             ? 'bg-primary text-primary-foreground' 
-            : 'bg-white border border-gray-200'
+            : 'bg-card border border-border'
         }`}>
           {/* WhatsApp-style tail for mobile */}
           {isMobile && (
@@ -43,13 +43,13 @@ const ClientMessageItem: React.FC<ClientMessageItemProps> = memo(({ message, isM
               className={`absolute top-0 ${
                 isFromCustomer 
                   ? 'right-0 border-l-[8px] border-l-primary border-t-[8px] border-t-transparent -mr-2' 
-                  : 'left-0 border-r-[8px] border-r-white border-t-[8px] border-t-transparent -ml-2'
-              }`} 
+                  : 'left-0 border-r-[8px] border-r-card border-t-[8px] border-t-transparent -ml-2'
+              }`}
               style={{ transform: 'translateY(0px)' }}
             />
           )}
           <p className={`${isMobile ? 'text-sm' : 'text-sm lg:text-base'} leading-relaxed break-words ${
-            isFromCustomer ? 'text-primary-foreground' : 'text-gray-900'
+            isFromCustomer ? 'text-primary-foreground' : 'text-card-foreground'
           }`}>
             {message.content}
           </p>
@@ -57,20 +57,20 @@ const ClientMessageItem: React.FC<ClientMessageItemProps> = memo(({ message, isM
           {/* Attachments */}
           {message.attachments && message.attachments.length > 0 && (
             <div className="mt-3 space-y-2">
-              <p className={`text-xs font-medium ${
-                isFromCustomer ? 'text-blue-100' : 'text-gray-600'
-              }`}>
+          <p className={`text-xs font-medium ${
+            isFromCustomer ? 'text-primary-foreground/70' : 'text-muted-foreground'
+          }`}>
                 Attachments:
               </p>
               {message.attachments.map((attachment, index) => (
-                <div key={index} className={`flex items-center justify-between p-2 rounded-lg ${
-                  isFromCustomer ? 'bg-blue-500' : 'bg-gray-50'
-                }`}>
+              <div key={index} className={`flex items-center justify-between p-2 rounded-lg ${
+                isFromCustomer ? 'bg-primary/20' : 'bg-muted'
+              }`}>
                   <div className="flex items-center space-x-2 min-w-0 flex-1">
                     <Paperclip className="h-3 w-3 flex-shrink-0" />
                     <span className="text-xs truncate">{attachment.name}</span>
                     <span className={`text-xs flex-shrink-0 ${
-                      isFromCustomer ? 'text-blue-200' : 'text-gray-500'
+                      isFromCustomer ? 'text-primary-foreground/60' : 'text-muted-foreground'
                     }`}>
                       ({attachment.size})
                     </span>
@@ -102,7 +102,7 @@ const ClientMessageItem: React.FC<ClientMessageItemProps> = memo(({ message, isM
         </div>
         
         {/* Message info - Simplified for mobile */}
-        <div className={`flex items-center ${isMobile ? 'mt-1' : 'mt-2'} space-x-2 text-xs text-gray-500 ${
+        <div className={`flex items-center ${isMobile ? 'mt-1' : 'mt-2'} space-x-2 text-xs text-muted-foreground ${
           isFromCustomer ? 'justify-end' : 'justify-start'
         }`}>
           {!isMobile && (
