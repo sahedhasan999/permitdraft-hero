@@ -87,26 +87,26 @@ const ActiveConversationView: React.FC<ActiveConversationViewProps> = memo(({
   return (
     <div className="h-full flex flex-col bg-white">
       {/* Header - WhatsApp style */}
-      <div className={`${isMobile ? 'p-3' : 'p-4 lg:p-6'} border-b bg-primary shadow-sm flex-shrink-0`}>
+      <div className={`${isMobile ? 'p-3' : 'p-4 lg:p-6'} border-b bg-teal-600 shadow-sm flex-shrink-0`}>
         <div className="flex items-center space-x-3">
           {isMobile && onBackToList && (
             <Button
               variant="ghost"
               size="sm"
               onClick={onBackToList}
-              className="p-1 text-primary-foreground hover:bg-primary-foreground/20"
+              className="p-1 text-white hover:bg-white/20"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
           )}
-          <div className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10 lg:w-12 lg:h-12'} bg-primary-foreground/20 rounded-full flex items-center justify-center`}>
-            <Headphones className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5 lg:h-6 lg:w-6'} text-primary-foreground`} />
+          <div className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10 lg:w-12 lg:h-12'} bg-white/20 rounded-full flex items-center justify-center`}>
+            <Headphones className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5 lg:h-6 lg:w-6'} text-white`} />
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className={`${isMobile ? 'text-base' : 'text-lg lg:text-xl'} font-semibold text-primary-foreground truncate`}>
+            <h2 className={`${isMobile ? 'text-base' : 'text-lg lg:text-xl'} font-semibold text-white truncate`}>
               {activeConversation.subject}
             </h2>
-            <p className={`${isMobile ? 'text-xs' : 'text-xs lg:text-sm'} text-primary-foreground/80`}>
+            <p className={`${isMobile ? 'text-xs' : 'text-xs lg:text-sm'} text-white/80`}>
               Support conversation
             </p>
           </div>

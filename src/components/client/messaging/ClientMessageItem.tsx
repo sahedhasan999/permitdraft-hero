@@ -34,7 +34,7 @@ const ClientMessageItem: React.FC<ClientMessageItemProps> = memo(({ message, isM
         {/* Message bubble - WhatsApp style */}
         <div className={`${isMobile ? 'rounded-lg' : 'rounded-2xl'} ${isMobile ? 'p-2.5' : 'p-3 lg:p-4'} shadow-sm relative ${
           isFromCustomer 
-            ? 'bg-primary text-primary-foreground' 
+            ? 'bg-teal-600 text-white' 
             : 'bg-card border border-border'
         }`}>
           {/* WhatsApp-style tail for mobile */}
@@ -42,14 +42,14 @@ const ClientMessageItem: React.FC<ClientMessageItemProps> = memo(({ message, isM
             <div 
               className={`absolute top-0 ${
                 isFromCustomer 
-                  ? 'right-0 border-l-[8px] border-l-primary border-t-[8px] border-t-transparent -mr-2' 
+                  ? 'right-0 border-l-[8px] border-l-teal-600 border-t-[8px] border-t-transparent -mr-2' 
                   : 'left-0 border-r-[8px] border-r-card border-t-[8px] border-t-transparent -ml-2'
               }`}
               style={{ transform: 'translateY(0px)' }}
             />
           )}
           <p className={`${isMobile ? 'text-sm' : 'text-sm lg:text-base'} leading-relaxed break-words ${
-            isFromCustomer ? 'text-primary-foreground' : 'text-card-foreground'
+            isFromCustomer ? 'text-white' : 'text-card-foreground'
           }`}>
             {message.content}
           </p>
@@ -58,19 +58,19 @@ const ClientMessageItem: React.FC<ClientMessageItemProps> = memo(({ message, isM
           {message.attachments && message.attachments.length > 0 && (
             <div className="mt-3 space-y-2">
           <p className={`text-xs font-medium ${
-            isFromCustomer ? 'text-primary-foreground/70' : 'text-muted-foreground'
+            isFromCustomer ? 'text-white/70' : 'text-muted-foreground'
           }`}>
                 Attachments:
               </p>
               {message.attachments.map((attachment, index) => (
               <div key={index} className={`flex items-center justify-between p-2 rounded-lg ${
-                isFromCustomer ? 'bg-primary/20' : 'bg-muted'
+                isFromCustomer ? 'bg-teal-700/50' : 'bg-muted'
               }`}>
                   <div className="flex items-center space-x-2 min-w-0 flex-1">
                     <Paperclip className="h-3 w-3 flex-shrink-0" />
                     <span className="text-xs truncate">{attachment.name}</span>
                     <span className={`text-xs flex-shrink-0 ${
-                      isFromCustomer ? 'text-primary-foreground/60' : 'text-muted-foreground'
+                      isFromCustomer ? 'text-white/60' : 'text-muted-foreground'
                     }`}>
                       ({attachment.size})
                     </span>
