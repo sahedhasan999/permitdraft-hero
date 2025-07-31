@@ -23,29 +23,10 @@ export const getFileTypeFromName = (fileName: string): string => {
 
 /**
  * Validate file based on allowed types and max size
+ * @deprecated Use validateFileSecure from security.ts for enhanced security
  */
 export const validateFile = (file: File, allowedTypes: string[] = [], maxSizeMB: number = 10): { valid: boolean; message?: string } => {
-  // Check file size
-  if (file.size > maxSizeMB * 1024 * 1024) {
-    return {
-      valid: false,
-      message: `File is too large. Maximum size is ${maxSizeMB}MB.`
-    };
-  }
-
-  // If no file type restrictions, return valid
-  if (!allowedTypes.length) {
-    return { valid: true };
-  }
-
-  // Check file type
-  const fileType = getFileTypeFromName(file.name);
-  if (!allowedTypes.includes(fileType)) {
-    return {
-      valid: false,
-      message: `File type not allowed. Allowed types: ${allowedTypes.join(', ')}`
-    };
-  }
-
-  return { valid: true };
+  // Import the secure validation
+  const { validateFileSecure } = require('@/utils/security');
+  return validateFileSecure(file, allowedTypes, maxSizeMB);
 };

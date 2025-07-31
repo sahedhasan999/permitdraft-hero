@@ -23,12 +23,10 @@ export const useAuth = () => {
   return context;
 };
 
-// List of admin emails - add your email here to grant admin access
-const ADMIN_EMAILS = [
-  'admin@permitdraftpro.com',
-  // Add your email below, for example:
-  // 'your-email@example.com',
-];
+import { environment } from '@/config/environment';
+
+// List of admin emails from environment configuration
+const ADMIN_EMAILS = environment.adminEmails;
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { 
@@ -48,10 +46,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (currentUser && currentUser.email) {
         const adminStatus = ADMIN_EMAILS.includes(currentUser.email);
         setIsAdmin(adminStatus);
-        console.log('Auth state: User email:', currentUser.email, 'Admin:', adminStatus);
+        // Secure logging - don't expose email in production
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Auth state: User authenticated, Admin:', adminStatus);
+        }
       } else {
         setIsAdmin(false);
-        console.log('Auth state: No user or email');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Auth state: No user authenticated');
+        }
       }
       setAuthStateChecked(true);
     };

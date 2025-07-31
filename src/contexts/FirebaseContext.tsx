@@ -61,7 +61,10 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
           lastLoginAt: serverTimestamp(),
         };
         await setDoc(userRef, userData);
-        console.log("Created user profile in Firestore for:", user.uid);
+        // Secure logging - don't expose UIDs in production
+        if (process.env.NODE_ENV === 'development') {
+          console.log("Created user profile in Firestore");
+        }
       } else {
         // Existing user, update last login and potentially other details
         await setDoc(userRef, {
@@ -70,7 +73,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
           email: user.email,
           lastLoginAt: serverTimestamp()
         }, { merge: true });
-        console.log("Updated user profile in Firestore for:", user.uid);
+        if (process.env.NODE_ENV === 'development') {
+          console.log("Updated user profile in Firestore");
+        }
       }
     } catch (error) {
       console.error("Error managing user profile in Firestore:", error);
@@ -115,7 +120,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
       const userCredential = await signInWithPopup(auth, googleProvider);
       if (userCredential.user) {
         await manageUserProfile(userCredential.user);
-        console.log("Google sign-in successful, user profile managed:", userCredential.user);
+        if (process.env.NODE_ENV === 'development') {
+          console.log("Google sign-in successful, user profile managed");
+        }
       }
       return userCredential.user;
     } catch (error) {
@@ -129,7 +136,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({ children }) 
       const userCredential = await signInWithPopup(auth, appleProvider);
       if (userCredential.user) {
         await manageUserProfile(userCredential.user);
-        console.log("Apple sign-in successful, user profile managed:", userCredential.user);
+        if (process.env.NODE_ENV === 'development') {
+          console.log("Apple sign-in successful, user profile managed");
+        }
       }
       return userCredential.user;
     } catch (error) {

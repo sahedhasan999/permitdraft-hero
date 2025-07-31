@@ -7,6 +7,7 @@ import { LogIn, Lock, AlertTriangle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { authRateLimit, isValidEmail, sanitizeText } from '@/utils/security';
 
 const AdminLoginForm = () => {
   const [email, setEmail] = useState('');
@@ -24,12 +25,33 @@ const AdminLoginForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Input validation
+    const sanitizedEmail = sanitizeText(email);
+    if (!isValidEmail(sanitizedEmail)) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Rate limiting check
+    if (authRateLimit.isRateLimited(`admin-login-${sanitizedEmail}`, 3, 300000)) {
+      toast({
+        title: "Too many attempts",
+        description: "Too many failed admin login attempts. Please wait 5 minutes",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     setAccessError(false);
     
     try {
-      // First attempt to login
-      await login(email, password);
+      await login(sanitizedEmail, password);
       
       // Wait a bit for isAdmin to be set
       setTimeout(() => {
@@ -42,6 +64,8 @@ const AdminLoginForm = () => {
             variant: "destructive",
           });
         } else {
+          // Reset rate limit on successful admin login
+          authRateLimit.reset(`admin-login-${sanitizedEmail}`);
           toast({
             title: "Login successful",
             description: "Welcome to the Admin Dashboard",
@@ -51,10 +75,9 @@ const AdminLoginForm = () => {
         setIsSubmitting(false);
       }, 500);
     } catch (error) {
-      console.error('Login error:', error);
       toast({
         title: "Login failed",
-        description: (error as Error).message || "Please check your credentials",
+        description: "Please check your credentials",
         variant: "destructive",
       });
       setIsSubmitting(false);

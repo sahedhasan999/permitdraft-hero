@@ -5,17 +5,10 @@ import { getAuth, GoogleAuthProvider, OAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getAnalytics } from "firebase/analytics";
+import { environment } from "./environment";
 
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyAfb7gQUInf_Ax8nkWjPnjbSvHECG8DvOQ",
-  authDomain: "permitdraftpro.firebaseapp.com",
-  projectId: "permitdraftpro",
-  storageBucket: "permitdraftpro.firebasestorage.app",
-  messagingSenderId: "814185624643",
-  appId: "1:814185624643:web:7c4bc80a538428a8ec10f6",
-  measurementId: "G-4KHXPL1804"
-};
+// Your web app's Firebase configuration from environment
+const firebaseConfig = environment.firebase;
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);

@@ -4,10 +4,11 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { AnimatedButton } from '@/components/ui/AnimatedButton';
-import { Button } from '@/components/ui/button'; // Added for social login buttons
-import { LogIn, Lock, ChromeIcon, AppleIcon } from 'lucide-react'; // ChromeIcon for Google, AppleIcon for Apple
+import { Button } from '@/components/ui/button';
+import { LogIn, Lock, ChromeIcon, AppleIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { authRateLimit, isValidEmail, sanitizeText } from '@/utils/security';
 
 interface LoginFormProps {
   redirectTo?: string;
@@ -43,11 +44,35 @@ const LoginForm: React.FC<LoginFormProps> = ({
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Input validation
+    const sanitizedEmail = sanitizeText(email);
+    if (!isValidEmail(sanitizedEmail)) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Rate limiting check
+    if (authRateLimit.isRateLimited(`login-${sanitizedEmail}`)) {
+      toast({
+        title: "Too many attempts",
+        description: "Please wait 5 minutes before trying again",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     
     try {
-      // First attempt to login
-      await login(email, password);
+      await login(sanitizedEmail, password);
+      
+      // Reset rate limit on successful login
+      authRateLimit.reset(`login-${sanitizedEmail}`);
       
       // Wait a bit for isAdmin to be set
       setTimeout(() => {
@@ -73,7 +98,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
     } catch (error) {
       toast({
         title: "Login failed",
-        description: (error as Error).message || "Please check your credentials",
+        description: "Please check your credentials",
         variant: "destructive",
       });
       setIsSubmitting(false);
