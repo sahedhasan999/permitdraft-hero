@@ -60,7 +60,7 @@ const Hero = () => {
       });
     }
   };
-  return <div ref={heroRef} className="relative pt-20 lg:pt-24 pb-12 lg:pb-16 overflow-hidden w-full">
+  return <div ref={heroRef} className="relative pt-20 lg:pt-24 pb-12 lg:pb-16 overflow-hidden w-screen -mx-4 lg:mx-0 lg:w-full">
       {/* Decorative elements */}
       <div ref={decorativeElement1} className="absolute -right-20 top-10 w-64 h-64 rounded-full bg-teal-100 opacity-50 blur-3xl" />
       <div ref={decorativeElement2} className="absolute -left-24 top-20 w-80 h-80 rounded-full bg-teal-200 opacity-40 blur-3xl" />
