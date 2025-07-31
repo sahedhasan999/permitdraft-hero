@@ -1,0 +1,46 @@
+# Robots.txt for PermitDraft Pro
+# Optimized for maximum search engine visibility
+
+User-agent: *
+Allow: /
+
+# Priority pages for crawling
+Allow: /services/
+Allow: /portfolio/
+Allow: /about/
+Allow: /contact/
+Allow: /testimonials/
+Allow: /blog/
+
+# Block admin and client areas from indexing
+Disallow: /admin/
+Disallow: /client/
+Disallow: /login
+Disallow: /order
+
+# Block unnecessary files
+Disallow: /*.json$
+Disallow: /*.xml$
+Disallow: /api/
+Disallow: /temp/
+Disallow: /_next/
+
+# Allow important files
+Allow: /sitemap.xml
+Allow: /favicon.ico
+
+# Sitemap location
+Sitemap: https://permitdraftpro.com/sitemap.xml
+
+# Crawl delay (optional)
+Crawl-delay: 1
+
+# Google-specific optimizations
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+# Bing-specific optimizations  
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
