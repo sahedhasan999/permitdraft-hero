@@ -60,16 +60,16 @@ const Hero = () => {
       });
     }
   };
-  return <div ref={heroRef} className="relative pt-20 lg:pt-24 pb-12 lg:pb-16 overflow-hidden">
+  return <div ref={heroRef} className="relative pt-20 lg:pt-24 pb-12 lg:pb-16 overflow-hidden w-full">
       {/* Decorative elements */}
       <div ref={decorativeElement1} className="absolute -right-20 top-10 w-64 h-64 rounded-full bg-teal-100 opacity-50 blur-3xl" />
       <div ref={decorativeElement2} className="absolute -left-24 top-20 w-80 h-80 rounded-full bg-teal-200 opacity-40 blur-3xl" />
       <div ref={decorativeElement3} className="absolute right-1/4 bottom-0 w-72 h-72 rounded-full bg-teal-50 opacity-60 blur-3xl" />
 
-      <div className="container relative px-1 lg:px-4 mx-auto">
+      <div className="container relative px-4 mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-6 items-center">
           {/* Hero Content */}
-          <div className="order-2 lg:order-1 animate-fade-up text-center lg:text-left lg:mx-2">
+          <div className="order-2 lg:order-1 animate-fade-up text-center lg:text-left mx-2">
             <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4 tracking-tight">
               Outdoor Designs, <br />
               <span className="text-primary">Approved Results</span>
