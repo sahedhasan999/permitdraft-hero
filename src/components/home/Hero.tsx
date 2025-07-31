@@ -66,7 +66,7 @@ const Hero = () => {
       <div ref={decorativeElement2} className="absolute -left-24 top-20 w-80 h-80 rounded-full bg-teal-200 opacity-40 blur-3xl" />
       <div ref={decorativeElement3} className="absolute right-1/4 bottom-0 w-72 h-72 rounded-full bg-teal-50 opacity-60 blur-3xl" />
 
-      <div className="container relative px-4 mx-auto">
+      <div className="container relative px-1 lg:px-4 mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-6 items-center">
           {/* Hero Content */}
           <div className="order-2 lg:order-1 animate-fade-up text-center lg:text-left mx-2">
