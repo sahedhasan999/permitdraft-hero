@@ -23,10 +23,12 @@ export const useAuth = () => {
   return context;
 };
 
-import { environment } from '@/config/environment';
-
-// List of admin emails from environment configuration
-const ADMIN_EMAILS = environment.adminEmails;
+// List of admin emails - add your email here to grant admin access
+const ADMIN_EMAILS = [
+  'admin@permitdraftpro.com',
+  // Add your email below, for example:
+  // 'your-email@example.com',
+];
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { 
