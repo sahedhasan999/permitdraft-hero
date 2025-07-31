@@ -109,21 +109,16 @@ const LoginForm: React.FC<LoginFormProps> = ({
     setIsGoogleLoading(true);
     try {
       await loginWithGoogle();
-      // Navigation is expected to be handled by AuthContext updating user state
-      // and triggering effects in this component or higher up.
       toast({
         title: "Signed in with Google!",
         description: "Welcome! Redirecting you now...",
       });
-      // The existing useEffect watching `isAdmin` or `user` should handle navigation
-      // No explicit navigation here to avoid conflicts if AuthContext/user state change handles it
     } catch (error: any) {
       toast({
         title: "Google Sign-In Failed",
         description: error.message || "Could not sign in with Google. Please try again.",
         variant: "destructive",
       });
-    } finally {
       setIsGoogleLoading(false);
     }
   };
@@ -136,14 +131,12 @@ const LoginForm: React.FC<LoginFormProps> = ({
         title: "Signed in with Apple!",
         description: "Welcome! Redirecting you now...",
       });
-      // Similar to Google login, navigation should be handled by user state changes.
     } catch (error: any) {
       toast({
         title: "Apple Sign-In Failed",
         description: error.message || "Could not sign in with Apple. This may not be supported on all browsers/devices. Please try again or use another method.",
         variant: "destructive",
       });
-    } finally {
       setIsAppleLoading(false);
     }
   };
