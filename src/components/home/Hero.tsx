@@ -69,7 +69,7 @@ const Hero = () => {
       <div className="container relative px-4 mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-6 items-center">
           {/* Hero Content */}
-          <div className="order-2 lg:order-1 animate-fade-up text-center lg:text-left mx-[25px]">
+          <div className="order-2 lg:order-1 animate-fade-up text-center lg:text-left mx-2">
             <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4 tracking-tight">
               Outdoor Designs, <br />
               <span className="text-primary">Approved Results</span>
