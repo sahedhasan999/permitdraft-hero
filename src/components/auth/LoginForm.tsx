@@ -27,7 +27,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isAppleLoading, setIsAppleLoading] = useState(false);
   
-  const { login, isAdmin, loginWithGoogle, loginWithApple } = useAuth();
+  const { login, isAdmin, loginWithGoogle, loginWithApple, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -41,6 +41,23 @@ const LoginForm: React.FC<LoginFormProps> = ({
       setPassword(initialPassword);
     }
   }, [initialEmail, initialPassword]);
+
+  // Handle navigation after successful login
+  useEffect(() => {
+    if (user) {
+      setIsSubmitting(false);
+      setIsGoogleLoading(false);
+      setIsAppleLoading(false);
+      
+      if (isAdmin) {
+        navigate('/admin/dashboard', { replace: true });
+      } else if (redirectTo) {
+        navigate(redirectTo, { replace: true });
+      } else {
+        navigate('/client/dashboard', { replace: true });
+      }
+    }
+  }, [user, isAdmin, redirectTo, navigate]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,27 +91,10 @@ const LoginForm: React.FC<LoginFormProps> = ({
       // Reset rate limit on successful login
       authRateLimit.reset(`login-${sanitizedEmail}`);
       
-      // Wait a bit for isAdmin to be set
-      setTimeout(() => {
-        if (isAdmin) {
-          toast({
-            title: "Admin login successful",
-            description: "Welcome to the Admin Dashboard",
-          });
-          navigate('/admin/dashboard', { replace: true });
-        } else {
-          toast({
-            title: "Login successful",
-            description: "Welcome to your dashboard",
-          });
-          if (redirectTo) {
-            navigate(redirectTo, { replace: true });
-          } else {
-            navigate('/client/dashboard', { replace: true });
-          }
-        }
-        setIsSubmitting(false);
-      }, 500);
+      toast({
+        title: "Login successful",
+        description: "Welcome!",
+      });
     } catch (error) {
       toast({
         title: "Login failed",

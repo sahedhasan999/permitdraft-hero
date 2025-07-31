@@ -13,7 +13,12 @@ const FloatingChatButton = () => {
 
   const handleChatClick = () => {
     if (!user) {
-      navigate('/login');
+      // Redirect to login with redirect back to messages
+      navigate('/login', { 
+        state: { 
+          redirectTo: '/client/messages'
+        } 
+      });
       return;
     }
     setIsOpen(true);
