@@ -23,7 +23,7 @@ const Login = () => {
   const [showSignUp, setShowSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, isLoading } = useAuth();
   const location = useLocation();
   const locationState = location.state as LocationState || {};
   
@@ -41,6 +41,18 @@ const Login = () => {
       setShowSignUp(true);
     }
   }, [locationState.showSignUp]);
+  
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-2 text-sm text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
   
   // Redirect if already logged in
   if (user) {

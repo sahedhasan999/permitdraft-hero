@@ -45,17 +45,24 @@ const LoginForm: React.FC<LoginFormProps> = ({
   // Handle navigation after successful login
   useEffect(() => {
     if (user) {
+      console.log('LoginForm: User authenticated', { user: user.email, isAdmin, redirectTo });
       setIsSubmitting(false);
       setIsGoogleLoading(false);
       setIsAppleLoading(false);
       
-      if (isAdmin) {
-        navigate('/admin/dashboard', { replace: true });
-      } else if (redirectTo) {
-        navigate(redirectTo, { replace: true });
-      } else {
-        navigate('/client/dashboard', { replace: true });
-      }
+      // Small delay to ensure auth state is fully settled
+      setTimeout(() => {
+        if (isAdmin) {
+          console.log('LoginForm: Redirecting to admin dashboard');
+          navigate('/admin/dashboard', { replace: true });
+        } else if (redirectTo) {
+          console.log('LoginForm: Redirecting to:', redirectTo);
+          navigate(redirectTo, { replace: true });
+        } else {
+          console.log('LoginForm: Redirecting to client dashboard');
+          navigate('/client/dashboard', { replace: true });
+        }
+      }, 100);
     }
   }, [user, isAdmin, redirectTo, navigate]);
   
