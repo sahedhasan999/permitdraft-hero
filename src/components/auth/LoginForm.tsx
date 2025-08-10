@@ -1,5 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,7 +17,7 @@ interface LoginFormProps {
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({ 
-  redirectTo,
+  redirectTo = '/dashboard',
   initialEmail = '',
   initialPassword = ''
 }) => {
@@ -27,8 +27,9 @@ const LoginForm: React.FC<LoginFormProps> = ({
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isAppleLoading, setIsAppleLoading] = useState(false);
   
-  const { login, isAdmin, loginWithGoogle, loginWithApple, user } = useAuth();
+  const { login, loginWithGoogle, loginWithApple } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Update the email/password if they change (for example from parent component)
   useEffect(() => {
@@ -40,15 +41,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
     }
   }, [initialEmail, initialPassword]);
 
-  // Parent page handles navigation after login; just reset loading flags when user changes
-  useEffect(() => {
-    if (user) {
-      setIsSubmitting(false);
-      setIsGoogleLoading(false);
-      setIsAppleLoading(false);
-    }
-  }, [user]);
-  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -76,15 +68,19 @@ const LoginForm: React.FC<LoginFormProps> = ({
     setIsSubmitting(true);
     
     try {
-      await login(sanitizedEmail, password);
+      const userCredential = await login(sanitizedEmail, password);
       
-      // Reset rate limit on successful login
-      authRateLimit.reset(`login-${sanitizedEmail}`);
-      
-      toast({
-        title: "Login successful",
-        description: "Welcome!",
-      });
+      if (userCredential.user) {
+        // Reset rate limit on successful login
+        authRateLimit.reset(`login-${sanitizedEmail}`);
+
+        toast({
+          title: "Login successful",
+          description: "Welcome back! Redirecting you now...",
+        });
+
+        navigate(redirectTo);
+      }
     } catch (error) {
       toast({
         title: "Login failed",
@@ -98,11 +94,14 @@ const LoginForm: React.FC<LoginFormProps> = ({
   const handleGoogleLogin = async () => {
     setIsGoogleLoading(true);
     try {
-      await loginWithGoogle();
-      toast({
-        title: "Signed in with Google!",
-        description: "Welcome! Redirecting you now...",
-      });
+      const userCredential = await loginWithGoogle();
+      if (userCredential.user) {
+        toast({
+          title: "Signed in with Google!",
+          description: "Welcome! Redirecting you now...",
+        });
+        navigate(redirectTo);
+      }
     } catch (error: any) {
       toast({
         title: "Google Sign-In Failed",
@@ -116,11 +115,14 @@ const LoginForm: React.FC<LoginFormProps> = ({
   const handleAppleLogin = async () => {
     setIsAppleLoading(true);
     try {
-      await loginWithApple();
-      toast({
-        title: "Signed in with Apple!",
-        description: "Welcome! Redirecting you now...",
-      });
+      const userCredential = await loginWithApple();
+      if (userCredential.user) {
+        toast({
+          title: "Signed in with Apple!",
+          description: "Welcome! Redirecting you now...",
+        });
+        navigate(redirectTo);
+      }
     } catch (error: any) {
       toast({
         title: "Apple Sign-In Failed",
