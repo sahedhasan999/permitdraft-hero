@@ -77,6 +77,12 @@ const ConditionalFooter = () => {
   return <Footer />;
 };
 
+// Redirect helper to role-based dashboard
+const RoleDashboardRedirect = () => {
+  const { isAdmin } = useAuth();
+  return <Navigate to={isAdmin ? '/admin/dashboard' : '/client/dashboard'} replace />;
+};
+
 function App() {
   return (
     <BrowserRouter>
@@ -97,6 +103,7 @@ function App() {
                   <Route path="/quote" element={<Quote />} />
                   <Route path="/order" element={<Order />} />
                   <Route path="/login" element={<Login />} />
+                  <Route path="/dashboard" element={<RoleDashboardRedirect />} />
                   
                   {/* Static Service Routes (for backward compatibility) */}
                   <Route path="/services/deck" element={<Deck />} />

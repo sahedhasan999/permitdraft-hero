@@ -24,19 +24,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
       isAdminRoute 
     });
 
-    // Keep the user on the right section after page reload
+    // Only log auth state; avoid navigation side-effects here
     if (user && !isLoading) {
-      if (isAdminRoute && !isAdmin) {
-        navigate('/client/dashboard', { 
-          state: { 
-            accessDenied: true, 
-            message: "You don't have permission to access the admin area." 
-          },
-          replace: true
-        });
-      } else if (isClientRoute && isAdmin) {
-        navigate('/admin/dashboard', { replace: true });
-      }
+      // No imperative navigation here to prevent race conditions
     }
   }, [user, isAdmin, isLoading, location.pathname, isAdminRoute, isClientRoute, navigate]);
 
@@ -64,6 +54,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
       accessDenied: true,
       message: "You don't have permission to access the admin area."
     }} replace />;
+  }
+  // If admin trying to access client routes, send them to admin dashboard
+  if (user && isClientRoute && isAdmin) {
+    return <Navigate to="/admin/dashboard" replace />;
   }
 
   return <>{children}</>;
