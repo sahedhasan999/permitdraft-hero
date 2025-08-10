@@ -23,14 +23,14 @@ const Login = () => {
   const [showSignUp, setShowSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { user, isAdmin, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
   const location = useLocation();
   const locationState = location.state as LocationState || {};
   
   // Get the redirect URL from location state
   const redirectTo = locationState.from?.pathname || 
                     locationState.redirectTo ||
-                    (isAdmin ? '/admin/dashboard' : '/client/dashboard');
+                    '/dashboard';
   
   // Get prefill data if any
   const prefillData = locationState.prefillData || {};

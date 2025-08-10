@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { AnimatedButton } from '@/components/ui/AnimatedButton';
@@ -29,8 +29,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
   
   const { login, isAdmin, loginWithGoogle, loginWithApple, user } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
-  const location = useLocation();
 
   // Update the email/password if they change (for example from parent component)
   useEffect(() => {
@@ -42,29 +40,14 @@ const LoginForm: React.FC<LoginFormProps> = ({
     }
   }, [initialEmail, initialPassword]);
 
-  // Handle navigation after successful login
+  // Parent page handles navigation after login; just reset loading flags when user changes
   useEffect(() => {
     if (user) {
-      console.log('LoginForm: User authenticated', { user: user.email, isAdmin, redirectTo });
       setIsSubmitting(false);
       setIsGoogleLoading(false);
       setIsAppleLoading(false);
-      
-      // Small delay to ensure auth state is fully settled
-      setTimeout(() => {
-        if (isAdmin) {
-          console.log('LoginForm: Redirecting to admin dashboard');
-          navigate('/admin/dashboard', { replace: true });
-        } else if (redirectTo) {
-          console.log('LoginForm: Redirecting to:', redirectTo);
-          navigate(redirectTo, { replace: true });
-        } else {
-          console.log('LoginForm: Redirecting to client dashboard');
-          navigate('/client/dashboard', { replace: true });
-        }
-      }, 100);
     }
-  }, [user, isAdmin, redirectTo, navigate]);
+  }, [user]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
