@@ -1,16 +1,15 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useFirebase } from './FirebaseContext';
-import { User } from 'firebase/auth';
+import { User, UserCredential } from 'firebase/auth';
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<UserCredential>;
   logout: () => Promise<void>;
   isAdmin: boolean;
-  loginWithGoogle: () => Promise<void>;
-  loginWithApple: () => Promise<void>;
+  loginWithGoogle: () => Promise<UserCredential>;
+  loginWithApple: () => Promise<UserCredential>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -65,7 +64,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [currentUser]);
 
   const login = async (email: string, password: string) => {
-    await signIn(email, password);
+    return await signIn(email, password);
   };
 
   const logout = async () => {
@@ -79,6 +78,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // The currentUser in AuthContext should update automatically because useFirebase().currentUser will update.
       // setIsAdmin will be re-evaluated by the useEffect watching currentUser.
       console.log("User logged in with Google:", userCredential);
+      return userCredential;
     } catch (error) {
       // Handle errors, maybe show a toast to the user
       console.error("AuthContext: Google login failed", error);
@@ -91,6 +91,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const userCredential = await signInWithApple();
       // Post-login logic similar to loginWithGoogle
       console.log("User logged in with Apple:", userCredential);
+      return userCredential;
     } catch (error) {
       console.error("AuthContext: Apple login failed", error);
       throw error;
@@ -107,8 +108,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       login,
       logout,
       isAdmin,
-      loginWithGoogle, // Add this
-      loginWithApple  // Add this
+      loginWithGoogle,
+      loginWithApple
     }}>
       {children}
     </AuthContext.Provider>
