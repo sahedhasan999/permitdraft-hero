@@ -1,15 +1,15 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useFirebase } from './FirebaseContext';
-import { User, UserCredential } from 'firebase/auth';
+import { User } from 'firebase/auth';
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<UserCredential>;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   isAdmin: boolean;
-  loginWithGoogle: () => Promise<UserCredential>;
-  loginWithApple: () => Promise<UserCredential>;
+  loginWithGoogle: () => Promise<void>;
+  loginWithApple: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -64,7 +64,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [currentUser]);
 
   const login = async (email: string, password: string) => {
-    return await signIn(email, password);
+    await signIn(email, password);
   };
 
   const logout = async () => {
@@ -73,25 +73,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const loginWithGoogle = async () => {
     try {
-      const userCredential = await signInWithGoogle();
-      // Post-login logic:
-      // The currentUser in AuthContext should update automatically because useFirebase().currentUser will update.
-      // setIsAdmin will be re-evaluated by the useEffect watching currentUser.
-      console.log("User logged in with Google:", userCredential);
-      return userCredential;
+      await signInWithGoogle();
     } catch (error) {
-      // Handle errors, maybe show a toast to the user
       console.error("AuthContext: Google login failed", error);
-      throw error; // Re-throw for the component to handle if needed
+      throw error;
     }
   };
 
   const loginWithApple = async () => {
     try {
-      const userCredential = await signInWithApple();
-      // Post-login logic similar to loginWithGoogle
-      console.log("User logged in with Apple:", userCredential);
-      return userCredential;
+      await signInWithApple();
     } catch (error) {
       console.error("AuthContext: Apple login failed", error);
       throw error;
