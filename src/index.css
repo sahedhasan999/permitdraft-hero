@@ -1,6 +1,6 @@
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200..800&display=swap");
+/* Fonts loaded asynchronously via index.html to avoid render blocking */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
