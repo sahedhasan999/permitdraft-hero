@@ -357,17 +357,8 @@ export class PerformanceOptimizer {
   }
   
   private static loadNonCriticalJS() {
-    // Load analytics and other non-critical scripts
-    const scripts = [
-      'https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID'
-    ];
-    
-    scripts.forEach(src => {
-      const script = document.createElement('script');
-      script.src = src;
-      script.async = true;
-      document.head.appendChild(script);
-    });
+    // Non-critical scripts are loaded by Firebase Analytics when needed
+    // No additional scripts to load here - analytics is handled by Firebase
   }
 }
 
