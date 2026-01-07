@@ -101,17 +101,6 @@ const ImageCarousel: React.FC<ImageCarouselProps> = memo(({
     return null;
   }
 
-  if (!imagesLoaded) {
-    return (
-      <div className={`${className} flex items-center justify-center bg-gray-100 rounded-lg`}>
-        <div className="text-center p-4">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-          <p className="mt-2 text-sm text-muted-foreground">Loading images...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div 
       className={`relative overflow-hidden rounded-lg group ${className}`}
@@ -126,14 +115,13 @@ const ImageCarousel: React.FC<ImageCarouselProps> = memo(({
             index === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
           }`}
         >
-          {loadedImages.has(index) && (
-            <img
-              src={image}
-              alt={`Architectural design ${index + 1}`}
-              className="rounded-lg shadow-lg w-full h-full object-cover"
-              loading="lazy"
-            />
-          )}
+          <img
+            src={image}
+            alt={`Architectural design ${index + 1}`}
+            className="rounded-lg shadow-lg w-full h-full object-cover"
+            loading={index === 0 ? "eager" : "lazy"}
+            fetchPriority={index === 0 ? "high" : "auto"}
+          />
         </div>
       ))}
       

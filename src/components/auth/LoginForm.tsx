@@ -68,19 +68,17 @@ const LoginForm: React.FC<LoginFormProps> = ({
     setIsSubmitting(true);
     
     try {
-      const userCredential = await login(sanitizedEmail, password);
+      await login(sanitizedEmail, password);
       
-      if (userCredential.user) {
-        // Reset rate limit on successful login
-        authRateLimit.reset(`login-${sanitizedEmail}`);
+      // Reset rate limit on successful login
+      authRateLimit.reset(`login-${sanitizedEmail}`);
 
-        toast({
-          title: "Login successful",
-          description: "Welcome back! Redirecting you now...",
-        });
+      toast({
+        title: "Login successful",
+        description: "Welcome back! Redirecting you now...",
+      });
 
-        navigate(redirectTo);
-      }
+      navigate(redirectTo);
     } catch (error) {
       toast({
         title: "Login failed",
@@ -94,14 +92,12 @@ const LoginForm: React.FC<LoginFormProps> = ({
   const handleGoogleLogin = async () => {
     setIsGoogleLoading(true);
     try {
-      const userCredential = await loginWithGoogle();
-      if (userCredential.user) {
-        toast({
-          title: "Signed in with Google!",
-          description: "Welcome! Redirecting you now...",
-        });
-        navigate(redirectTo);
-      }
+      await loginWithGoogle();
+      toast({
+        title: "Signed in with Google!",
+        description: "Welcome! Redirecting you now...",
+      });
+      navigate(redirectTo);
     } catch (error: any) {
       toast({
         title: "Google Sign-In Failed",
@@ -115,14 +111,12 @@ const LoginForm: React.FC<LoginFormProps> = ({
   const handleAppleLogin = async () => {
     setIsAppleLoading(true);
     try {
-      const userCredential = await loginWithApple();
-      if (userCredential.user) {
-        toast({
-          title: "Signed in with Apple!",
-          description: "Welcome! Redirecting you now...",
-        });
-        navigate(redirectTo);
-      }
+      await loginWithApple();
+      toast({
+        title: "Signed in with Apple!",
+        description: "Welcome! Redirecting you now...",
+      });
+      navigate(redirectTo);
     } catch (error: any) {
       toast({
         title: "Apple Sign-In Failed",
