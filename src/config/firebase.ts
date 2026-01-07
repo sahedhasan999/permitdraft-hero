@@ -4,7 +4,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, OAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
-import { getAnalytics } from "firebase/analytics";
+import { getAnalytics, Analytics } from "firebase/analytics";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -24,7 +24,23 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
-export const analytics = getAnalytics(app);
+
+// Lazy load analytics to reduce initial bundle size
+let analyticsInstance: Analytics | null = null;
+export const getAnalyticsInstance = () => {
+  if (!analyticsInstance && typeof window !== 'undefined') {
+    analyticsInstance = getAnalytics(app);
+  }
+  return analyticsInstance;
+};
+
+// Initialize analytics lazily after page load
+if (typeof window !== 'undefined') {
+  window.addEventListener('load', () => {
+    // Delay analytics initialization to not block critical rendering
+    setTimeout(() => getAnalyticsInstance(), 2000);
+  });
+}
 
 // Initialize Google Auth Provider
 export const googleProvider = new GoogleAuthProvider();
