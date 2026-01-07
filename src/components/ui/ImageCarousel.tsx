@@ -108,19 +108,41 @@ const ImageCarousel: React.FC<ImageCarouselProps> = memo(({
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {images.map((image, index) => (
+      {/* Render first image separately for LCP optimization */}
+      {images.length > 0 && (
         <div
-          key={index}
           className={`absolute inset-0 transition-opacity duration-1000 ${
-            index === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
+            currentIndex === 0 ? "opacity-100 z-10" : "opacity-0 z-0"
+          }`}
+        >
+          <img
+            src={images[0]}
+            alt="Architectural design 1"
+            className="rounded-lg shadow-lg w-full h-full object-cover"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            width={691}
+            height={413}
+          />
+        </div>
+      )}
+      {/* Render remaining images with lazy loading */}
+      {images.slice(1).map((image, index) => (
+        <div
+          key={index + 1}
+          className={`absolute inset-0 transition-opacity duration-1000 ${
+            index + 1 === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
           }`}
         >
           <img
             src={image}
-            alt={`Architectural design ${index + 1}`}
+            alt={`Architectural design ${index + 2}`}
             className="rounded-lg shadow-lg w-full h-full object-cover"
-            loading={index === 0 ? "eager" : "lazy"}
-            fetchPriority={index === 0 ? "high" : "auto"}
+            loading="lazy"
+            decoding="async"
+            width={691}
+            height={413}
           />
         </div>
       ))}
