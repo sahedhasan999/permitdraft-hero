@@ -172,20 +172,24 @@ const ImageCarousel: React.FC<ImageCarouselProps> = memo(({
         </>
       )}
       
-      {/* Dots indicator */}
+      {/* Dots indicator - using min 24px touch targets for accessibility */}
       {images.length > 1 && (
-        <div className="absolute bottom-3 left-0 right-0 z-20 flex justify-center space-x-2">
+        <div className="absolute bottom-1 left-0 right-0 z-20 flex justify-center gap-1">
           {images.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentIndex(index)}
-              className={`w-2 h-2 rounded-full transition-all ${
-                index === currentIndex
-                  ? "bg-white w-4"
-                  : "bg-white/50 hover:bg-white/80"
-              }`}
+              className="min-w-6 min-h-6 flex items-center justify-center p-2"
               aria-label={`Go to slide ${index + 1}`}
-            />
+            >
+              <span
+                className={`block rounded-full transition-all ${
+                  index === currentIndex
+                    ? "bg-white w-4 h-2"
+                    : "bg-white/50 hover:bg-white/80 w-2 h-2"
+                }`}
+              />
+            </button>
           ))}
         </div>
       )}
